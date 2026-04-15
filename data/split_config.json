@@ -1,0 +1,168 @@
+{
+  "description": "Patient-level split for CHB-MIT. chb01+chb21 are the SAME subject (1.5yr gap) and must always stay on the same side of any split.",
+  "unique_subjects": 23,
+  "total_cases": 24,
+  "notes": [
+    "chb01/chb21 = same female subject, recorded 1.5 years apart. Treated as ONE subject in all splits.",
+    "chb24 was added Dec 2010, has no gender/age in SUBJECT-INFO.",
+    "chb22 and chb23 are INDEPENDENT subjects (not re-recordings of chb02/chb03)."
+  ],
+  "all_cases": [
+    "chb01", "chb02", "chb03", "chb04", "chb05", "chb06", "chb07", "chb08",
+    "chb09", "chb10", "chb11", "chb12", "chb13", "chb14", "chb15", "chb16",
+    "chb17", "chb18", "chb19", "chb20", "chb21", "chb22", "chb23", "chb24"
+  ],
+  "same_subject_groups": {
+    "chb01_chb21": ["chb01", "chb21"]
+  },
+  "single_split": {
+    "description": "Fixed single split for rapid development. ~75% train, ~10% val, ~15% test by patient count.",
+    "train": [
+      "chb01", "chb21", "chb02", "chb03", "chb04", "chb05", "chb06", "chb07",
+      "chb08", "chb09", "chb10", "chb11", "chb12", "chb13", "chb14", "chb15",
+      "chb16", "chb17"
+    ],
+    "val": ["chb18", "chb19"],
+    "test": ["chb20", "chb22", "chb23", "chb24"]
+  },
+  "lopo_folds": [
+    {
+      "fold": 0,
+      "test_subject": "chb01+chb21",
+      "test_cases": ["chb01", "chb21"],
+      "train_cases": ["chb02", "chb03", "chb04", "chb05", "chb06", "chb07", "chb08", "chb09", "chb10", "chb11", "chb12", "chb13", "chb14", "chb15", "chb16", "chb17", "chb18", "chb19", "chb20", "chb22", "chb23", "chb24"]
+    },
+    {
+      "fold": 1,
+      "test_subject": "chb02",
+      "test_cases": ["chb02"],
+      "train_cases": ["chb01", "chb21", "chb03", "chb04", "chb05", "chb06", "chb07", "chb08", "chb09", "chb10", "chb11", "chb12", "chb13", "chb14", "chb15", "chb16", "chb17", "chb18", "chb19", "chb20", "chb22", "chb23", "chb24"]
+    },
+    {
+      "fold": 2,
+      "test_subject": "chb03",
+      "test_cases": ["chb03"],
+      "train_cases": ["chb01", "chb21", "chb02", "chb04", "chb05", "chb06", "chb07", "chb08", "chb09", "chb10", "chb11", "chb12", "chb13", "chb14", "chb15", "chb16", "chb17", "chb18", "chb19", "chb20", "chb22", "chb23", "chb24"]
+    },
+    {
+      "fold": 3,
+      "test_subject": "chb04",
+      "test_cases": ["chb04"],
+      "train_cases": ["chb01", "chb21", "chb02", "chb03", "chb05", "chb06", "chb07", "chb08", "chb09", "chb10", "chb11", "chb12", "chb13", "chb14", "chb15", "chb16", "chb17", "chb18", "chb19", "chb20", "chb22", "chb23", "chb24"]
+    },
+    {
+      "fold": 4,
+      "test_subject": "chb05",
+      "test_cases": ["chb05"],
+      "train_cases": ["chb01", "chb21", "chb02", "chb03", "chb04", "chb06", "chb07", "chb08", "chb09", "chb10", "chb11", "chb12", "chb13", "chb14", "chb15", "chb16", "chb17", "chb18", "chb19", "chb20", "chb22", "chb23", "chb24"]
+    },
+    {
+      "fold": 5,
+      "test_subject": "chb06",
+      "test_cases": ["chb06"],
+      "train_cases": ["chb01", "chb21", "chb02", "chb03", "chb04", "chb05", "chb07", "chb08", "chb09", "chb10", "chb11", "chb12", "chb13", "chb14", "chb15", "chb16", "chb17", "chb18", "chb19", "chb20", "chb22", "chb23", "chb24"]
+    },
+    {
+      "fold": 6,
+      "test_subject": "chb07",
+      "test_cases": ["chb07"],
+      "train_cases": ["chb01", "chb21", "chb02", "chb03", "chb04", "chb05", "chb06", "chb08", "chb09", "chb10", "chb11", "chb12", "chb13", "chb14", "chb15", "chb16", "chb17", "chb18", "chb19", "chb20", "chb22", "chb23", "chb24"]
+    },
+    {
+      "fold": 7,
+      "test_subject": "chb08",
+      "test_cases": ["chb08"],
+      "train_cases": ["chb01", "chb21", "chb02", "chb03", "chb04", "chb05", "chb06", "chb07", "chb09", "chb10", "chb11", "chb12", "chb13", "chb14", "chb15", "chb16", "chb17", "chb18", "chb19", "chb20", "chb22", "chb23", "chb24"]
+    },
+    {
+      "fold": 8,
+      "test_subject": "chb09",
+      "test_cases": ["chb09"],
+      "train_cases": ["chb01", "chb21", "chb02", "chb03", "chb04", "chb05", "chb06", "chb07", "chb08", "chb10", "chb11", "chb12", "chb13", "chb14", "chb15", "chb16", "chb17", "chb18", "chb19", "chb20", "chb22", "chb23", "chb24"]
+    },
+    {
+      "fold": 9,
+      "test_subject": "chb10",
+      "test_cases": ["chb10"],
+      "train_cases": ["chb01", "chb21", "chb02", "chb03", "chb04", "chb05", "chb06", "chb07", "chb08", "chb09", "chb11", "chb12", "chb13", "chb14", "chb15", "chb16", "chb17", "chb18", "chb19", "chb20", "chb22", "chb23", "chb24"]
+    },
+    {
+      "fold": 10,
+      "test_subject": "chb11",
+      "test_cases": ["chb11"],
+      "train_cases": ["chb01", "chb21", "chb02", "chb03", "chb04", "chb05", "chb06", "chb07", "chb08", "chb09", "chb10", "chb12", "chb13", "chb14", "chb15", "chb16", "chb17", "chb18", "chb19", "chb20", "chb22", "chb23", "chb24"]
+    },
+    {
+      "fold": 11,
+      "test_subject": "chb12",
+      "test_cases": ["chb12"],
+      "train_cases": ["chb01", "chb21", "chb02", "chb03", "chb04", "chb05", "chb06", "chb07", "chb08", "chb09", "chb10", "chb11", "chb13", "chb14", "chb15", "chb16", "chb17", "chb18", "chb19", "chb20", "chb22", "chb23", "chb24"]
+    },
+    {
+      "fold": 12,
+      "test_subject": "chb13",
+      "test_cases": ["chb13"],
+      "train_cases": ["chb01", "chb21", "chb02", "chb03", "chb04", "chb05", "chb06", "chb07", "chb08", "chb09", "chb10", "chb11", "chb12", "chb14", "chb15", "chb16", "chb17", "chb18", "chb19", "chb20", "chb22", "chb23", "chb24"]
+    },
+    {
+      "fold": 13,
+      "test_subject": "chb14",
+      "test_cases": ["chb14"],
+      "train_cases": ["chb01", "chb21", "chb02", "chb03", "chb04", "chb05", "chb06", "chb07", "chb08", "chb09", "chb10", "chb11", "chb12", "chb13", "chb15", "chb16", "chb17", "chb18", "chb19", "chb20", "chb22", "chb23", "chb24"]
+    },
+    {
+      "fold": 14,
+      "test_subject": "chb15",
+      "test_cases": ["chb15"],
+      "train_cases": ["chb01", "chb21", "chb02", "chb03", "chb04", "chb05", "chb06", "chb07", "chb08", "chb09", "chb10", "chb11", "chb12", "chb13", "chb14", "chb16", "chb17", "chb18", "chb19", "chb20", "chb22", "chb23", "chb24"]
+    },
+    {
+      "fold": 15,
+      "test_subject": "chb16",
+      "test_cases": ["chb16"],
+      "train_cases": ["chb01", "chb21", "chb02", "chb03", "chb04", "chb05", "chb06", "chb07", "chb08", "chb09", "chb10", "chb11", "chb12", "chb13", "chb14", "chb15", "chb17", "chb18", "chb19", "chb20", "chb22", "chb23", "chb24"]
+    },
+    {
+      "fold": 16,
+      "test_subject": "chb17",
+      "test_cases": ["chb17"],
+      "train_cases": ["chb01", "chb21", "chb02", "chb03", "chb04", "chb05", "chb06", "chb07", "chb08", "chb09", "chb10", "chb11", "chb12", "chb13", "chb14", "chb15", "chb16", "chb18", "chb19", "chb20", "chb22", "chb23", "chb24"]
+    },
+    {
+      "fold": 17,
+      "test_subject": "chb18",
+      "test_cases": ["chb18"],
+      "train_cases": ["chb01", "chb21", "chb02", "chb03", "chb04", "chb05", "chb06", "chb07", "chb08", "chb09", "chb10", "chb11", "chb12", "chb13", "chb14", "chb15", "chb16", "chb17", "chb19", "chb20", "chb22", "chb23", "chb24"]
+    },
+    {
+      "fold": 18,
+      "test_subject": "chb19",
+      "test_cases": ["chb19"],
+      "train_cases": ["chb01", "chb21", "chb02", "chb03", "chb04", "chb05", "chb06", "chb07", "chb08", "chb09", "chb10", "chb11", "chb12", "chb13", "chb14", "chb15", "chb16", "chb17", "chb18", "chb20", "chb22", "chb23", "chb24"]
+    },
+    {
+      "fold": 19,
+      "test_subject": "chb20",
+      "test_cases": ["chb20"],
+      "train_cases": ["chb01", "chb21", "chb02", "chb03", "chb04", "chb05", "chb06", "chb07", "chb08", "chb09", "chb10", "chb11", "chb12", "chb13", "chb14", "chb15", "chb16", "chb17", "chb18", "chb19", "chb22", "chb23", "chb24"]
+    },
+    {
+      "fold": 20,
+      "test_subject": "chb22",
+      "test_cases": ["chb22"],
+      "train_cases": ["chb01", "chb21", "chb02", "chb03", "chb04", "chb05", "chb06", "chb07", "chb08", "chb09", "chb10", "chb11", "chb12", "chb13", "chb14", "chb15", "chb16", "chb17", "chb18", "chb19", "chb20", "chb23", "chb24"]
+    },
+    {
+      "fold": 21,
+      "test_subject": "chb23",
+      "test_cases": ["chb23"],
+      "train_cases": ["chb01", "chb21", "chb02", "chb03", "chb04", "chb05", "chb06", "chb07", "chb08", "chb09", "chb10", "chb11", "chb12", "chb13", "chb14", "chb15", "chb16", "chb17", "chb18", "chb19", "chb20", "chb22", "chb24"]
+    },
+    {
+      "fold": 22,
+      "test_subject": "chb24",
+      "test_cases": ["chb24"],
+      "train_cases": ["chb01", "chb21", "chb02", "chb03", "chb04", "chb05", "chb06", "chb07", "chb08", "chb09", "chb10", "chb11", "chb12", "chb13", "chb14", "chb15", "chb16", "chb17", "chb18", "chb19", "chb20", "chb22", "chb23"]
+    }
+  ]
+}

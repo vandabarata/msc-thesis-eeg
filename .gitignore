@@ -1,0 +1,24 @@
+# Data (large)
+clean_edfs/
+chb-mit-scalp-eeg-database-1.0.0/
+chb-mit-scalp-eeg-database-1.0.0.zip
+data/window_cache/
+
+# Environment
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Results and checkpoints (regenerable)
+results/
+*.npz
+*.pt
+
+# IDE / tool config
+CLAUDE.md
+.claude/
+.ipynb_checkpoints/
+
+# Secrets
+.env
