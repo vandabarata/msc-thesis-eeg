@@ -51,6 +51,7 @@ from torch.utils.data import DataLoader
 from models.detector import SeizureDetector
 from data.loader import (
     CHBMITDataset,
+    CaseAwareSampler,
     get_dataloaders,
     get_lopo_dataloaders,
     ALL_CASES,
@@ -89,6 +90,8 @@ class TrainConfig:
 
 
 # ── SMOTE / ADASYN Augmentation ───────────────────────────────────────────
+_INTERICTAL_RATIO = 10  # interictal subsample = 10× ictal count
+
 def apply_oversampling(
     dataset: CHBMITDataset,
     method: str = "smote",
@@ -98,17 +101,10 @@ def apply_oversampling(
     """
     Apply SMOTE or ADASYN oversampling to the ictal class in the dataset.
 
-    Flattens 23×1024 windows to feature vectors, applies oversampling,
-    reshapes back. Returns NEW synthetic windows only (not the originals).
-
-    Args:
-        dataset: CHBMITDataset (training split)
-        method: "smote" or "adasyn"
-        k: number of neighbors
-        seed: random seed
-
-    Returns:
-        List of (window, label=1, patient_id) tuples — synthetic ictal windows
+    Loads all ictal windows plus a random subsample of interictal windows
+    (10x ictal count) to keep memory feasible on 32 GB machines. SMOTE
+    only uses k-NN from the minority class, so the full majority set is
+    not needed. Returns NEW synthetic windows only (not the originals).
     """
     try:
         if method == "smote":
@@ -124,15 +120,24 @@ def apply_oversampling(
             f"imbalanced-learn is required for {method}: pip install imbalanced-learn"
         )
 
-    # Extract all windows as flat feature vectors
-    n = len(dataset)
+    rng = np.random.RandomState(seed)
     flat_dim = N_CHANNELS * WINDOW_SAMPLES
+
+    ictal_idx = np.where(dataset._all_labels == 1)[0]
+    interictal_idx = np.where(dataset._all_labels == 0)[0]
+    n_sub = min(len(interictal_idx), len(ictal_idx) * _INTERICTAL_RATIO)
+    interictal_sub = rng.choice(interictal_idx, size=n_sub, replace=False)
+
+    selected = np.concatenate([ictal_idx, interictal_sub])
+    n = len(selected)
+    print(f"  {method.upper()}: loading {len(ictal_idx)} ictal + {n_sub} interictal subsample ({n} total)")
+
     X = np.zeros((n, flat_dim), dtype=np.float32)
     y = np.zeros(n, dtype=int)
     patient_ids = np.zeros(n, dtype=int)
 
-    for i in range(n):
-        window, label, pid = dataset.windows[i]
+    for i, real_idx in enumerate(selected):
+        window, label, pid = dataset._get_real_window(int(real_idx))
         X[i] = window.ravel()
         y[i] = label
         patient_ids[i] = pid
@@ -140,19 +145,16 @@ def apply_oversampling(
     n_before = len(X)
     X_resampled, y_resampled = sampler.fit_resample(X, y)
 
-    # The new samples are at indices [n_before:]
     n_new = len(X_resampled) - n_before
     if n_new <= 0:
         print(f"Warning: {method} generated 0 new samples (class may already be balanced)")
         return []
 
+    ictal_pids = patient_ids[y == 1]
     synthetic = []
     for i in range(n_before, len(X_resampled)):
         window = X_resampled[i].reshape(N_CHANNELS, WINDOW_SAMPLES)
-        # Assign to a random training patient (SMOTE doesn't track this)
-        pid = int(np.random.RandomState(seed + i).choice(
-            patient_ids[y == 1]
-        ))
+        pid = int(rng.choice(ictal_pids))
         synthetic.append((window, 1, pid))
 
     print(f"  {method.upper()} generated {len(synthetic)} synthetic ictal windows")
@@ -222,6 +224,8 @@ class Trainer:
 
         for epoch in range(self.config.max_epochs):
             t0 = time.time()
+            if hasattr(train_loader.sampler, 'set_epoch'):
+                train_loader.sampler.set_epoch(epoch)
 
             # ── Train one epoch ────────────────────────────────────────
             model.train()
@@ -352,6 +356,12 @@ def train_single_split(
     # because synthetic_windows passed to CHBMITDataset will be normalized by the
     # dataset constructor. Operating on already-normalized windows would cause
     # double normalization (bug fixed 2026-04-14).
+    if augmentation in ("smote", "adasyn") and synthetic_windows is not None:
+        raise ValueError(
+            "Cannot combine oversampling (E2) with synthetic windows (E3-E5). "
+            "These are mutually exclusive experiments."
+        )
+
     oversample_windows = None
     if augmentation in ("smote", "adasyn"):
         train_ds_unnorm = CHBMITDataset(split="train", seed=seed, normalize=False)
@@ -381,11 +391,10 @@ def train_single_split(
     print(f"  Class weights: {class_weights.tolist()}")
 
     # Build data loaders
-    g = torch.Generator().manual_seed(seed)
+    train_sampler = CaseAwareSampler(train_ds, seed=seed)
     train_loader = DataLoader(
-        train_ds, batch_size=config.batch_size, shuffle=True,
+        train_ds, batch_size=config.batch_size, sampler=train_sampler,
         num_workers=config.num_workers, pin_memory=True, drop_last=True,
-        generator=g,
     )
     val_loader = DataLoader(
         val_ds, batch_size=config.batch_size, shuffle=False,
@@ -478,6 +487,17 @@ def train_lopo(
         seed_results = {}
 
         for fold in folds:
+            # Resume: skip completed folds
+            fold_result_path = RESULTS_DIR / experiment / f"seed_{seed}" / f"fold_{fold:02d}" / "results.json"
+            if fold_result_path.exists():
+                print(f"\n  Fold {fold}/22, Seed {seed} — skipping (already complete)")
+                try:
+                    with open(fold_result_path) as _rf:
+                        seed_results[fold] = json.load(_rf)
+                    continue
+                except (json.JSONDecodeError, KeyError):
+                    pass  # corrupted, re-run
+
             print(f"\n{'─' * 50}")
             print(f"  Fold {fold}/22, Seed {seed}")
             print(f"{'─' * 50}")
@@ -530,11 +550,10 @@ def train_lopo(
             print(f"  Test:  {len(test_ds)}")
 
             # Build data loaders
-            g = torch.Generator().manual_seed(seed)
+            train_sampler = CaseAwareSampler(train_ds, seed=seed)
             train_loader = DataLoader(
-                train_ds, batch_size=config.batch_size, shuffle=True,
+                train_ds, batch_size=config.batch_size, sampler=train_sampler,
                 num_workers=config.num_workers, pin_memory=True, drop_last=True,
-                generator=g,
             )
             val_loader = DataLoader(
                 val_ds, batch_size=config.batch_size, shuffle=False,
@@ -622,7 +641,26 @@ def train_lopo(
 
     summary_dir = RESULTS_DIR / experiment
     summary_dir.mkdir(parents=True, exist_ok=True)
-    with open(summary_dir / "lopo_summary.json", "w") as f:
+    summary_path = summary_dir / "lopo_summary.json"
+
+    # Merge with existing summary (allows split-machine runs)
+    if summary_path.exists():
+        try:
+            with open(summary_path) as _f:
+                existing = json.load(_f)
+            for s_key, s_val in existing.get("all_results", {}).items():
+                s_key_int = int(s_key) if isinstance(s_key, str) and s_key.isdigit() else s_key
+                if s_key_int not in summary["all_results"]:
+                    summary["all_results"][s_key_int] = s_val
+                else:
+                    for f_key, f_val in s_val.items():
+                        f_key_int = int(f_key) if isinstance(f_key, str) and f_key.isdigit() else f_key
+                        if f_key_int not in summary["all_results"][s_key_int]:
+                            summary["all_results"][s_key_int][f_key_int] = f_val
+        except (json.JSONDecodeError, KeyError):
+            pass
+
+    with open(summary_path, "w") as f:
         json.dump(summary, f, indent=2, default=str)
 
     return summary

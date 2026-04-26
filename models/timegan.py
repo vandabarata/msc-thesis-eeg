@@ -293,8 +293,9 @@ class TimeGAN(nn.Module):
         N = len(real_windows)
 
         # Reshape all real data to sequence format
-        real_tensor = torch.from_numpy(real_windows).float().to(device)
-        real_seq = self._reshape_to_seq(real_tensor)  # (N, T, feature_dim)
+        real_seq = self._reshape_to_seq(
+            torch.from_numpy(real_windows).float().to(device)
+        )  # (N, T, feature_dim)
 
         history = {"phase1_loss": [], "phase2_loss": [], "phase3_g_loss": [], "phase3_d_loss": []}
 

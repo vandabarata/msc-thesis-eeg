@@ -549,19 +549,19 @@ class LatentDiffusion(nn.Module):
             Dict with loss history
         """
         self.to(device)
-        self.schedule.to(device)
 
         # Step 1: Encode all windows to latent codes
         if verbose:
             print("  Encoding dataset to latent space...")
         z_all, labels_all = self.encode_dataset(real_windows, labels, device, batch_size)
-        z_tensor = torch.from_numpy(z_all).float().to(device)
-        z_tensor = self._z_to_spatial(z_tensor)  # (N, latent_channels, latent_length)
-        y_tensor = torch.from_numpy(labels_all).long().to(device)
-        N = len(z_tensor)
+        # Keep latent codes on CPU, move per-batch to GPU
+        z_cpu = torch.from_numpy(z_all).float()
+        z_cpu = self._z_to_spatial(z_cpu)  # (N, latent_channels, latent_length)
+        y_cpu = torch.from_numpy(labels_all).long()
+        N = len(z_cpu)
 
         if verbose:
-            print(f"  Encoded {N} windows to latent space ({z_tensor.shape})")
+            print(f"  Encoded {N} windows to latent space ({z_cpu.shape})")
             print(f"  Training UNet denoiser ({n_epochs} epochs)")
 
         # Only optimize UNet parameters
@@ -576,8 +576,8 @@ class LatentDiffusion(nn.Module):
 
             for i in range(0, N, batch_size):
                 idx = perm[i:i + batch_size]
-                z_0 = z_tensor[idx]
-                y = y_tensor[idx]
+                z_0 = z_cpu[idx].to(device)
+                y = y_cpu[idx].to(device)
 
                 loss = self.p_losses(z_0, y)
 

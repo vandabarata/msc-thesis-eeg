@@ -3,6 +3,7 @@ clean_edfs/
 chb-mit-scalp-eeg-database-1.0.0/
 chb-mit-scalp-eeg-database-1.0.0.zip
 data/window_cache/
+data/signal_cache/
 
 # Environment
 .venv/
@@ -22,3 +23,7 @@ CLAUDE.md
 
 # Secrets
 .env
+
+# Logs
+*.log
+nohup.out

@@ -108,6 +108,19 @@ def compute_psd_kl_divergence(real: np.ndarray, synthetic: np.ndarray, fs: int =
     return kl_per_band
 
 
+def _band_powers_from_psd(freqs: np.ndarray, psd_mean: np.ndarray, psd_std: np.ndarray) -> dict:
+    """Compute per-band power from pre-computed PSD (avoids redundant recomputation)."""
+    freq_res = freqs[1] - freqs[0]
+    band_powers = {}
+    for name, (lo, hi) in BANDS.items():
+        mask = (freqs >= lo) & (freqs <= hi)
+        band_powers[name] = (
+            float(np.sum(psd_mean[mask]) * freq_res),
+            float(np.sum(psd_std[mask]) * freq_res),
+        )
+    return band_powers
+
+
 def plot_psd_comparison(
     real_windows: np.ndarray,
     synthetic_windows: np.ndarray,
@@ -144,9 +157,9 @@ def plot_psd_comparison(
     ax1.legend(fontsize=8)
     ax1.grid(True, alpha=0.3)
 
-    # Right: band power comparison
-    bands_r = compute_band_powers(real_windows)
-    bands_s = compute_band_powers(synthetic_windows)
+    # Right: band power comparison (reuse already-computed PSDs)
+    bands_r = _band_powers_from_psd(freqs_r, psd_r, std_r)
+    bands_s = _band_powers_from_psd(freqs_s, psd_s, std_s)
 
     names = list(BANDS.keys())
     x = np.arange(len(names))
@@ -274,13 +287,11 @@ def plot_amplitude_dist(
     """
     rng = np.random.RandomState(seed)
 
-    # Subsample for speed
-    def flatten_subsample(arr, n):
-        flat = arr.ravel()
-        if len(flat) > n:
-            idx = rng.choice(len(flat), n, replace=False)
-            return flat[idx]
-        return flat
+    # Subsample windows first, then flatten (avoids full ravel memory spike)
+    def flatten_subsample(arr, n_vals):
+        n_windows = min(len(arr), max(1, n_vals // (arr.shape[1] * arr.shape[2])))
+        idx = rng.choice(len(arr), n_windows, replace=False)
+        return arr[idx].ravel()
 
     real_flat = flatten_subsample(real_windows, n_samples * 1000)
     synth_flat = flatten_subsample(synthetic_windows, n_samples * 1000)

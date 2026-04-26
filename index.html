@@ -157,6 +157,7 @@ tailwind.config = {
 
 <!-- Mobile drawer — separate fixed element so it doesn't trap scroll inside nav -->
 <div id="mobile-menu" class="fixed top-20 left-0 right-0 z-40 md:hidden flex-col bg-[#0c0e1a] border-b border-[#0d28c2]/30 px-4 pb-4 shadow-xl">
+  <a href="#home" class="nav-link mobile-nav-link block py-3 text-gray-400 hover:text-cyan-500 transition-colors font-medium border-b border-gray-800/50 text-sm" data-page="home">Home</a>
   <a href="#methodology" class="nav-link mobile-nav-link block py-3 text-gray-400 hover:text-cyan-500 transition-colors font-medium border-b border-gray-800/50 text-sm" data-page="methodology">Methodology</a>
   <a href="#dataset" class="nav-link mobile-nav-link block py-3 text-gray-400 hover:text-cyan-500 transition-colors font-medium border-b border-gray-800/50 text-sm" data-page="dataset">Dataset</a>
   <a href="#cleaning" class="nav-link mobile-nav-link block py-3 text-gray-400 hover:text-cyan-500 transition-colors font-medium border-b border-gray-800/50 text-sm" data-page="cleaning">Cleaning</a>
@@ -196,7 +197,7 @@ tailwind.config = {
             <div class="text-xs text-gray-600"><span data-stat="total-cases">24</span> cases</div>
           </div>
           <div class="bg-gray-900 border border-gray-800 rounded-lg px-3 sm:px-5 py-3 text-center sm:text-left">
-            <div class="text-xl sm:text-2xl font-bold text-cyan-500" data-stat="total-files">686</div>
+            <div class="text-xl sm:text-2xl font-bold text-cyan-500" data-stat="total-files">683</div>
             <div class="text-xs text-gray-500">EDF Files</div>
           </div>
           <div class="bg-gray-900 border border-gray-800 rounded-lg px-3 sm:px-5 py-3 text-center sm:text-left">
@@ -419,7 +420,7 @@ tailwind.config = {
         <div class="text-3xl font-bold text-cyan-500" data-stat="unique-subjects">23</div><div class="text-xs text-gray-500 mt-1">Subjects</div><div class="text-xs text-gray-600"><span data-stat="total-cases">24</span> cases</div>
       </div>
       <div class="stat-card bg-gray-900 border border-gray-800 rounded-xl p-4 text-center flex flex-col justify-center">
-        <div class="text-3xl font-bold text-cyan-500" data-stat="total-files">686</div><div class="text-xs text-gray-500 mt-1">EDF Files</div>
+        <div class="text-3xl font-bold text-cyan-500" data-stat="total-files">683</div><div class="text-xs text-gray-500 mt-1">EDF Files</div>
       </div>
       <div class="stat-card bg-gray-900 border border-gray-800 rounded-xl p-4 text-center flex flex-col justify-center">
         <div class="text-3xl font-bold text-rsch-400" data-stat="seizure-files">141</div><div class="text-xs text-gray-500 mt-1">Seizure Files</div>
@@ -542,7 +543,7 @@ tailwind.config = {
         <div class="bg-gray-800 rounded-lg p-4 text-center border-t-2 border-emerald-500">
           <div class="text-2xl mb-2">&#128260;</div>
           <div class="font-semibold text-sm text-white">Homogenize</div>
-          <div class="text-xs text-gray-500 mt-1">Pad missing channels, resolve duplicates, split montage sets</div>
+          <div class="text-xs text-gray-500 mt-1">Map to fixed 23-channel target montage, zero-pad missing, drop extra</div>
         </div>
         <div class="bg-gray-800 rounded-lg p-4 text-center border-t-2 border-rose-500">
           <div class="text-2xl mb-2">&#128190;</div>
@@ -557,7 +558,9 @@ tailwind.config = {
       <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
         <h3 class="font-semibold text-white mb-3">Cleaning Results</h3>
         <div class="space-y-3">
-          <div class="flex justify-between"><span class="text-gray-500">Files with channels removed</span><span class="font-mono text-amber-400">410 / 686</span></div>
+          <div class="flex justify-between"><span class="text-gray-500">Files with channels removed</span><span class="font-mono text-amber-400">109 / 686</span></div>
+          <div class="flex justify-between"><span class="text-gray-500">Files with zero-padded channels</span><span class="font-mono text-amber-400">28 / 683</span></div>
+          <div class="flex justify-between"><span class="text-gray-500">Files dropped (no bipolar channels)</span><span class="font-mono text-red-400">3</span></div>
           <div class="flex justify-between"><span class="text-gray-500">Patients with montage changes</span><span class="font-mono text-gray-300">10</span></div>
         </div>
       </div>
@@ -576,11 +579,11 @@ tailwind.config = {
         <div class="space-y-3 text-sm">
           <div>
             <div class="font-medium text-white">T8-P8 Duplicate</div>
-            <div class="text-gray-500">Present in all 686 files. Second instance renamed to T8-P8-2.</div>
+            <div class="text-gray-500">Present in all output files. Second instance renamed to T8-P8-2.</div>
           </div>
           <div>
-            <div class="font-medium text-white">Missing Channels</div>
-            <div class="text-gray-500">Padded with zero signals to ensure consistent 23-channel layout per montage set.</div>
+            <div class="font-medium text-white">Target Montage Remapping</div>
+            <div class="text-gray-500">All files mapped to a fixed 23-channel target montage (<code class="text-cyan-500">TARGET_MONTAGE</code>). Missing channels zero-padded; extra channels dropped. QC rejects windows with flat (zero-padded) channels.</div>
           </div>
         </div>
       </div>
@@ -772,7 +775,7 @@ tailwind.config = {
 
           <div>
             <div class="font-semibold text-gray-300 mb-1">Why Butterworth IIR with <code class="text-cyan-500">filtfilt</code>, not FIR</div>
-            <p><a href="#cite-sobhani2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">Sobhani et al., 2025</a> advocate for <a href="#gl-iirfir" class="text-cyan-600 hover:text-cyan-400 hover:underline">FIR</a> filters because of their <em class="text-gray-500">&ldquo;linear phase properties, which guarantee that the temporal structure of the EEG waveforms is maintained without introducing phase distortion.&rdquo;</em> This is valid for a causal (real-time) filter. However, we apply <code class="text-cyan-500">filtfilt</code> (forward-backward filtering), which makes any IIR filter <strong class="text-white">zero-phase</strong> - achieving the same temporal-structure preservation as FIR while requiring a much lower filter order (4th-order Butterworth vs. typically 100+ order FIR for a comparable transition band). Lower order means fewer edge artefacts and faster computation across 686 files &times; 23 channels.</p>
+            <p><a href="#cite-sobhani2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">Sobhani et al., 2025</a> advocate for <a href="#gl-iirfir" class="text-cyan-600 hover:text-cyan-400 hover:underline">FIR</a> filters because of their <em class="text-gray-500">&ldquo;linear phase properties, which guarantee that the temporal structure of the EEG waveforms is maintained without introducing phase distortion.&rdquo;</em> This is valid for a causal (real-time) filter. However, we apply <code class="text-cyan-500">filtfilt</code> (forward-backward filtering), which makes any IIR filter <strong class="text-white">zero-phase</strong> - achieving the same temporal-structure preservation as FIR while requiring a much lower filter order (4th-order Butterworth vs. typically 100+ order FIR for a comparable transition band). Lower order means fewer edge artefacts and faster computation across 683 files &times; 23 channels.</p>
           </div>
         </div>
 
@@ -881,7 +884,7 @@ tailwind.config = {
           <div>
             <div class="font-semibold text-gray-300 mb-1">Literature basis for segment rejection</div>
             <div class="space-y-2 text-xs mt-2">
-              <div class="flex gap-2"><span class="text-rose-400">&#9679;</span><span><a href="#cite-zhao2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Zhao et al., 2022</a> - Clinical experts <em class="text-gray-500">&ldquo;selected the sleep stage interictal iEEG <strong>without motion artifacts</strong> and at least 1 h far away from seizures for analysis.&rdquo;</em> Our automated QC approximates this expert-level quality gate for 686 files &times; thousands of windows, where manual review is infeasible.</span></div>
+              <div class="flex gap-2"><span class="text-rose-400">&#9679;</span><span><a href="#cite-zhao2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Zhao et al., 2022</a> - Clinical experts <em class="text-gray-500">&ldquo;selected the sleep stage interictal iEEG <strong>without motion artifacts</strong> and at least 1 h far away from seizures for analysis.&rdquo;</em> Our automated QC approximates this expert-level quality gate for 683 files &times; thousands of windows, where manual review is infeasible.</span></div>
               <div class="flex gap-2"><span class="text-rose-400">&#9679;</span><span><a href="#cite-carrle2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Carrle et al., 2023</a> - <em class="text-gray-500">&ldquo;Any window with minimum or maximum values below or above 2&times; standard deviation of the average minimum or maximum values, respectively, was regarded as an <strong>outlier</strong>.&rdquo;</em> Our criteria are more targeted (flat + saturated) and reject fewer windows than a blanket 2&sigma; rule, reducing the exclusion bias that <a href="#cite-dakshit2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Dakshit et al., 2023</a> warn about.</span></div>
             </div>
           </div>
@@ -927,7 +930,7 @@ tailwind.config = {
                   <span class="text-amber-400 font-bold shrink-0">1.</span>
                   <div>
                     <strong class="text-gray-300">Leakage risk under cross-subject evaluation.</strong>
-                    <p class="mt-1">ICA computes a mixing matrix from the full recording. If this decomposition is fitted on data that includes test subjects (even indirectly, through shared statistics), it leaks information about the test distribution into training. Since all preprocessing steps that learn parameters must be fit using training data only, running ICA per-patient per-fold would be required - adding significant computational overhead (686 files &times; 23 <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> folds) for marginal benefit on long-term monitoring data.</p>
+                    <p class="mt-1">ICA computes a mixing matrix from the full recording. If this decomposition is fitted on data that includes test subjects (even indirectly, through shared statistics), it leaks information about the test distribution into training. Since all preprocessing steps that learn parameters must be fit using training data only, running ICA per-patient per-fold would be required - adding significant computational overhead (683 files &times; 23 <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> folds) for marginal benefit on long-term monitoring data.</p>
                   </div>
                 </div>
 
@@ -1182,7 +1185,7 @@ tailwind.config = {
 <div id="page-roadmap" class="page">
   <section class="max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12">
     <h1 class="text-3xl font-bold text-white mb-2">Roadmap &amp; Experiment Plan</h1>
-    <p class="text-gray-500 mb-3">Experiment plan. Seven experiments mapped to the thesis research questions, running 30 Mar &ndash; 26 Jul 2026. Sequential single-machine execution: CVAE first (LDM depends on its encoder), then LDM, then TimeGAN.</p>
+    <p class="text-gray-500 mb-3">Experiment plan. Seven experiments mapped to the thesis research questions, running 30 Mar &ndash; 26 Jul 2026. Sequential single-machine execution: TimeGAN first (independent), then CVAE, then LDM (reuses CVAE encoder).</p>
 
     <!-- Plan overview -->
     <div class="bg-gray-900 border border-iscte-500/20 rounded-xl p-5 mb-3" id="plan-overview">
@@ -1215,9 +1218,9 @@ tailwind.config = {
           <div class="space-y-1 text-xs text-gray-500">
             <div>30 Mar 2026 - Plan start (Phase 0)</div>
             <div>21 Apr 2026 - E1+E2 baselines (Phase 1)</div>
-            <div>28 Apr 2026 - CVAE training begins (E4)</div>
-            <div>19 May 2026 - LDM training begins (E5, uses CVAE encoder)</div>
-            <div>9 Jun 2026 - TimeGAN training begins (E3)</div>
+            <div>28 Apr 2026 - TimeGAN training begins (E3)</div>
+            <div>19 May 2026 - CVAE training begins (E4)</div>
+            <div>9 Jun 2026 - LDM training begins (E5, uses CVAE encoder)</div>
             <div>30 Jun 2026 - Comparison + subject-ID (E6, E7)</div>
             <div>11 Jul 2026 - All experiments complete</div>
             <div>26 Jul 2026 - Thesis writing deadline</div>
@@ -1452,7 +1455,7 @@ tailwind.config = {
       <!-- Gantt chart -->
       <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-3">
         <h3 class="font-semibold text-white mb-1">Phase Overview (21 Apr &ndash; 26 Jul 2026)</h3>
-        <p class="text-xs text-gray-500 mb-3">Sequential execution on a single machine. CVAE before LDM (encoder dependency). Writing runs alongside from 13 Apr.</p>
+        <p class="text-xs text-gray-500 mb-3">Sequential execution on a single machine. TimeGAN first (independent), then CVAE, then LDM (encoder dependency). Writing runs alongside from 13 Apr.</p>
         <div class="chart-wrap" style="height:clamp(260px,40vw,340px)"><canvas id="chart-gantt"></canvas></div>
       </div>
 
@@ -1471,7 +1474,7 @@ tailwind.config = {
               <div class="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">Steps</div>
               <div class="space-y-2 text-xs text-gray-400">
                 <div class="flex gap-2"><span class="text-gray-400 shrink-0">1.</span><span><strong class="text-gray-300">Environment:</strong> Python/PyTorch environment with GPU support; CUDA availability and memory verified.</span></div>
-                <div class="flex gap-2"><span class="text-gray-400 shrink-0">2.</span><span><strong class="text-gray-300">Load data:</strong> Homogenized EDF+ files loaded; all 686 files confirmed readable with correct 23-channel layout and seizure annotations.</span></div>
+                <div class="flex gap-2"><span class="text-gray-400 shrink-0">2.</span><span><strong class="text-gray-300">Load data:</strong> Homogenized EDF+ files loaded; all 683 files confirmed readable with correct 23-channel layout and seizure annotations.</span></div>
                 <div class="flex gap-2"><span class="text-gray-400 shrink-0">3.</span><span><strong class="text-gray-300">Windowing:</strong> <a href="#gl-slidingwindow" class="text-cyan-600 hover:text-cyan-400 hover:underline">Sliding-window</a> segmentation (4-second windows, 50% overlap at 256 Hz = 1024 samples). Ictal/interictal label assignment validated from annotations.</span></div>
                 <div class="flex gap-2"><span class="text-gray-400 shrink-0">4.</span><span><strong class="text-gray-300">Splits:</strong> Patient-level train/val/test split strategy with chb01 and chb21 always in the same fold. Exact split documented for all future experiments.</span></div>
                 <div class="flex gap-2"><span class="text-gray-400 shrink-0">5.</span><span><strong class="text-gray-300">Class balance:</strong> Class balance statistics computed per patient and globally. ~0.4% ictal window rate confirmed.</span></div>
@@ -1523,74 +1526,10 @@ tailwind.config = {
         </div>
 
         <!-- Phase 2 -->
-        <div class="bg-gray-900 border border-cyan-500/20 rounded-xl overflow-hidden">
-          <div class="flex items-center gap-3 px-5 py-3 bg-cyan-500/10 border-b border-cyan-500/20">
-            <span class="text-xs font-bold text-white bg-cyan-500/30 px-2 py-0.5 rounded">28 Apr &ndash; 16 May</span>
-            <span class="font-semibold text-white text-sm">Phase 2 - CVAE Training &amp; Evaluation (E4)</span>
-            <span class="ml-auto text-xs text-cyan-500">3 weeks</span>
-          </div>
-          <div class="p-5 grid md:grid-cols-2 gap-4">
-            <div>
-              <div class="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">Steps</div>
-              <div class="space-y-2 text-xs text-gray-400">
-                <div class="flex gap-2"><span class="text-cyan-500 shrink-0">1.</span><span><strong class="text-gray-300">Architecture:</strong> <a href="#model-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a> with 1-D convolutional encoder/decoder and patient conditioning.</span></div>
-                <div class="flex gap-2"><span class="text-cyan-500 shrink-0">2.</span><span><strong class="text-gray-300">KL annealing:</strong> β starts at 0 (pure reconstruction) and linearly increases to 1 over the first 50 epochs. MSE reconstruction loss.</span></div>
-                <div class="flex gap-2"><span class="text-cyan-500 shrink-0">3.</span><span><strong class="text-gray-300">Latent space exploration:</strong> Interpolation between ictal/interictal latent codes and between patients, with visualisation of reconstructed signals.</span></div>
-                <div class="flex gap-2"><span class="text-cyan-500 shrink-0">4.</span><span><strong class="text-gray-300">Quality evaluation:</strong> Standard evaluation protocol: <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a>, <a href="#gl-discriminative" class="text-cyan-600 hover:text-cyan-400 hover:underline">discriminative score</a>, coherence, <a href="#gl-tsne" class="text-cyan-600 hover:text-cyan-400 hover:underline">t-SNE</a>, <a href="#gl-tstr" class="text-cyan-600 hover:text-cyan-400 hover:underline">TSTR</a>, augmented classifier. Latent dimension z and reconstruction quality recorded as hyperparameters.</span></div>
-                <div class="flex gap-2"><span class="text-cyan-500 shrink-0">5.</span><span><strong class="text-gray-300">Encoder freeze:</strong> The trained encoder is saved for reuse as the latent space for the LDM in Phase 3.</span></div>
-              </div>
-            </div>
-            <div>
-              <div class="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">Deliverables</div>
-              <div class="space-y-1.5 text-xs">
-                <div class="flex items-start gap-2"><span class="text-cyan-500 shrink-0">▸</span><span class="text-gray-400"><code class="text-cyan-500">cvae.py</code> — CVAE implementation with 1-D conv encoder/decoder</span></div>
-                <div class="flex items-start gap-2"><span class="text-cyan-500 shrink-0">▸</span><span class="text-gray-400">Trained CVAE checkpoint + saved encoder weights (for LDM reuse)</span></div>
-                <div class="flex items-start gap-2"><span class="text-cyan-500 shrink-0">▸</span><span class="text-gray-400">Latent space interpolation plots, <a href="#gl-elbo" class="text-cyan-600 hover:text-cyan-400 hover:underline">ELBO</a> training curves</span></div>
-                <div class="flex items-start gap-2"><span class="text-cyan-500 shrink-0">▸</span><span class="text-gray-400">E4 results table</span></div>
-              </div>
-              <div class="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide mt-4">Watch out for</div>
-              <div class="text-xs text-amber-400 bg-amber-500/5 border border-amber-500/20 rounded p-2">Posterior collapse: a KL term near zero with all samples drawn from the prior signals the encoder is being ignored. Mitigation involves reducing β or increasing encoder capacity. Blurry reconstructions are a known CVAE limitation.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Phase 3 -->
-        <div class="bg-gray-900 border border-emerald-500/20 rounded-xl overflow-hidden">
-          <div class="flex items-center gap-3 px-5 py-3 bg-emerald-500/10 border-b border-emerald-500/20">
-            <span class="text-xs font-bold text-white bg-emerald-500/30 px-2 py-0.5 rounded">19 May &ndash; 6 Jun</span>
-            <span class="font-semibold text-white text-sm">Phase 3 - Latent Diffusion Model Training &amp; Evaluation (E5)</span>
-            <span class="ml-auto text-xs text-emerald-400">3 weeks</span>
-          </div>
-          <div class="p-5 grid md:grid-cols-2 gap-4">
-            <div>
-              <div class="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">Steps</div>
-              <div class="space-y-2 text-xs text-gray-400">
-                <div class="flex gap-2"><span class="text-emerald-400 shrink-0">1.</span><span><strong class="text-gray-300">Latent code preparation:</strong> The frozen CVAE encoder from Phase 2 extracts latent codes z for all ictal training windows, which are cached. The LDM operates entirely in this latent space.</span></div>
-                <div class="flex gap-2"><span class="text-emerald-400 shrink-0">2.</span><span><strong class="text-gray-300">Denoiser architecture:</strong> <a href="#model-ldm" class="text-cyan-600 hover:text-cyan-400 hover:underline">1-D UNet denoiser</a> with skip connections, sinusoidal time-step embedding, and patient conditioning via additive embedding.</span></div>
-                <div class="flex gap-2"><span class="text-emerald-400 shrink-0">3.</span><span><strong class="text-gray-300">Diffusion training:</strong> <a href="#gl-ddpm" class="text-cyan-600 hover:text-cyan-400 hover:underline">DDPM</a> forward/reverse process (T=1000 steps, cosine noise schedule). The UNet learns to predict the noise ε via simple MSE loss.</span></div>
-                <div class="flex gap-2"><span class="text-emerald-400 shrink-0">4.</span><span><strong class="text-gray-300">Fast sampling:</strong> DDIM sampling (50–100 steps) for fast inference. Synthetic latent codes are decoded with the CVAE decoder to obtain synthetic EEG windows.</span></div>
-                <div class="flex gap-2"><span class="text-emerald-400 shrink-0">5.</span><span><strong class="text-gray-300">Full evaluation:</strong> <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a>, <a href="#gl-discriminative" class="text-cyan-600 hover:text-cyan-400 hover:underline">discriminative score</a>, coherence, <a href="#gl-tsne" class="text-cyan-600 hover:text-cyan-400 hover:underline">t-SNE</a>, <a href="#gl-tstr" class="text-cyan-600 hover:text-cyan-400 hover:underline">TSTR</a>, augmented classifier — compared against E4 (CVAE). Per-sample generation time measured (DDIM vs DDPM).</span></div>
-              </div>
-            </div>
-            <div>
-              <div class="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">Deliverables</div>
-              <div class="space-y-1.5 text-xs">
-                <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">▸</span><span class="text-gray-400"><code class="text-cyan-500">ldm.py</code> — LDM with 1-D UNet denoiser + DDPM/DDIM sampling</span></div>
-                <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">▸</span><span class="text-gray-400">Trained LDM checkpoint; DDIM sampling confirmed working</span></div>
-                <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">▸</span><span class="text-gray-400">Generation speed benchmark (DDPM vs DDIM, samples/sec)</span></div>
-                <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">▸</span><span class="text-gray-400">E5 results table</span></div>
-              </div>
-              <div class="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide mt-4">Watch out for</div>
-              <div class="text-xs text-amber-400 bg-amber-500/5 border border-amber-500/20 rounded p-2">Training time is the main risk. If GPU memory is insufficient for T=1000, fallback options are T=200 or a smaller UNet. The CVAE encoder must remain frozen — only the UNet is trained in this phase.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Phase 4 -->
         <div class="bg-gray-900 border border-rsch-500/20 rounded-xl overflow-hidden">
           <div class="flex items-center gap-3 px-5 py-3 bg-rsch-500/10 border-b border-rsch-500/20">
-            <span class="text-xs font-bold text-white bg-rsch-500/30 px-2 py-0.5 rounded">9 Jun &ndash; 27 Jun</span>
-            <span class="font-semibold text-white text-sm">Phase 4 - TimeGAN Training &amp; Evaluation (E3)</span>
+            <span class="text-xs font-bold text-white bg-rsch-500/30 px-2 py-0.5 rounded">28 Apr &ndash; 16 May</span>
+            <span class="font-semibold text-white text-sm">Phase 2 - TimeGAN Training &amp; Evaluation (E3)</span>
             <span class="ml-auto text-xs text-rsch-400">3 weeks</span>
           </div>
           <div class="p-5 grid md:grid-cols-2 gap-4">
@@ -1614,6 +1553,70 @@ tailwind.config = {
               </div>
               <div class="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide mt-4">Watch out for</div>
               <div class="text-xs text-amber-400 bg-amber-500/5 border border-amber-500/20 rounded p-2">Mode collapse: identical-looking generated samples in t-SNE indicate collapsed diversity. Mitigation involves lowering the learning rate and increasing the supervised loss weight. TimeGAN is sensitive to the η (stepwise loss) coefficient.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 3 -->
+        <div class="bg-gray-900 border border-cyan-500/20 rounded-xl overflow-hidden">
+          <div class="flex items-center gap-3 px-5 py-3 bg-cyan-500/10 border-b border-cyan-500/20">
+            <span class="text-xs font-bold text-white bg-cyan-500/30 px-2 py-0.5 rounded">19 May &ndash; 6 Jun</span>
+            <span class="font-semibold text-white text-sm">Phase 3 - CVAE Training &amp; Evaluation (E4)</span>
+            <span class="ml-auto text-xs text-cyan-500">3 weeks</span>
+          </div>
+          <div class="p-5 grid md:grid-cols-2 gap-4">
+            <div>
+              <div class="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">Steps</div>
+              <div class="space-y-2 text-xs text-gray-400">
+                <div class="flex gap-2"><span class="text-cyan-500 shrink-0">1.</span><span><strong class="text-gray-300">Architecture:</strong> <a href="#model-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a> with 1-D convolutional encoder/decoder and patient conditioning.</span></div>
+                <div class="flex gap-2"><span class="text-cyan-500 shrink-0">2.</span><span><strong class="text-gray-300">KL annealing:</strong> β starts at 0 (pure reconstruction) and linearly increases to 1 over the first 50 epochs. MSE reconstruction loss.</span></div>
+                <div class="flex gap-2"><span class="text-cyan-500 shrink-0">3.</span><span><strong class="text-gray-300">Latent space exploration:</strong> Interpolation between ictal/interictal latent codes and between patients, with visualisation of reconstructed signals.</span></div>
+                <div class="flex gap-2"><span class="text-cyan-500 shrink-0">4.</span><span><strong class="text-gray-300">Quality evaluation:</strong> Standard evaluation protocol: <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a>, <a href="#gl-discriminative" class="text-cyan-600 hover:text-cyan-400 hover:underline">discriminative score</a>, coherence, <a href="#gl-tsne" class="text-cyan-600 hover:text-cyan-400 hover:underline">t-SNE</a>, <a href="#gl-tstr" class="text-cyan-600 hover:text-cyan-400 hover:underline">TSTR</a>, augmented classifier. Latent dimension z and reconstruction quality recorded as hyperparameters.</span></div>
+                <div class="flex gap-2"><span class="text-cyan-500 shrink-0">5.</span><span><strong class="text-gray-300">Encoder freeze:</strong> The trained encoder is saved for reuse as the latent space for the LDM in Phase 4.</span></div>
+              </div>
+            </div>
+            <div>
+              <div class="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">Deliverables</div>
+              <div class="space-y-1.5 text-xs">
+                <div class="flex items-start gap-2"><span class="text-cyan-500 shrink-0">▸</span><span class="text-gray-400"><code class="text-cyan-500">cvae.py</code> — CVAE implementation with 1-D conv encoder/decoder</span></div>
+                <div class="flex items-start gap-2"><span class="text-cyan-500 shrink-0">▸</span><span class="text-gray-400">Trained CVAE checkpoint + saved encoder weights (for LDM reuse)</span></div>
+                <div class="flex items-start gap-2"><span class="text-cyan-500 shrink-0">▸</span><span class="text-gray-400">Latent space interpolation plots, <a href="#gl-elbo" class="text-cyan-600 hover:text-cyan-400 hover:underline">ELBO</a> training curves</span></div>
+                <div class="flex items-start gap-2"><span class="text-cyan-500 shrink-0">▸</span><span class="text-gray-400">E4 results table</span></div>
+              </div>
+              <div class="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide mt-4">Watch out for</div>
+              <div class="text-xs text-amber-400 bg-amber-500/5 border border-amber-500/20 rounded p-2">Posterior collapse: a KL term near zero with all samples drawn from the prior signals the encoder is being ignored. Mitigation involves reducing β or increasing encoder capacity. Blurry reconstructions are a known CVAE limitation.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 4 -->
+        <div class="bg-gray-900 border border-emerald-500/20 rounded-xl overflow-hidden">
+          <div class="flex items-center gap-3 px-5 py-3 bg-emerald-500/10 border-b border-emerald-500/20">
+            <span class="text-xs font-bold text-white bg-emerald-500/30 px-2 py-0.5 rounded">9 Jun &ndash; 27 Jun</span>
+            <span class="font-semibold text-white text-sm">Phase 4 - Latent Diffusion Model Training &amp; Evaluation (E5)</span>
+            <span class="ml-auto text-xs text-emerald-400">3 weeks</span>
+          </div>
+          <div class="p-5 grid md:grid-cols-2 gap-4">
+            <div>
+              <div class="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">Steps</div>
+              <div class="space-y-2 text-xs text-gray-400">
+                <div class="flex gap-2"><span class="text-emerald-400 shrink-0">1.</span><span><strong class="text-gray-300">Latent code preparation:</strong> The frozen CVAE encoder from Phase 3 extracts latent codes z for all ictal training windows, which are cached. The LDM operates entirely in this latent space.</span></div>
+                <div class="flex gap-2"><span class="text-emerald-400 shrink-0">2.</span><span><strong class="text-gray-300">Denoiser architecture:</strong> <a href="#model-ldm" class="text-cyan-600 hover:text-cyan-400 hover:underline">1-D UNet denoiser</a> with skip connections, sinusoidal time-step embedding, and patient conditioning via additive embedding.</span></div>
+                <div class="flex gap-2"><span class="text-emerald-400 shrink-0">3.</span><span><strong class="text-gray-300">Diffusion training:</strong> <a href="#gl-ddpm" class="text-cyan-600 hover:text-cyan-400 hover:underline">DDPM</a> forward/reverse process (T=1000 steps, cosine noise schedule). The UNet learns to predict the noise ε via simple MSE loss.</span></div>
+                <div class="flex gap-2"><span class="text-emerald-400 shrink-0">4.</span><span><strong class="text-gray-300">Fast sampling:</strong> DDIM sampling (50–100 steps) for fast inference. Synthetic latent codes are decoded with the CVAE decoder to obtain synthetic EEG windows.</span></div>
+                <div class="flex gap-2"><span class="text-emerald-400 shrink-0">5.</span><span><strong class="text-gray-300">Full evaluation:</strong> <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a>, <a href="#gl-discriminative" class="text-cyan-600 hover:text-cyan-400 hover:underline">discriminative score</a>, coherence, <a href="#gl-tsne" class="text-cyan-600 hover:text-cyan-400 hover:underline">t-SNE</a>, <a href="#gl-tstr" class="text-cyan-600 hover:text-cyan-400 hover:underline">TSTR</a>, augmented classifier — compared against E4 (CVAE). Per-sample generation time measured (DDIM vs DDPM).</span></div>
+              </div>
+            </div>
+            <div>
+              <div class="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">Deliverables</div>
+              <div class="space-y-1.5 text-xs">
+                <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">▸</span><span class="text-gray-400"><code class="text-cyan-500">ldm.py</code> — LDM with 1-D UNet denoiser + DDPM/DDIM sampling</span></div>
+                <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">▸</span><span class="text-gray-400">Trained LDM checkpoint; DDIM sampling confirmed working</span></div>
+                <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">▸</span><span class="text-gray-400">Generation speed benchmark (DDPM vs DDIM, samples/sec)</span></div>
+                <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">▸</span><span class="text-gray-400">E5 results table</span></div>
+              </div>
+              <div class="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide mt-4">Watch out for</div>
+              <div class="text-xs text-amber-400 bg-amber-500/5 border border-amber-500/20 rounded p-2">Training time is the main risk. If GPU memory is insufficient for T=1000, fallback options are T=200 or a smaller UNet. The CVAE encoder must remain frozen — only the UNet is trained in this phase.</div>
             </div>
           </div>
         </div>
@@ -1733,22 +1736,102 @@ tailwind.config = {
 <div id="page-status" class="page">
   <section class="max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12">
     <h1 class="text-3xl font-bold text-white mb-2">Current Status</h1>
-    <p class="text-gray-500 mb-3">Implementation progress, design decisions, and next steps. Last updated: 19 April 2026. See the <a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">Roadmap</a> for the full experiment plan and timeline.</p>
+    <p class="text-gray-500 mb-3">Implementation progress, design decisions, and next steps. Last updated: 26 April 2026. See the <a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">Roadmap</a> for the full experiment plan and timeline.</p>
+
+    <!-- E1 Results -->
+    <div class="bg-gray-900 border border-emerald-500/30 rounded-xl p-5 mb-3">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-sm shrink-0">E1</div>
+        <div>
+          <h3 class="font-semibold text-white text-sm">Baseline Results (single-split, no augmentation)</h3>
+          <p class="text-xs text-gray-500">Completed 26 Apr 2026 &mdash; 3 seeds, class-weighted CE loss, early stopping on val <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></p>
+        </div>
+        <span class="ml-auto text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded">DONE</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs">
+          <thead><tr class="border-b border-gray-700 text-left text-gray-500"><th class="py-2 pr-4">Metric</th><th class="py-2 pr-4">Seed 42</th><th class="py-2 pr-4">Seed 123</th><th class="py-2 pr-4">Seed 456</th><th class="py-2 font-semibold text-gray-400">Mean &plusmn; Std</th></tr></thead>
+          <tbody class="text-gray-400">
+            <tr class="border-b border-gray-800/50">
+              <td class="py-2 pr-4 text-gray-300 font-medium"><a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></td>
+              <td class="py-2 pr-4">0.1047</td><td class="py-2 pr-4">0.1896</td><td class="py-2 pr-4">0.2355</td>
+              <td class="py-2 font-semibold text-white">0.1766 &plusmn; 0.0540</td>
+            </tr>
+            <tr class="border-b border-gray-800/50">
+              <td class="py-2 pr-4 text-gray-300 font-medium"><a href="#gl-auroc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUROC</a></td>
+              <td class="py-2 pr-4">0.8267</td><td class="py-2 pr-4">0.8978</td><td class="py-2 pr-4">0.9057</td>
+              <td class="py-2 font-semibold text-white">0.8767 &plusmn; 0.0353</td>
+            </tr>
+            <tr class="border-b border-gray-800/50">
+              <td class="py-2 pr-4 text-gray-300 font-medium"><a href="#gl-f1" class="text-cyan-600 hover:text-cyan-400 hover:underline">F1</a> (optimal)</td>
+              <td class="py-2 pr-4">0.1794</td><td class="py-2 pr-4">0.3281</td><td class="py-2 pr-4">0.3536</td>
+              <td class="py-2 font-semibold text-white">0.2870 &plusmn; 0.0779</td>
+            </tr>
+            <tr class="border-b border-gray-800/50">
+              <td class="py-2 pr-4 text-gray-300 font-medium">Sens. @ 95% Spec.</td>
+              <td class="py-2 pr-4">0.4829</td><td class="py-2 pr-4">0.6639</td><td class="py-2 pr-4">0.7064</td>
+              <td class="py-2 font-semibold text-white">0.6177 &plusmn; 0.0965</td>
+            </tr>
+            <tr class="border-b border-gray-800/50">
+              <td class="py-2 pr-4 text-gray-300 font-medium">Per-patient AUPRC</td>
+              <td class="py-2 pr-4">0.1366</td><td class="py-2 pr-4">0.2567</td><td class="py-2 pr-4">0.2857</td>
+              <td class="py-2 font-semibold text-white">0.2263 &plusmn; 0.0646</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mt-3 grid grid-cols-3 gap-3 text-xs">
+        <div class="bg-gray-800/40 rounded p-2 text-center">
+          <div class="text-gray-500">Seed 42</div>
+          <div class="text-gray-400">Best epoch 3/13</div>
+          <div class="text-gray-500">val_auprc 0.6135</div>
+        </div>
+        <div class="bg-gray-800/40 rounded p-2 text-center">
+          <div class="text-gray-500">Seed 123</div>
+          <div class="text-gray-400">Best epoch 8/18</div>
+          <div class="text-gray-500">val_auprc 0.6398</div>
+        </div>
+        <div class="bg-gray-800/40 rounded p-2 text-center">
+          <div class="text-gray-500">Seed 456</div>
+          <div class="text-gray-400">Best epoch 10/20</div>
+          <div class="text-gray-500">val_auprc 0.6904</div>
+        </div>
+      </div>
+      <div class="mt-3 text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-2">
+        <strong class="text-gray-400">Interpretation:</strong> Results are within the expected range for a no-augmentation baseline on CHB-MIT with patient-independent splitting. The high variance between seeds (e.g. AUPRC 0.10&ndash;0.24) reflects the stochastic nature of training on heavily imbalanced data. Sensitivity at 95% specificity averaging ~62% confirms the model detects roughly half to two-thirds of seizure windows while maintaining a low false-alarm rate &mdash; the floor that augmentation experiments (E2&ndash;E5) must beat.
+      </div>
+    </div>
+
+    <!-- Pipeline hardening -->
+    <div class="bg-gray-900 border border-gray-700/40 rounded-xl p-5 mb-3">
+      <div class="flex items-center gap-3 mb-2">
+        <h3 class="font-semibold text-white text-sm">Pipeline Hardening (26 Apr 2026)</h3>
+        <span class="text-xs text-gray-500">Proactive audit of E3&ndash;E7 code before training begins</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-400">
+        <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span>Generator memory: CVAE and LDM keep training data on CPU, move per-batch to GPU (avoids VRAM OOM on 12 GB card)</span></div>
+        <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span>Double normalization fix: generators now train on &micro;V-scale data (<code class="text-cyan-500">normalize=False</code>), not already-normalized data</span></div>
+        <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span><a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> resume: <code class="text-cyan-500">train.py</code> skips completed folds and merges partial summaries (supports split-machine runs)</span></div>
+        <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span><a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> generation CLI: <code class="text-cyan-500">generate.py --mode lopo --folds</code> trains generators per-fold with skip-if-done logic</span></div>
+        <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span><a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a>/<a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400 hover:underline">ADASYN</a> OOM fix: interictal subsampled to 10&times; ictal count before oversampling (~4.4 GB vs 123 GB)</span></div>
+        <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span>E7 sentinel PID fix: synthetic windows with unknown patient IDs filtered instead of silently mapped to subject 0</span></div>
+      </div>
+    </div>
 
     <!-- Progress overview -->
     <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-3">
       <div class="flex items-center gap-4 mb-3">
         <h3 class="font-semibold text-white">Overall Thesis Progress</h3>
-        <span class="text-2xl font-bold text-cyan-500">~50%</span>
+        <span class="text-2xl font-bold text-cyan-500">~30%</span>
       </div>
       <div class="w-full bg-gray-800 rounded-full h-4 mb-3 overflow-hidden">
-        <div class="h-full rounded-full bg-gradient-to-r from-iscte-500 to-cyan-500 relative" style="width: 50%">
+        <div class="h-full rounded-full bg-gradient-to-r from-iscte-500 to-cyan-500 relative" style="width: 30%">
           <div class="absolute inset-0 bg-white/10 animate-pulse rounded-full"></div>
         </div>
       </div>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs">
         <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3">
-          <div class="text-emerald-400 font-bold text-lg">3</div>
+          <div class="text-emerald-400 font-bold text-lg">1</div>
           <div class="text-gray-400">Phases Complete</div>
         </div>
         <div class="bg-iscte-500/10 border border-iscte-500/30 rounded-lg p-3">
@@ -1756,7 +1839,7 @@ tailwind.config = {
           <div class="text-gray-400">Phase Active</div>
         </div>
         <div class="bg-gray-800/60 border border-gray-700 rounded-lg p-3">
-          <div class="text-gray-400 font-bold text-lg">2</div>
+          <div class="text-gray-400 font-bold text-lg">4</div>
           <div class="text-gray-400">Phases Remaining</div>
         </div>
         <div class="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
@@ -1772,21 +1855,22 @@ tailwind.config = {
         <h3 class="font-semibold text-white mb-3 text-sm">What's Done</h3>
         <div class="space-y-2 text-xs">
           <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-1 mb-1">Data pipeline</div>
-          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">homogenize.py</code> - <a href="#gl-edf" class="text-cyan-600 hover:text-cyan-400 hover:underline">EDF</a> <a href="#gl-homogenization" class="text-cyan-600 hover:text-cyan-400 hover:underline">homogenization</a> (686 files cleaned to 23 channels)</span></div>
+          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">homogenize.py</code> - <a href="#gl-edf" class="text-cyan-600 hover:text-cyan-400 hover:underline">EDF</a> <a href="#gl-homogenization" class="text-cyan-600 hover:text-cyan-400 hover:underline">homogenization</a> (683 files cleaned to 23-channel target montage)</span></div>
           <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">loader.py</code> - PyTorch Dataset with <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a>, preprocessing, QC, leakage-safe normalization, synthetic safeguards</span></div>
           <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">split_config.json</code> - 23 <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> folds + <a href="#gl-singlesplit" class="text-cyan-600 hover:text-cyan-400 hover:underline">single split</a>, chb01/chb21 grouped</span></div>
           <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">chb-mit-analysis.ipynb</code> - Full EDA notebook (executed)</span></div>
-          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">clean_edfs/</code> - 686 homogenized EDF+ files, 40 patient/set directories</span></div>
-          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">window_cache/</code> - 4 of 24 patients cached (chb01, chb02, chb03, chb21)</span></div>
+          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">clean_edfs/</code> - 683 homogenized EDF+ files, 38 patient/set directories</span></div>
+          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">signal_cache/</code> - flat-signal mmap cache (~35-40 GB, ~40% less than pre-windowed)</span></div>
           <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-3 mb-1">Models</div>
           <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">detector.py</code> - <a href="#gl-frozen" class="text-cyan-600 hover:text-cyan-400 hover:underline">Frozen 1D-CNN</a> seizure detector (49K params, E1&ndash;E5)</span></div>
           <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">timegan.py</code> - TimeGAN with 5 GRU sub-networks (1.6M params, <a href="#cite-yoon2019" class="text-cyan-600 hover:text-cyan-400 hover:underline">Yoon et al., 2019</a>)</span></div>
           <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">cvae.py</code> - Conditional VAE with 1D-Conv encoder/decoder (1.9M params, 128-dim latent)</span></div>
           <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">ldm.py</code> - Latent Diffusion with UNet-1D denoiser + <a href="#gl-ddpm" class="text-cyan-600 hover:text-cyan-400 hover:underline">DDPM/DDIM</a> (2.3M params)</span></div>
           <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-3 mb-1">Training &amp; evaluation</div>
-          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">train.py</code> - Training pipeline with <a href="#gl-earlystopping" class="text-cyan-600 hover:text-cyan-400 hover:underline">early stopping</a>, E1/E2 + synthetic injection, LOPO + single-split</span></div>
+          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><strong class="text-emerald-400">E1 baseline complete</strong> &mdash; 3 seeds, single-split. Mean AUPRC 0.1766 &plusmn; 0.0540 (<a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">details above</a>)</span></div>
+          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">train.py</code> - Training pipeline with <a href="#gl-earlystopping" class="text-cyan-600 hover:text-cyan-400 hover:underline">early stopping</a>, E1/E2 + synthetic injection, <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> + single-split, per-fold resume (skip completed folds), summary merge for split-machine runs</span></div>
           <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">evaluate.py</code> - Full metric suite (<a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a>, <a href="#gl-auroc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUROC</a>, F1, per-patient, <a href="#gl-wilcoxon" class="text-cyan-600 hover:text-cyan-400 hover:underline">Wilcoxon</a>)</span></div>
-          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">generate.py</code> - Generator training + synthetic window production (all 3 models)</span></div>
+          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">generate.py</code> - Generator training + synthetic window production (all 3 models), <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> per-fold training CLI, memory-safe ictal extraction, &micro;V-scale training (no double normalization)</span></div>
           <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">visualize.py</code> - <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a> comparison, <a href="#gl-tsne" class="text-cyan-600 hover:text-cyan-400 hover:underline">t-SNE</a>, amplitude distributions, <a href="#gl-kl" class="text-cyan-600 hover:text-cyan-400 hover:underline">KL divergence</a></span></div>
           <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">subject_identity.py</code> - E7 <a href="#gl-linearprobe" class="text-cyan-600 hover:text-cyan-400 hover:underline">linear probe</a> for subject-identity analysis</span></div>
         </div>
@@ -1794,13 +1878,12 @@ tailwind.config = {
       <div class="bg-gray-900 border border-amber-500/20 rounded-xl p-5">
         <h3 class="font-semibold text-white mb-3 text-sm">What's Left</h3>
         <div class="space-y-2 text-xs">
-          <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-1 mb-1">Immediate</div>
-          <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400"><a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E1</a> baseline run - also caches remaining 20 patient window files</span></div>
-          <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400"><a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E2b</a> (SMOTE) and <a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E2c</a> (<a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400 hover:underline">ADASYN</a>) control runs</span></div>
+          <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-1 mb-1">In progress</div>
+          <div class="flex items-start gap-2"><span class="text-cyan-400 shrink-0 animate-pulse">&#9679;</span><span class="text-gray-400"><a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E2b</a> (<a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a>) and <a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E2c</a> (<a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400 hover:underline">ADASYN</a>) control runs &mdash; training on remote GPU (3 seeds each, back-to-back)</span></div>
           <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-3 mb-1">Generator experiments</div>
-          <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">CVAE training (<a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E4</a>) - first generator, also produces encoder for LDM</span></div>
+          <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">TimeGAN training (<a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E3</a>) - first generator, independent architecture</span></div>
+          <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">CVAE training (<a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E4</a>) - also produces encoder for LDM</span></div>
           <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">LDM training (<a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E5</a>) - after CVAE, reuses its encoder</span></div>
-          <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">TimeGAN training (<a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E3</a>) - independent, no dependency on other generators</span></div>
           <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-3 mb-1">Analysis &amp; writing</div>
           <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">Full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> evaluation (23 folds &times; 3 seeds per experiment)</span></div>
           <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">Cross-generator comparison (<a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E6</a>) and subject-identity analysis (<a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E7</a>)</span></div>
@@ -1823,6 +1906,58 @@ tailwind.config = {
           <div><strong class="text-gray-300">scikit-learn + imbalanced-learn</strong> - Standard implementations of SMOTE/ADASYN (<a href="#cite-zhao2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Zhao et al., 2022</a>) and evaluation metrics (AUPRC, AUROC). Using canonical implementations ensures comparability with the literature.</div>
           <div><strong class="text-gray-300">SciPy signal processing</strong> - <a href="#gl-butterworth" class="text-cyan-600 hover:text-cyan-400 hover:underline">Butterworth</a> filters, <code class="text-cyan-500">filtfilt</code> for zero-phase filtering, Welch <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a> estimation. Standard DSP tools with no reason to reimplement.</div>
           <div><strong class="text-gray-300">1D raw signals</strong> (not 2D spectrograms) - The spectrogram representation was deliberately dropped (v10 scope cut). Working directly on raw 1D signals keeps the pipeline simpler and avoids the confound of &ldquo;did the improvement come from the augmentation or from the representation change?&rdquo;</div>
+        </div>
+      </div>
+
+      <!-- Data Caching & Memory Management -->
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-3" id="design-caching">
+        <h3 class="font-semibold text-white mb-3">Data Caching &amp; Memory Management</h3>
+        <p class="text-gray-500 text-xs mb-3">The CHB-MIT dataset after preprocessing is ~43 GB of raw signal. A naive pre-windowed cache with 50% overlap nearly doubles this, exceeding both the 32 GB RAM and available disk on the target machine. The flat-signal approach below was <em class="text-gray-400">necessary</em> to run experiments on available hardware, not just an optimization.</p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs">
+            <thead><tr class="border-b border-gray-700 text-left text-gray-500"><th class="py-2 pr-4">Decision</th><th class="py-2 pr-4">Choice</th><th class="py-2">Justification</th></tr></thead>
+            <tbody class="text-gray-400">
+              <tr class="border-b border-gray-800/50">
+                <td class="py-3 pr-4 text-gray-300 font-medium">Cache format</td>
+                <td class="py-3 pr-4">Flat preprocessed signals, not pre-windowed arrays</td>
+                <td class="py-3">With 50% overlap, each sample appears in two windows, inflating ~43 GB to 64&ndash;74 GB. Storing the flat signal instead and computing windows on the fly via <code class="text-cyan-500">signal[:, start:start+1024]</code> eliminates this duplication. Total cache: ~35&ndash;40 GB (&sim;40% less).</td>
+              </tr>
+              <tr class="border-b border-gray-800/50">
+                <td class="py-3 pr-4 text-gray-300 font-medium">Storage layout</td>
+                <td class="py-3 pr-4"><code class="text-cyan-500">&lt;case&gt;_signals.npy</code> + <code class="text-cyan-500">&lt;case&gt;_index.npz</code></td>
+                <td class="py-3">Per case: one uncompressed <code class="text-cyan-500">.npy</code> file (23 &times; N samples, float16) for memory mapping, plus a small compressed index (~100 KB) with precomputed valid window start positions, labels, patient ID, and QC rejection count.</td>
+              </tr>
+              <tr class="border-b border-gray-800/50">
+                <td class="py-3 pr-4 text-gray-300 font-medium">Memory strategy</td>
+                <td class="py-3 pr-4">Memory-mapped I/O (<code class="text-cyan-500">mmap_mode='r'</code>)</td>
+                <td class="py-3">Cannot load 35&ndash;40 GB into 32 GB RAM. Memory mapping lets the OS page cache manage which signal pages are resident. Python heap stays under ~10 MB (index arrays only). Each <code class="text-cyan-500">__getitem__</code> reads ~46 KB from disk via the page cache.</td>
+              </tr>
+              <tr class="border-b border-gray-800/50">
+                <td class="py-3 pr-4 text-gray-300 font-medium">Numeric precision</td>
+                <td class="py-3 pr-4">float16 on disk, float32 at access time</td>
+                <td class="py-3">Halves disk and mmap footprint. EEG values after clipping are in [&minus;800, +800] &micro;V &mdash; well within float16 range (up to 2048.0 exact). Quantization error (~0.01&ndash;0.1 &micro;V) is below the EEG noise floor (~1&ndash;5 &micro;V). Cast to float32 in <code class="text-cyan-500">__getitem__</code> before normalization and training.</td>
+              </tr>
+              <tr class="border-b border-gray-800/50">
+                <td class="py-3 pr-4 text-gray-300 font-medium">QC timing</td>
+                <td class="py-3 pr-4">Precomputed at cache-build time</td>
+                <td class="py-3">QC costs ~303 &micro;s/window. With ~1.4M windows &times; ~10 epochs, on-the-fly QC would add ~70 min/experiment. Precomputing during the one-time cache build amortizes this entirely. QC runs on preprocessed signals <em>before</em> normalization (thresholds are in &micro;V).</td>
+              </tr>
+              <tr class="border-b border-gray-800/50">
+                <td class="py-3 pr-4 text-gray-300 font-medium">Normalization timing</td>
+                <td class="py-3 pr-4">On the fly in <code class="text-cyan-500">__getitem__</code></td>
+                <td class="py-3">Normalization params depend on the training set of each LOPO fold. Pre-normalizing would require 23 copies of the cache. Instead, caches store raw &micro;V values and normalization is applied per window (~37 &micro;s overhead). Total per-window cost: ~60&ndash;70 &micro;s &mdash; negligible vs ~1&ndash;2 ms GPU compute per batch element.</td>
+              </tr>
+              <tr class="border-b border-gray-800/50">
+                <td class="py-3 pr-4 text-gray-300 font-medium">Cross-file windows</td>
+                <td class="py-3 pr-4">Prevented (windows respect file boundaries)</td>
+                <td class="py-3">The flat signal concatenates multiple EDF files per case. Windows are enumerated within each file independently, so no window spans a recording boundary (which could be hours or days apart). Data loss: at most 1023 samples (~4s) per file.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-3 text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-3 space-y-2">
+          <p><strong class="text-gray-400">Hardware context:</strong> Target machine has 32 GB RAM, ~98 GB disk (shared with OS and Python env), and an RTX 3080 Ti (12 GB VRAM). A naive pre-windowed loader consumed ~125 GB RAM and was OOM-killed on first training attempt. The flat-signal approach reduces disk to ~35&ndash;40 GB and RAM to ~10 MB.</p>
+          <p><strong class="text-gray-400">Generator &amp; oversampling memory:</strong> CVAE and LDM training keep data tensors on CPU and move per-batch to GPU (12 GB VRAM cannot hold the full ictal set + model + optimizer). <a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a>/<a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400 hover:underline">ADASYN</a> subsample interictal windows to 10&times; ictal count before oversampling &mdash; without this, the flattened feature matrix would require ~123 GB RAM.</p>
         </div>
       </div>
 
@@ -2203,7 +2338,7 @@ tailwind.config = {
               <span class="text-xs text-gray-500">~15&ndash;30 min</span>
             </div>
             <p class="text-gray-400 text-xs mt-1">The baseline everything else is compared against. Trains the 49K-param detector on real data only. Expected low sensitivity (~30&ndash;50%) and high specificity (~95%+) - confirming the imbalance problem is real.</p>
-            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">python -m training.train --experiment e1 --mode single --seeds 42</code>
+            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">python -m training.train --experiment e1 --mode single --seeds 42 123 456</code>
           </div>
         </div>
         <!-- Step 2 -->
@@ -2215,45 +2350,48 @@ tailwind.config = {
               <span class="text-xs text-gray-500">~15&ndash;40 min each</span>
             </div>
             <p class="text-gray-400 text-xs mt-1">Non-synthetic baselines. Any generator must beat these to be useful. <a href="#cite-carrle2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Carrle et al., 2023</a> showed noise augmentation matched GANs in some cases.</p>
-            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">python -m training.train --experiment e2 --augmentation smote --mode single --seeds 42</code>
-            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-1 overflow-x-auto">python -m training.train --experiment e2 --augmentation adasyn --mode single --seeds 42</code>
+            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">python -m training.train --experiment e2 --augmentation smote --mode single --seeds 42 123 456</code>
+            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-1 overflow-x-auto">python -m training.train --experiment e2 --augmentation adasyn --mode single --seeds 42 123 456</code>
           </div>
         </div>
         <!-- Step 3 -->
         <div class="flex gap-4">
-          <div class="shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-sm font-bold">3</div>
-          <div class="min-w-0">
-            <div class="flex items-start gap-2 flex-wrap">
-              <span class="text-white font-medium text-sm">E4 CVAE</span>
-              <span class="text-xs text-emerald-400 font-medium">Fastest generator</span>
-              <span class="text-xs text-gray-500">~1&ndash;3 hours</span>
-            </div>
-            <p class="text-gray-400 text-xs mt-1">All convolutions (no recurrence, no multi-phase training). Most stable training (no adversarial dynamics). Also produces the encoder checkpoint needed for the LDM later.</p>
-            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">python -m training.generate --model cvae --ratio 1.0 --seed 42</code>
-          </div>
-        </div>
-        <!-- Step 4 -->
-        <div class="flex gap-4">
-          <div class="shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-sm font-bold">4</div>
-          <div class="min-w-0">
-            <div class="flex items-start gap-2 flex-wrap">
-              <span class="text-white font-medium text-sm">E5 LDM</span>
-              <span class="text-xs text-gray-500">~2&ndash;4 hours (after CVAE)</span>
-            </div>
-            <p class="text-gray-400 text-xs mt-1">Requires the CVAE checkpoint from Step 3. The UNet denoiser trains in <a href="#gl-latentspace" class="text-cyan-600 hover:text-cyan-400 hover:underline">latent space</a> (small and fast), but DDPM sampling is slow. DDIM (50 steps) is used by default for generation.</p>
-            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">python -m training.generate --model ldm --cvae-checkpoint results/e4/seed_42/single_split/cvae.pt --ratio 1.0 --seed 42</code>
-          </div>
-        </div>
-        <!-- Step 5 -->
-        <div class="flex gap-4">
-          <div class="shrink-0 w-8 h-8 rounded-full bg-rsch-500/10 border border-rsch-500/30 flex items-center justify-center text-rsch-400 text-sm font-bold">5</div>
+          <div class="shrink-0 w-8 h-8 rounded-full bg-rsch-500/10 border border-rsch-500/30 flex items-center justify-center text-rsch-400 text-sm font-bold">3</div>
           <div class="min-w-0">
             <div class="flex items-start gap-2 flex-wrap">
               <span class="text-white font-medium text-sm">E3 TimeGAN</span>
               <span class="text-xs text-gray-500">~3&ndash;8 hours</span>
             </div>
-            <p class="text-gray-400 text-xs mt-1"><code class="text-cyan-500">GRU</code>s are slower than convolutions, and TimeGAN has 3 sequential training phases (autoencoder, supervisor, joint adversarial). No dependency on CVAE or LDM.</p>
+            <p class="text-gray-400 text-xs mt-1">First generator (independent, no dependencies). <code class="text-cyan-500">GRU</code>-based with 3 sequential training phases (autoencoder, supervisor, joint adversarial). Early results inform whether the generative approach is promising.</p>
             <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">python -m training.generate --model timegan --ratio 1.0 --seed 42</code>
+            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-1 overflow-x-auto">python -m training.train --experiment e3 --synthetic-windows results/e3/seed_42/single_split/synthetic_ratio_1.00.npz --mode single --seeds 42 123 456</code>
+          </div>
+        </div>
+        <!-- Step 4 -->
+        <div class="flex gap-4">
+          <div class="shrink-0 w-8 h-8 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-sm font-bold">4</div>
+          <div class="min-w-0">
+            <div class="flex items-start gap-2 flex-wrap">
+              <span class="text-white font-medium text-sm">E4 CVAE</span>
+              <span class="text-xs text-cyan-400 font-medium">Fastest generator</span>
+              <span class="text-xs text-gray-500">~1&ndash;3 hours</span>
+            </div>
+            <p class="text-gray-400 text-xs mt-1">All convolutions (no recurrence, no multi-phase training). Most stable training (no adversarial dynamics). Also produces the encoder checkpoint needed for the LDM next.</p>
+            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">python -m training.generate --model cvae --ratio 1.0 --seed 42</code>
+            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-1 overflow-x-auto">python -m training.train --experiment e4 --synthetic-windows results/e4/seed_42/single_split/synthetic_ratio_1.00.npz --mode single --seeds 42 123 456</code>
+          </div>
+        </div>
+        <!-- Step 5 -->
+        <div class="flex gap-4">
+          <div class="shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-sm font-bold">5</div>
+          <div class="min-w-0">
+            <div class="flex items-start gap-2 flex-wrap">
+              <span class="text-white font-medium text-sm">E5 LDM</span>
+              <span class="text-xs text-gray-500">~2&ndash;4 hours (after CVAE)</span>
+            </div>
+            <p class="text-gray-400 text-xs mt-1">Requires the CVAE checkpoint from Step 4. The UNet denoiser trains in <a href="#gl-latentspace" class="text-cyan-600 hover:text-cyan-400 hover:underline">latent space</a> (small and fast), but DDPM sampling is slow. DDIM (50 steps) is used by default for generation.</p>
+            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">python -m training.generate --model ldm --cvae-checkpoint results/e4/seed_42/single_split/cvae.pt --ratio 1.0 --seed 42</code>
+            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-1 overflow-x-auto">python -m training.train --experiment e5 --synthetic-windows results/e5/seed_42/single_split/synthetic_ratio_1.00.npz --mode single --seeds 42 123 456</code>
           </div>
         </div>
         <!-- Step 6 -->
@@ -2412,7 +2550,7 @@ tailwind.config = {
         </div>
         <div id="gl-homogenization" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">Homogenization</div>
-          <p class="text-gray-400">The process of making all recordings conform to the same channel layout and file format, regardless of the original electrode configuration. In CHB-MIT, different patients use slightly different channel sets (some have ECG, VNS, or reference channels). Homogenization removes non-EEG channels, zero-pads missing channels, and outputs standardized 23-channel EDF+ files so that all recordings can be processed by the same pipeline.</p>
+          <p class="text-gray-400">The process of making all recordings conform to the same channel layout and file format, regardless of the original electrode configuration. In CHB-MIT, different patients use slightly different channel sets (some have ECG, VNS, or reference channels) and some undergo montage changes mid-recording. Homogenization removes non-EEG channels, maps all files to a fixed 23-channel target bipolar montage (<code class="text-cyan-500">TARGET_MONTAGE</code> in <code class="text-cyan-500">homogenize.py</code>), zero-pads missing channels, drops extra channels, and outputs standardized EDF+ files. Files with no usable bipolar channels (e.g. common-reference recordings) are dropped entirely. QC later rejects windows where zero-padded channels produce flat signals.</p>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-shoeb2009" class="text-cyan-600 hover:text-cyan-400 hover:underline">Shoeb, 2009</a>: CHB-MIT has heterogeneous montages across patients requiring standardization before uniform processing.</p>
         </div>
         <div id="gl-slidingwindow" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
@@ -2667,7 +2805,7 @@ tailwind.config = {
         <div>A. <strong class="text-white">Nichol</strong> and P. Dhariwal, &ldquo;Improved denoising diffusion probabilistic models,&rdquo; in <em>Proc. ICML</em>, 2021. <a href="https://doi.org/10.48550/arXiv.2102.09672" target="_blank" class="text-cyan-600 hover:text-cyan-400 hover:underline">doi: 10.48550/arXiv.2102.09672</a><span class="ml-2 px-1.5 py-0.5 bg-rsch-500/20 rounded text-rsch-400 text-xs font-medium shrink-0">Thesis</span></div>
       </div>
       <div id="cite-niedermeyer2011" class="flex gap-3 p-2.5 rounded hover:bg-gray-800/40 transition-colors scroll-mt-20">
-        <div>E. <strong class="text-white">Niedermeyer</strong> and F. H. Lopes da Silva, <em>Electroencephalography: Basic Principles, Clinical Applications, and Related Fields</em>, 6th ed. Philadelphia, PA: Lippincott Williams &amp; Wilkins, 2011.<span class="ml-2 px-1.5 py-0.5 bg-gray-700/40 rounded text-gray-500 text-xs font-medium shrink-0">Foundational</span></div>
+        <div>E. <strong class="text-white">Niedermeyer</strong> and F. H. Lopes da Silva, <em>Electroencephalography: Basic Principles, Clinical Applications, and Related Fields</em>, 6th ed. Philadelphia, PA: Lippincott Williams &amp; Wilkins, 2011. <a href="https://doi.org/10.1093/med/9780190228484.001.0001" target="_blank" class="text-cyan-600 hover:text-cyan-400 hover:underline">doi: 10.1093/med/9780190228484.001.0001</a><span class="ml-2 px-1.5 py-0.5 bg-gray-700/40 rounded text-gray-500 text-xs font-medium shrink-0">Foundational</span></div>
       </div>
       <div id="cite-page2021" class="flex gap-3 p-2.5 rounded hover:bg-gray-800/40 transition-colors scroll-mt-20">
         <div>M. J. <strong class="text-white">Page</strong> <em>et al.</em>, &ldquo;The PRISMA 2020 statement: An updated guideline for reporting systematic reviews,&rdquo; <em>BMJ</em>, vol. 372, Art. no. n71, 2021. <a href="https://doi.org/10.1136/bmj.n71" target="_blank" class="text-cyan-600 hover:text-cyan-400 hover:underline">doi: 10.1136/bmj.n71</a><span class="ml-2 px-1.5 py-0.5 bg-gray-700/40 rounded text-gray-500 text-xs font-medium shrink-0">Foundational</span></div>
@@ -2766,10 +2904,10 @@ const patients = [
   {id:'chb09',gender:'F',age:10,  total:19,seizure:3, montage:'Multi-set',   notes:'VNS removed; 4-hr files',                 same:''},
   {id:'chb10',gender:'M',age:3,   total:25,seizure:7, montage:'Stable',      notes:'2-hr files',                              same:''},
   {id:'chb11',gender:'F',age:12,  total:35,seizure:3, montage:'Multi-set',   notes:'',                                        same:''},
-  {id:'chb12',gender:'F',age:2,   total:24,seizure:13,montage:'Multi-set (4)','notes':'4 montage configs; most complex',      same:''},
-  {id:'chb13',gender:'F',age:3,   total:33,seizure:8, montage:'Multi-set',   notes:'EKG, LOC-ROC, LUE-RAE removed',          same:''},
+  {id:'chb12',gender:'F',age:2,   total:21,seizure:10,montage:'Multi-set (2)',notes:'3 common-ref files dropped; 2 usable sets', same:''},
+  {id:'chb13',gender:'F',age:3,   total:33,seizure:8, montage:'Multi-set (6)',notes:'EKG, LOC-ROC, LUE-RAE removed; 22 files zero-padded (5 ch)',same:''},
   {id:'chb14',gender:'F',age:9,   total:26,seizure:7, montage:'Stable',      notes:'',                                        same:''},
-  {id:'chb15',gender:'M',age:16,  total:40,seizure:14,montage:'Multi-set',   notes:'Most seizure files; Ref channels removed',same:''},
+  {id:'chb15',gender:'M',age:16,  total:40,seizure:14,montage:'Multi-set',   notes:'Most seizure files; Ref removed; set0 has 5 zero-padded ch',same:''},
   {id:'chb16',gender:'F',age:7,   total:19,seizure:6, montage:'Multi-set',   notes:'',                                        same:''},
   {id:'chb17',gender:'F',age:12,  total:21,seizure:3, montage:'Multi-set',   notes:'3 sub-cases: chb17a/b/c',                 same:''},
   {id:'chb18',gender:'F',age:18,  total:36,seizure:6, montage:'Multi-set',   notes:'',                                        same:''},
@@ -2952,14 +3090,14 @@ const reRecordings = ['chb21']; // Only chb21 is a re-recording (of chb01). chb2
 
 // ── Computed constants (single source of truth) ──────────────────────────
 const TOTAL_CASES     = patients.length;                                    // 24
-const TOTAL_FILES     = patients.reduce((a, p) => a + p.total, 0);         // 686
-const SEIZURE_FILES   = patients.reduce((a, p) => a + p.seizure, 0);       // 141
+const TOTAL_FILES     = patients.reduce((a, p) => a + p.total, 0);         // 683
+const SEIZURE_FILES   = patients.reduce((a, p) => a + p.seizure, 0);       // 138
 const UNIQUE_SUBJECTS = TOTAL_CASES - reRecordings.length;                  // 23
 const N_FEMALE        = patients.filter(p => p.gender === 'F').length;      // 18 cases (17 unique — chb21=chb01)
 const N_FEMALE_UNIQUE = N_FEMALE - reRecordings.filter(r => patients.find(p => p.id === r)?.gender === 'F').length; // 17
 const N_MALE          = patients.filter(p => p.gender === 'M').length;      // 5
 const N_UNKNOWN       = patients.filter(p => p.gender === '?').length;      // 1
-const SEIZURE_RATE    = (SEIZURE_FILES / TOTAL_FILES * 100).toFixed(1);     // "20.6"
+const SEIZURE_RATE    = (SEIZURE_FILES / TOTAL_FILES * 100).toFixed(1);     // "20.2"
 const SAMPLE_RATE     = 256;                                                 // Hz
 const N_CHANNELS      = 23;                                                  // after homogenization
 const N_MODELS        = 3;                                                   // TimeGAN, CVAE, LDM
@@ -3093,10 +3231,10 @@ function buildCleaningTable() {
     chb09: { removed: 'VNS (last 18 files)',      duration: '4 hr',   action: 'VNS removed; montage split (2 sets)' },
     chb10: { removed: 'none',                    duration: '2 hr',   action: 'T8-P8 duplicate renamed' },
     chb11: { removed: 'none',                    duration: '1 hr',   action: 'Montage split (2 sets)' },
-    chb12: { removed: 'ECG (some files)',         duration: '1 hr',   action: 'ECG removed; montage split (4 sets — most complex)' },
-    chb13: { removed: 'EKG, LOC-ROC, LUE-RAE',  duration: '1 hr',   action: 'Polygraphy removed; montage split (2 sets)' },
+    chb12: { removed: 'ECG, -CS2, unipolar',       duration: '1 hr',   action: '3 common-ref files dropped; 2 usable bipolar sets' },
+    chb13: { removed: 'EKG, LOC-ROC, LUE-RAE',  duration: '1 hr',   action: 'Polygraphy removed; montage split (6 sets); 22 files zero-padded' },
     chb14: { removed: 'none',                    duration: '1 hr',   action: 'T8-P8 duplicate renamed' },
-    chb15: { removed: 'Ref, CS2 channels',       duration: '1 hr',   action: 'Reference channels removed; montage split (2 sets)' },
+    chb15: { removed: 'Ref, CS2 channels',       duration: '1 hr',   action: 'Ref removed; set0 zero-padded (5 missing ch); montage split (2 sets)' },
     chb16: { removed: 'none',                    duration: '1 hr',   action: 'Montage split (2 sets)' },
     chb17: { removed: 'none',                    duration: '1 hr',   action: 'Montage split (3 sub-cases: 17a/b/c)' },
     chb18: { removed: 'none',                    duration: '1 hr',   action: 'Montage split (2 sets)' },
@@ -3170,9 +3308,9 @@ function initRoadmapCharts() {
   const phases = [
     { label: 'P0: Pipeline (done)',         start: 1,  dur: 3,  color: 'rgba(148,163,184,0.25)', border: 'rgba(148,163,184,0.5)' },
     { label: 'P1: Baseline (E1+E2)',      start: 4,  dur: 1,  color: 'rgba(156,163,175,0.40)', border: 'rgba(156,163,175,0.8)' },
-    { label: 'P2: CVAE (E4)',              start: 5,  dur: 3,  color: 'rgba(20,191,184,0.55)',  border: 'rgba(20,191,184,0.9)' },
-    { label: 'P3: LDM (E5)',              start: 8,  dur: 3,  color: 'rgba(52,211,153,0.55)',  border: 'rgba(52,211,153,0.9)' },
-    { label: 'P4: TimeGAN (E3)',           start: 11, dur: 3,  color: 'rgba(133,23,172,0.55)',  border: 'rgba(133,23,172,0.9)' },
+    { label: 'P2: TimeGAN (E3)',           start: 5,  dur: 3,  color: 'rgba(133,23,172,0.55)',  border: 'rgba(133,23,172,0.9)' },
+    { label: 'P3: CVAE (E4)',              start: 8,  dur: 3,  color: 'rgba(20,191,184,0.55)',  border: 'rgba(20,191,184,0.9)' },
+    { label: 'P4: LDM (E5)',              start: 11, dur: 3,  color: 'rgba(52,211,153,0.55)',  border: 'rgba(52,211,153,0.9)' },
     { label: 'P5: Compare (E6)',           start: 14, dur: 2,  color: 'rgba(245,158,11,0.55)',  border: 'rgba(245,158,11,0.9)' },
     { label: 'P6: Subject-ID (E7)',        start: 14, dur: 2,  color: 'rgba(244,63,94,0.55)',   border: 'rgba(244,63,94,0.9)' },
     { label: 'Writing (ongoing)',          start: 4,  dur: 14, color: 'rgba(75,85,99,0.20)',    border: 'rgba(75,85,99,0.50)' },
@@ -3240,7 +3378,7 @@ function buildPatientTable() {
   const datasetNotes = {
     chb04: 'Oldest patient',
     chb06: 'Youngest patient',
-    chb12: 'Most seizure files (13)',
+    chb12: 'Most seizure files (10 usable)',
     chb15: 'Most seizure files (14)',
     chb17: '3 sub-cases: chb17a/b/c',
     chb21: 'Re-recording of chb01, 1.5 yrs later',

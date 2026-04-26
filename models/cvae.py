@@ -321,11 +321,12 @@ class CVAE(nn.Module):
         self.to(device)
         N = len(real_windows)
 
-        x_tensor = torch.from_numpy(real_windows).float().to(device)
-        y_tensor = torch.from_numpy(labels).long().to(device)
-        p_tensor = None
+        # Keep data on CPU, move per-batch to GPU to avoid VRAM OOM
+        x_cpu = torch.from_numpy(real_windows).float()
+        y_cpu = torch.from_numpy(labels).long()
+        p_cpu = None
         if patient_ids is not None and self.n_patients:
-            p_tensor = torch.from_numpy(patient_ids).long().to(device)
+            p_cpu = torch.from_numpy(patient_ids).long()
 
         optimizer = torch.optim.Adam(self.parameters(), lr=lr)
         history = {"total_loss": [], "recon_loss": [], "kl_loss": [], "beta": []}
@@ -340,9 +341,9 @@ class CVAE(nn.Module):
 
             for i in range(0, N, batch_size):
                 idx = perm[i:i + batch_size]
-                x = x_tensor[idx]
-                y = y_tensor[idx]
-                p = p_tensor[idx] if p_tensor is not None else None
+                x = x_cpu[idx].to(device)
+                y = y_cpu[idx].to(device)
+                p = p_cpu[idx].to(device) if p_cpu is not None else None
 
                 x_recon, mu, log_var = self.forward(x, y, p)
                 total, recon, kl = self.loss_function(x, x_recon, mu, log_var, beta)

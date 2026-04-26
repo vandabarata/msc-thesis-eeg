@@ -259,25 +259,39 @@ def run_e7(
             synth_emb_t = torch.from_numpy(emb_synth).float().to(device)
             synth_pids_t = torch.from_numpy(synthetic_patient_ids).long().to(device)
 
-            # Remap synthetic pids
+            # Remap synthetic pids — skip windows with unknown IDs (e.g. sentinel -1)
             unique_pids = np.unique(pids_real)
             pid_map = {int(pid): i for i, pid in enumerate(unique_pids)}
-            mapped_synth = torch.tensor(
-                [pid_map.get(int(p), 0) for p in synthetic_patient_ids],
-                dtype=torch.long, device=device,
-            )
+            known_mask = np.array([int(p) in pid_map for p in synthetic_patient_ids])
+            if known_mask.sum() == 0:
+                results["e7b_synthetic_transfer"] = {
+                    "accuracy": float("nan"),
+                    "n_synthetic": len(synthetic_windows),
+                    "n_known_pid": 0,
+                    "interpretation": "No synthetic windows have known patient IDs — cannot evaluate subject transfer",
+                }
+                if verbose:
+                    print("    Skipped: no synthetic windows have known patient IDs")
+            else:
+                synth_emb_t = synth_emb_t[torch.from_numpy(known_mask)]
+                known_pids = synthetic_patient_ids[known_mask]
+                mapped_synth = torch.tensor(
+                    [pid_map[int(p)] for p in known_pids],
+                    dtype=torch.long, device=device,
+                )
 
-            logits = probe_real(synth_emb_t)
-            preds = logits.argmax(dim=1)
-            acc = (preds == mapped_synth).float().mean().item()
+                logits = probe_real(synth_emb_t)
+                preds = logits.argmax(dim=1)
+                acc = (preds == mapped_synth).float().mean().item()
 
-        results["e7b_synthetic_transfer"] = {
-            "accuracy": float(acc),
-            "n_synthetic": len(synthetic_windows),
-            "interpretation": "HIGH = generator memorizes subject patterns"
-        }
-        if verbose:
-            print(f"    Accuracy: {acc:.4f}")
+                results["e7b_synthetic_transfer"] = {
+                    "accuracy": float(acc),
+                    "n_synthetic": len(synthetic_windows),
+                    "n_known_pid": int(known_mask.sum()),
+                    "interpretation": "HIGH = generator memorizes subject patterns",
+                }
+                if verbose:
+                    print(f"    Accuracy: {acc:.4f} ({known_mask.sum()}/{len(synthetic_patient_ids)} windows with known PIDs)")
 
     # ── E7c: Augmented model ──────────────────────────────────────────
     if detector_augmented is not None:

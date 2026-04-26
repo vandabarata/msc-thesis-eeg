@@ -15,10 +15,12 @@ Window quality control (applied after windowing):
   - Reject windows where any channel is flat (std < 0.01 µV)
   - Reject windows where >25% of samples in any channel are clipped
 
-Per-case window caching:
-  On first load, preprocessed + QC-filtered windows (in µV) are cached
-  to data/window_cache/<case_id>.npz. Subsequent loads read from cache
-  in seconds instead of minutes. Delete data/window_cache/ to rebuild.
+Per-case flat-signal caching:
+  On first load, preprocessed signals (in µV) are cached as flat
+  (23, N) float16 arrays to data/signal_cache/<case_id>_signals.npy,
+  alongside a small index file with precomputed valid window positions.
+  Windows are sliced on the fly from memory-mapped signals — no overlap
+  duplication. Delete data/signal_cache/ to rebuild.
 
 Literature references (thesis SLR numbering):
   [6]  You et al. (2025) — filtering is standard across EEG generation pipelines
@@ -339,7 +341,10 @@ def compute_normalization_params(
     Compute per-channel mean and std from all files in the given cases.
     Uses Welford's online algorithm (vectorized per-file batch update)
     to avoid loading everything into memory.
-    Signals are preprocessed (notch + bandpass + clip) before computing stats.
+
+    Prefers signal caches (preprocessed float16 mmap) when available, falling
+    back to reading and preprocessing clean EDFs.  This allows norm params to
+    be computed on machines that only have the caches (no clean_edfs/).
 
     Returns:
         (means, stds) each of shape (N_CHANNELS,)
@@ -348,29 +353,40 @@ def compute_normalization_params(
     mean = np.zeros(N_CHANNELS, dtype=np.float64)
     m2 = np.zeros(N_CHANNELS, dtype=np.float64)
 
+    def _welford_update(signals_f64: np.ndarray) -> None:
+        n_samples = signals_f64.shape[1]
+        for ch in range(N_CHANNELS):
+            ch_data = signals_f64[ch]
+            new_count = count[ch] + n_samples
+            ch_mean = ch_data.mean()
+            ch_m2 = ch_data.var() * n_samples
+            delta = ch_mean - mean[ch]
+            mean[ch] = (count[ch] * mean[ch] + n_samples * ch_mean) / new_count
+            m2[ch] += ch_m2 + delta ** 2 * count[ch] * n_samples / new_count
+            count[ch] = new_count
+
+    CHUNK = 256 * 3600  # ~1 hour of signal at 256 Hz
+
     for case_id in cases:
+        sig_path = SIGNAL_CACHE_DIR / f"{case_id}_signals.npy"
+        if sig_path.exists():
+            sig = np.load(str(sig_path), mmap_mode='r')
+            if sig.shape[0] == N_CHANNELS and sig.shape[1] > 0:
+                for start in range(0, sig.shape[1], CHUNK):
+                    chunk = sig[:, start:start + CHUNK].astype(np.float64)
+                    _welford_update(chunk)
+            continue
+
         edf_dirs = _get_edf_dirs_for_case(case_id)
         for edf_dir in edf_dirs:
             for edf_file in sorted(edf_dir.glob("*.edf")):
                 signals = read_edf_signals(str(edf_file))
                 if signals.shape[0] != N_CHANNELS:
                     continue
-                # Preprocess before computing stats
                 signals = preprocess_signals(signals)
-                n_samples = signals.shape[1]
-                # Vectorized Welford batch update (per-file, not per-sample)
-                for ch in range(N_CHANNELS):
-                    ch_data = signals[ch].astype(np.float64)
-                    new_count = count[ch] + n_samples
-                    ch_mean = ch_data.mean()
-                    ch_m2 = ch_data.var() * n_samples  # sum of squared deviations
-                    delta = ch_mean - mean[ch]
-                    mean[ch] = (count[ch] * mean[ch] + n_samples * ch_mean) / new_count
-                    m2[ch] += ch_m2 + delta ** 2 * count[ch] * n_samples / new_count
-                    count[ch] = new_count
+                _welford_update(signals.astype(np.float64))
 
     stds = np.sqrt(m2 / np.maximum(count - 1, 1))
-    # Prevent division by zero
     stds = np.maximum(stds, 1e-8)
 
     return mean.astype(np.float32), stds.astype(np.float32)
@@ -394,30 +410,219 @@ def _get_edf_dirs_for_case(case_id: str) -> List[Path]:
     return dirs
 
 
+# ── Flat-Signal Cache ─────────────────────────────────────────────────────
+# Instead of caching pre-windowed arrays (which double storage due to 50%
+# overlap), we cache flat preprocessed signals per case and compute windows
+# on the fly via memory-mapped slicing.
+#
+# Per case the cache contains:
+#   <case_id>_signals.npy  — (23, total_samples) float16, uncompressed (mmap)
+#   <case_id>_index.npz    — compressed; keys: starts, labels, pid, qc_rejected
+#     starts:  (N,) int64  — valid window start positions (QC-passed)
+#     labels:  (N,) int8   — 0=interictal, 1=ictal
+#     pid:     scalar int8 — patient id for this case
+#     qc_rejected: scalar  — count of QC-rejected windows
+
+SIGNAL_CACHE_DIR = BASE_DIR / "signal_cache"
+
+
+def _build_signal_cache(case_id: str) -> None:
+    """Build flat-signal cache for one case from its clean EDF files."""
+    import tempfile
+
+    SIGNAL_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    all_seizure_times = get_all_seizure_times()
+    seizure_times_by_file = all_seizure_times.get(case_id, {})
+    edf_dirs = _get_edf_dirs_for_case(case_id)
+    patient_id = CASE_TO_ID[case_id]
+
+    file_signals = []
+    file_boundaries = []
+    file_seizure_times = []
+    cumulative_samples = 0
+
+    for edf_dir in edf_dirs:
+        for edf_file in sorted(edf_dir.glob("*.edf")):
+            seizure_times = seizure_times_by_file.get(edf_file.name, [])
+            try:
+                signals = read_edf_signals(str(edf_file))
+            except Exception as e:
+                print(f"    Warning: failed to read {edf_file}: {e}")
+                continue
+            if signals.shape[0] != N_CHANNELS:
+                print(f"    Warning: {edf_file} has {signals.shape[0]} channels, skipping")
+                continue
+
+            signals = preprocess_signals(signals)
+            n_samples = signals.shape[1]
+
+            file_signals.append(signals.astype(np.float16))
+            file_boundaries.append((cumulative_samples, cumulative_samples + n_samples))
+            file_seizure_times.append(seizure_times)
+            cumulative_samples += n_samples
+            del signals
+
+    if cumulative_samples == 0:
+        flat = np.empty((N_CHANNELS, 0), dtype=np.float16)
+    else:
+        flat = np.concatenate(file_signals, axis=1)
+    del file_signals
+
+    # Build seizure mask over full concatenated signal
+    seizure_mask = np.zeros(cumulative_samples, dtype=bool)
+    for (offset, _), times in zip(file_boundaries, file_seizure_times):
+        for start_sec, end_sec in times:
+            s = offset + max(0, start_sec * FS)
+            e = offset + min(cumulative_samples - offset, end_sec * FS)
+            seizure_mask[s:e] = True
+
+    # Enumerate windows, run QC, record valid positions
+    starts = []
+    labels = []
+    qc_rejected = 0
+    pos = 0
+
+    # Only create windows within file boundaries (no cross-file windows)
+    for (f_start, f_end) in file_boundaries:
+        pos = f_start
+        while pos + WINDOW_SAMPLES <= f_end:
+            window = flat[:, pos:pos + WINDOW_SAMPLES]
+            if window_passes_qc(window.astype(np.float32)):
+                ictal_frac = seizure_mask[pos:pos + WINDOW_SAMPLES].mean()
+                label = 1 if ictal_frac >= ICTAL_THRESHOLD else 0
+                starts.append(pos)
+                labels.append(label)
+            else:
+                qc_rejected += 1
+            pos += STEP_SAMPLES
+
+    # Write signal .npy (atomic via temp file)
+    # suffix must end with .npy so np.save doesn't append another .npy
+    sig_path = SIGNAL_CACHE_DIR / f"{case_id}_signals.npy"
+    fd, tmp = tempfile.mkstemp(dir=str(SIGNAL_CACHE_DIR), suffix=".tmp.npy")
+    os.close(fd)
+    try:
+        np.save(tmp, flat)
+        os.rename(tmp, str(sig_path))
+    except BaseException:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
+        raise
+    del flat
+
+    # Write index .npz (small, compressed)
+    idx_path = SIGNAL_CACHE_DIR / f"{case_id}_index.npz"
+    np.savez_compressed(
+        str(idx_path),
+        starts=np.array(starts, dtype=np.int64),
+        labels=np.array(labels, dtype=np.int8),
+        pid=np.array(patient_id, dtype=np.int8),
+        qc_rejected=np.array(qc_rejected),
+    )
+    print(f"  {case_id}: cached {len(starts)} windows, {qc_rejected} QC-rejected, "
+          f"signal shape {(N_CHANNELS, cumulative_samples)}")
+
+
+class _WindowsProxy:
+    """Sequence proxy so dataset.windows[i] and iteration still work.
+
+    Each access slices one window from the memory-mapped flat signal.
+    No window data is held in memory between accesses.
+    """
+
+    def __init__(self, dataset: "CHBMITDataset"):
+        self._ds = dataset
+
+    def __len__(self):
+        return len(self._ds)
+
+    def __getitem__(self, idx):
+        if isinstance(idx, slice):
+            return [self[i] for i in range(*idx.indices(len(self)))]
+        if idx < 0:
+            idx += len(self)
+        if self._ds._active_indices is not None:
+            idx = int(self._ds._active_indices[idx])
+        if idx < self._ds._n_real:
+            return self._ds._get_real_window(idx)
+        else:
+            syn_idx = idx - self._ds._n_real
+            return self._ds._synthetic_windows[syn_idx]
+
+    def __iter__(self):
+        for i in range(len(self)):
+            yield self[i]
+
+
+# ── Case-Aware Batch Sampler ──────────────────────────────────────────────
+class CaseAwareSampler(torch.utils.data.Sampler):
+    """Yields indices grouped by case to keep mmap page cache warm.
+
+    Within each case, window indices are shuffled.  Case order is also
+    shuffled each epoch.  Every index is yielded exactly once per epoch,
+    so training sees the same data as a fully-shuffled sampler.
+    """
+
+    def __init__(self, dataset: "CHBMITDataset", seed: int = 42):
+        self._cumulative = dataset._cumulative
+        self._n_real = dataset._n_real
+        self._n_synthetic = dataset._n_synthetic
+        self._active_indices = dataset._active_indices
+        self._seed = seed
+        self._epoch = 0
+
+    def __len__(self) -> int:
+        if self._active_indices is not None:
+            return len(self._active_indices)
+        return self._n_real + self._n_synthetic
+
+    def set_epoch(self, epoch: int) -> None:
+        self._epoch = epoch
+
+    def __iter__(self):
+        rng = np.random.RandomState(self._seed + self._epoch)
+
+        if self._active_indices is not None:
+            perm = rng.permutation(len(self._active_indices))
+            yield from perm.tolist()
+            return
+
+        n_cases = len(self._cumulative) - 1
+        case_order = rng.permutation(n_cases)
+
+        for case_idx in case_order:
+            start = int(self._cumulative[case_idx])
+            end = int(self._cumulative[case_idx + 1])
+            case_indices = rng.permutation(np.arange(start, end))
+            yield from case_indices.tolist()
+
+        if self._n_synthetic > 0:
+            syn_indices = rng.permutation(np.arange(self._n_real, self._n_real + self._n_synthetic))
+            yield from syn_indices.tolist()
+
+
 # ── Dataset ────────────────────────────────────────────────────────────────
 class CHBMITDataset(Dataset):
     """
-    PyTorch Dataset for CHB-MIT EEG windows.
+    PyTorch Dataset backed by memory-mapped flat signals.
 
-    Supports both single-split and LOPO fold evaluation. Windows are built
-    eagerly during construction but stored as lightweight index entries
-    pointing back to preprocessed per-file arrays, avoiding the ~60+ GB
-    memory footprint of storing all windows as separate numpy arrays.
+    Each case's preprocessed EEG is stored as a flat (23, N) float16 array.
+    Windows are sliced on the fly — no duplication from overlap. Total cache
+    is ~35-40 GB (vs ~64-74 GB for pre-windowed), and RAM usage is ~10 MB
+    regardless of dataset size.
 
     Args:
         split: "train", "val", or "test"
         split_config_path: path to split_config.json
         normalize: whether to apply z-score normalization
         ictal_only: if True, only return ictal (seizure) windows
-        fold: if set, use LOPO fold N instead of single_split. In LOPO mode,
-            split="test" uses the fold's test_cases; split="train" uses the
-            fold's train_cases (minus a held-out 20% for val if split="val").
+        fold: if set, use LOPO fold N instead of single_split
         synthetic_windows: optional list of (window, label, patient_id) tuples.
-            ONLY allowed for split="train". Raises ValueError otherwise.
-            Must be already normalized if normalize=True.
+            ONLY allowed for split="train".
+        seed: random seed for reproducible val split
 
     Leakage prevention (enforced at init):
-        - Asserts no patient overlap between train/val/test splits
+        - No patient overlap between train/val/test splits
         - Normalization params keyed to training cases (hash-based caching)
         - QC runs before normalization (thresholds in µV)
         - Synthetic data blocked from val/test splits
@@ -439,23 +644,20 @@ class CHBMITDataset(Dataset):
         self.ictal_only = ictal_only
         self.seed = seed
 
-        # Load split config
         config_path = split_config_path or str(SPLIT_CONFIG_PATH)
         with open(config_path, "r") as f:
             config = json.load(f)
 
         # ── Determine cases for this split ─────────────────────────────
         if fold is not None:
-            # LOPO mode
             lopo = config["lopo_folds"][fold]
             all_train = lopo["train_cases"]
             test_cases = lopo["test_cases"]
+            self.train_cases = all_train
 
             if split == "test":
                 self.cases = test_cases
-                self.train_cases = all_train
             else:
-                # Split train_cases into train (80%) and val (20%)
                 rng = np.random.RandomState(seed)
                 indices = rng.permutation(len(all_train))
                 val_size = max(1, len(all_train) // 5)
@@ -463,19 +665,15 @@ class CHBMITDataset(Dataset):
 
                 if split == "val":
                     self.cases = [all_train[i] for i in sorted(val_indices)]
-                else:  # train
+                else:
                     self.cases = [all_train[i] for i in range(len(all_train)) if i not in val_indices]
-                self.train_cases = [all_train[i] for i in range(len(all_train)) if i not in val_indices]
 
-            # Leakage check for LOPO
             assert not (set(self.cases) & set(test_cases)) or split == "test", \
                 f"DATA LEAKAGE in LOPO fold {fold}: {set(self.cases) & set(test_cases)}"
         else:
-            # Single-split mode
             self.cases = config["single_split"][split]
             self.train_cases = config["single_split"]["train"]
 
-            # Leakage assertion: no patient overlap between splits
             all_splits = config["single_split"]
             for a_name, b_name in [("train", "val"), ("train", "test"), ("val", "test")]:
                 a_set = set(all_splits.get(a_name, []))
@@ -494,49 +692,55 @@ class CHBMITDataset(Dataset):
                 f"See thesis Section 1.4 and Carrle et al. (2023)."
             )
 
-        # Load all seizure times
-        all_seizure_times = get_all_seizure_times()
-
         # Load normalization params (compute if missing)
         self.mean: Optional[np.ndarray] = None
         self.std: Optional[np.ndarray] = None
         if normalize:
             self._load_or_compute_norm_params()
 
-        # Build all windows
-        self.windows: List[Tuple[np.ndarray, int, int]] = []
+        # Build flat-signal index (lazy mmap — files opened on demand)
+        self._signal_paths: List[Path] = []          # per-case signal file paths
+        self._signal_cache: Dict[int, np.ndarray] = {}  # LRU cache of open mmaps
+        self._signal_cache_order: List[int] = []     # access order for LRU eviction
+        self._signal_cache_max: int = 4              # max open mmaps at once
+        self._window_starts: List[np.ndarray] = []   # per-case arrays of start positions
+        self._cumulative: np.ndarray = np.array([0], dtype=np.int64)
+        self._all_labels: np.ndarray = np.empty(0, dtype=np.int8)
+        self._all_pids: np.ndarray = np.empty(0, dtype=np.int8)
         self._qc_rejected = 0
-        self._load_windows(all_seizure_times)
+        self._build_index()
+        self._n_real = int(self._cumulative[-1])
 
         # Add synthetic windows (training only — enforced above)
-        self._n_synthetic = 0
+        self._synthetic_windows: List[Tuple[np.ndarray, int, int]] = []
         if synthetic_windows is not None:
-            # Normalize synthetic windows if needed (they must be in µV scale)
-            normed = []
             for window, label, patient_id in synthetic_windows:
                 if self.normalize and self.mean is not None and self.std is not None:
                     window = (window - self.mean[:, None]) / self.std[:, None]
-                normed.append((window, label, patient_id))
-            self._n_synthetic = len(normed)
-            self.windows.extend(normed)
+                self._synthetic_windows.append((window, label, patient_id))
+        self._n_synthetic = len(self._synthetic_windows)
 
         # Cache class counts
-        self._n_ictal = sum(1 for _, l, _ in self.windows if l == 1)
-        self._n_interictal = len(self.windows) - self._n_ictal
+        real_ictal = int(np.sum(self._all_labels == 1)) if len(self._all_labels) > 0 else 0
+        syn_ictal = sum(1 for _, l, _ in self._synthetic_windows if l == 1)
+        self._n_ictal = real_ictal + syn_ictal
+        self._n_interictal = (self._n_real + self._n_synthetic) - self._n_ictal
 
         # Filter to ictal only if requested
+        self._active_indices: Optional[np.ndarray] = None
         if ictal_only:
-            self.windows = [(w, l, p) for w, l, p in self.windows if l == 1]
-            self._n_ictal = len(self.windows)
+            real_ictal_idx = np.where(self._all_labels == 1)[0]
+            syn_ictal_idx = np.array([
+                self._n_real + i for i, (_, l, _) in enumerate(self._synthetic_windows) if l == 1
+            ], dtype=np.int64)
+            self._active_indices = np.concatenate([real_ictal_idx, syn_ictal_idx]) if len(syn_ictal_idx) > 0 else real_ictal_idx
+            self._n_ictal = len(self._active_indices)
             self._n_interictal = 0
 
-    def _load_or_compute_norm_params(self):
-        """Load normalization params from file, or compute from training data.
+        self.windows = _WindowsProxy(self)
 
-        Norm params are keyed by a hash of the training case list to prevent
-        cross-split/cross-fold leakage. Different LOPO folds or split configs
-        will compute and cache separate normalization parameters.
-        """
+    def _load_or_compute_norm_params(self):
+        """Load or compute per-channel normalization params from training data."""
         import hashlib
         cases_key = hashlib.md5(",".join(sorted(self.train_cases)).encode()).hexdigest()[:8]
         norm_path = NORM_PARAMS_PATH.parent / f"norm_params_{cases_key}.npz"
@@ -551,111 +755,101 @@ class CHBMITDataset(Dataset):
             np.savez(str(norm_path), mean=self.mean, std=self.std)
             print(f"Saved normalization params to {norm_path}")
 
-    def _load_windows(self, all_seizure_times: Dict):
-        """Load and segment all EDF files for the assigned cases.
+    def _build_index(self):
+        """Build index over flat-signal caches (lazy mmap).
 
-        Uses per-case disk caching: windows are preprocessed, windowed, and
-        QC-filtered once, then saved as .npz files in data/window_cache/.
-        Subsequent loads read from cache in seconds instead of minutes.
-        Cache stores windows in µV (pre-normalization) so the same cache
-        works across different LOPO folds.
+        For each case: ensure signal cache exists, store the path (NOT
+        opened yet), and load the small index file.  Mmaps are opened on
+        demand in _get_mmap() with LRU eviction, so only a few cases are
+        resident at any time.  Total RAM: ~10 MB for metadata arrays.
         """
-        WINDOW_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        SIGNAL_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
+        all_labels = []
+        all_pids = []
+        cumulative = [0]
 
         for case_id in self.cases:
-            cache_path = WINDOW_CACHE_DIR / f"{case_id}.npz"
+            sig_path = SIGNAL_CACHE_DIR / f"{case_id}_signals.npy"
+            idx_path = SIGNAL_CACHE_DIR / f"{case_id}_index.npz"
 
-            if cache_path.exists():
-                # Load from cache (stored as float16, upcast to float32)
-                data = np.load(str(cache_path), allow_pickle=False)
-                cached_windows = data["windows"].astype(np.float32)  # (N, 23, 1024)
-                cached_labels = data["labels"]      # (N,) int8
-                cached_pids = data["patient_ids"]   # (N,) int8
-                qc_rejected = int(data["qc_rejected"])
+            if not sig_path.exists() or not idx_path.exists():
+                print(f"  Building signal cache for {case_id}...")
+                _build_signal_cache(case_id)
 
-                # Apply normalization if needed
-                case_windows = []
-                for i in range(len(cached_windows)):
-                    w = cached_windows[i]
-                    if self.normalize and self.mean is not None and self.std is not None:
-                        w = (w - self.mean[:, None]) / self.std[:, None]
-                    case_windows.append((w, int(cached_labels[i]), int(cached_pids[i])))
+            index_data = np.load(str(idx_path))
 
-                self.windows.extend(case_windows)
-                self._qc_rejected += qc_rejected
-            else:
-                # Process from EDF files and build cache
-                case_windows_uv = []  # Pre-normalization windows in µV
-                qc_rejected = 0
-                seizure_times_by_file = all_seizure_times.get(case_id, {})
-                edf_dirs = _get_edf_dirs_for_case(case_id)
+            starts = index_data["starts"]
+            labels = index_data["labels"]
+            pid = int(index_data["pid"])
+            self._qc_rejected += int(index_data["qc_rejected"])
 
-                for edf_dir in edf_dirs:
-                    for edf_file in sorted(edf_dir.glob("*.edf")):
-                        edf_name = edf_file.name
-                        seizure_times = seizure_times_by_file.get(edf_name, [])
+            n_windows = len(starts)
+            self._signal_paths.append(sig_path)
+            self._window_starts.append(starts)
+            all_labels.append(labels)
+            all_pids.append(np.full(n_windows, pid, dtype=np.int8))
+            cumulative.append(cumulative[-1] + n_windows)
 
-                        if not seizure_times and edf_name not in seizure_times_by_file:
-                            similar = [k for k in seizure_times_by_file if edf_name.replace('.edf','') in k or k.replace('.edf','') in edf_name]
-                            if similar:
-                                print(f"Warning: {edf_name} not in summary but similar keys exist: {similar}. Possible filename mismatch.")
+        self._cumulative = np.array(cumulative, dtype=np.int64)
+        self._all_labels = np.concatenate(all_labels) if all_labels else np.empty(0, dtype=np.int8)
+        self._all_pids = np.concatenate(all_pids) if all_pids else np.empty(0, dtype=np.int8)
 
-                        try:
-                            signals = read_edf_signals(str(edf_file))
-                        except Exception as e:
-                            print(f"Warning: failed to read {edf_file}: {e}")
-                            continue
+    def _get_mmap(self, case_idx: int) -> np.ndarray:
+        """Return mmap for a case, opening lazily with LRU eviction."""
+        if case_idx in self._signal_cache:
+            order = self._signal_cache_order
+            order.remove(case_idx)
+            order.append(case_idx)
+            return self._signal_cache[case_idx]
 
-                        if signals.shape[0] != N_CHANNELS:
-                            print(f"Warning: {edf_file} has {signals.shape[0]} channels, expected {N_CHANNELS}. Skipping.")
-                            continue
+        if len(self._signal_cache) >= self._signal_cache_max:
+            evict = self._signal_cache_order.pop(0)
+            del self._signal_cache[evict]
 
-                        signals = preprocess_signals(signals)
-                        file_windows = create_windows_from_file(signals, seizure_times, case_id)
+        mmap = np.load(str(self._signal_paths[case_idx]), mmap_mode='r')
+        self._signal_cache[case_idx] = mmap
+        self._signal_cache_order.append(case_idx)
+        return mmap
 
-                        for window, label, patient_id in file_windows:
-                            if window_passes_qc(window):
-                                case_windows_uv.append((window, label, patient_id))
-                            else:
-                                qc_rejected += 1
+    def _resolve_index(self, idx: int) -> Tuple[int, int]:
+        """Map global real-window index to (case_index, local_window_index)."""
+        case_idx = int(np.searchsorted(self._cumulative[1:], idx, side='right'))
+        local_idx = idx - int(self._cumulative[case_idx])
+        return case_idx, local_idx
 
-                # Save cache (µV scale, pre-normalization, compressed float16)
-                if case_windows_uv:
-                    w_arr = np.array([w for w, _, _ in case_windows_uv], dtype=np.float16)
-                    l_arr = np.array([l for _, l, _ in case_windows_uv], dtype=np.int8)
-                    p_arr = np.array([p for _, _, p in case_windows_uv], dtype=np.int8)
-                    np.savez_compressed(
-                        str(cache_path), windows=w_arr, labels=l_arr,
-                        patient_ids=p_arr, qc_rejected=np.array(qc_rejected),
-                    )
-                    print(f"  Cached {len(case_windows_uv)} windows for {case_id} ({qc_rejected} QC-rejected)")
-                else:
-                    # Save empty cache
-                    np.savez_compressed(
-                        str(cache_path),
-                        windows=np.empty((0, N_CHANNELS, WINDOW_SAMPLES), dtype=np.float16),
-                        labels=np.empty((0,), dtype=np.int8),
-                        patient_ids=np.empty((0,), dtype=np.int8),
-                        qc_rejected=np.array(qc_rejected),
-                    )
-                    print(f"  Cached 0 windows for {case_id} ({qc_rejected} QC-rejected)")
-
-                # Apply normalization and add to dataset
-                for window, label, patient_id in case_windows_uv:
-                    if self.normalize and self.mean is not None and self.std is not None:
-                        window = (window - self.mean[:, None]) / self.std[:, None]
-                    self.windows.append((window, label, patient_id))
-                self._qc_rejected += qc_rejected
+    def _get_real_window(self, idx: int) -> Tuple[np.ndarray, int, int]:
+        """Slice one window from the memory-mapped flat signal."""
+        case_idx, local_idx = self._resolve_index(idx)
+        start = int(self._window_starts[case_idx][local_idx])
+        signal_mmap = self._get_mmap(case_idx)
+        window = signal_mmap[:, start:start + WINDOW_SAMPLES]
+        window = np.ascontiguousarray(window, dtype=np.float32)
+        if self.normalize and self.mean is not None and self.std is not None:
+            window = (window - self.mean[:, None]) / self.std[:, None]
+        label = int(self._all_labels[idx])
+        patient_id = int(self._all_pids[idx])
+        return window, label, patient_id
 
     def __len__(self) -> int:
-        return len(self.windows)
+        if self._active_indices is not None:
+            return len(self._active_indices)
+        return self._n_real + self._n_synthetic
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, int, int]:
-        window, label, patient_id = self.windows[idx]
-        return torch.from_numpy(window), label, patient_id
+        if self._active_indices is not None:
+            idx = int(self._active_indices[idx])
+
+        if idx < self._n_real:
+            window, label, patient_id = self._get_real_window(idx)
+        else:
+            syn_idx = idx - self._n_real
+            window, label, patient_id = self._synthetic_windows[syn_idx]
+
+        return torch.from_numpy(np.ascontiguousarray(window)), label, patient_id
 
     def get_class_counts(self) -> Tuple[int, int]:
-        """Return (n_interictal, n_ictal) counts (cached)."""
+        """Return (n_interictal, n_ictal) counts."""
         return self._n_interictal, self._n_ictal
 
     def get_class_weights(self) -> torch.Tensor:
@@ -674,18 +868,7 @@ def get_dataloaders(
     normalize: bool = True,
     seed: int = 42,
 ) -> Tuple[DataLoader, DataLoader, DataLoader]:
-    """
-    Create train, val, and test DataLoaders (single-split mode).
-
-    Args:
-        batch_size: batch size for all loaders
-        num_workers: number of parallel data loading workers
-        normalize: apply per-channel z-score normalization
-        seed: random seed for reproducible shuffling
-
-    Returns:
-        (train_loader, val_loader, test_loader)
-    """
+    """Create train, val, and test DataLoaders (single-split mode)."""
     train_ds = CHBMITDataset(split="train", normalize=normalize, seed=seed)
     val_ds = CHBMITDataset(split="val", normalize=normalize, seed=seed)
     test_ds = CHBMITDataset(split="test", normalize=normalize, seed=seed)
@@ -716,24 +899,7 @@ def get_lopo_dataloaders(
     seed: int = 42,
     synthetic_windows: Optional[List[Tuple[np.ndarray, int, int]]] = None,
 ) -> Tuple[DataLoader, DataLoader, DataLoader]:
-    """
-    Create train, val, and test DataLoaders for a specific LOPO fold.
-
-    The fold's train_cases are split 80/20 into train/val.
-    The fold's test_cases become the test set.
-    Synthetic windows (if provided) are added to training only.
-
-    Args:
-        fold: LOPO fold index (0-22)
-        batch_size: batch size for all loaders
-        num_workers: number of parallel data loading workers
-        normalize: apply per-channel z-score normalization
-        seed: random seed for reproducible val split and shuffling
-        synthetic_windows: optional synthetic windows for training augmentation
-
-    Returns:
-        (train_loader, val_loader, test_loader)
-    """
+    """Create train, val, and test DataLoaders for a specific LOPO fold."""
     train_ds = CHBMITDataset(
         split="train", fold=fold, normalize=normalize,
         seed=seed, synthetic_windows=synthetic_windows,
@@ -761,17 +927,38 @@ def get_lopo_dataloaders(
 
 # ── CLI Verification ───────────────────────────────────────────────────────
 if __name__ == "__main__":
+    import sys
+
     print("=" * 60)
     print("CHB-MIT EEG Dataset Loader - Verification")
     print("=" * 60)
 
     print(f"\nConfig:")
-    print(f"  Clean EDFs dir: {CLEAN_EDFS_DIR}")
-    print(f"  Raw DB dir:     {RAW_DB_DIR}")
-    print(f"  Split config:   {SPLIT_CONFIG_PATH}")
-    print(f"  Window:         {WINDOW_SEC}s = {WINDOW_SAMPLES} samples")
-    print(f"  Overlap:        {OVERLAP * 100:.0f}%")
-    print(f"  Step:           {STEP_SAMPLES} samples")
+    print(f"  Clean EDFs dir:    {CLEAN_EDFS_DIR}")
+    print(f"  Signal cache dir:  {SIGNAL_CACHE_DIR}")
+    print(f"  Split config:      {SPLIT_CONFIG_PATH}")
+    print(f"  Window:            {WINDOW_SEC}s = {WINDOW_SAMPLES} samples")
+    print(f"  Overlap:           {OVERLAP * 100:.0f}%")
+    print(f"  Step:              {STEP_SAMPLES} samples")
+
+    # Allow building caches without loading full dataset
+    if "--build-cache" in sys.argv:
+        print(f"\nBuilding signal caches for all cases...")
+        config_path = str(SPLIT_CONFIG_PATH)
+        with open(config_path) as f:
+            cfg = json.load(f)
+        all_cases_set: set = set()
+        for fold_cfg in cfg["lopo_folds"]:
+            all_cases_set.update(fold_cfg["train_cases"])
+            all_cases_set.update(fold_cfg["test_cases"])
+        for case_id in sorted(all_cases_set):
+            sig_path = SIGNAL_CACHE_DIR / f"{case_id}_signals.npy"
+            if sig_path.exists():
+                print(f"  {case_id}: already cached, skipping")
+                continue
+            _build_signal_cache(case_id)
+        print("\nDone! All signal caches built.")
+        sys.exit(0)
 
     print(f"\nLoading training set...")
     train_ds = CHBMITDataset(split="train")
@@ -782,12 +969,16 @@ if __name__ == "__main__":
     print(f"  QC rejected:    {train_ds._qc_rejected}")
     print(f"  Class weights:  {train_ds.get_class_weights().tolist()}")
 
-    # Check a sample
     w, l, p = train_ds[0]
     print(f"\n  Sample shape:   {w.shape}")
     print(f"  Sample dtype:   {w.dtype}")
     print(f"  Sample label:   {l}")
     print(f"  Sample patient: {ALL_CASES[p]} (id={p})")
+
+    # Also test _WindowsProxy
+    w2, l2, p2 = train_ds.windows[0]
+    assert w2.shape == (N_CHANNELS, WINDOW_SAMPLES), f"Proxy shape mismatch: {w2.shape}"
+    print(f"  Proxy test:     OK (shape {w2.shape})")
 
     print(f"\nLoading validation set...")
     val_ds = CHBMITDataset(split="val")
@@ -803,7 +994,6 @@ if __name__ == "__main__":
     print(f"  Interictal:     {n_inter_t}")
     print(f"  Ictal:          {n_ictal_t}")
 
-    # Summary
     total = len(train_ds) + len(val_ds) + len(test_ds)
     total_ictal = n_ictal + n_ictal_v + n_ictal_t
     print(f"\n{'=' * 60}")

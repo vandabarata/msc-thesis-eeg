@@ -34,6 +34,18 @@ import pyedflib.highlevel as hl
 
 DEFAULT_FS = 256
 
+# The fixed 23-channel bipolar montage that every clean EDF must have.
+# Derived from the majority of CHB-MIT recordings.  Sets with fewer
+# channels get zero-padded (QC will reject windows on flat channels).
+TARGET_MONTAGE: List[str] = [
+    "FP1-F7", "F7-T7", "T7-P7", "P7-O1",
+    "FP1-F3", "F3-C3", "C3-P3", "P3-O1",
+    "FP2-F4", "F4-C4", "C4-P4", "P4-O2",
+    "FP2-F8", "F8-T8", "T8-P8", "P8-O2",
+    "FZ-CZ", "CZ-PZ",
+    "P7-T7", "T7-FT9", "FT9-FT10", "FT10-T8", "T8-P8-2",
+]
+
 NDArray = np.ndarray
 Metadata = Dict[str, Any]
 Record = Dict[str, Union[NDArray, Metadata]]
@@ -581,6 +593,12 @@ def process_patient_to_edf(pacient: str, signals_path: str, clean_edf_path: str,
                             force: bool = False) -> None:
     """Like process_patient_auto but writes clean EDF+ files instead of pickles.
 
+    Every output EDF has exactly TARGET_MONTAGE (23 bipolar channels) in a
+    fixed order.  Channels present in the raw EDF are selected; missing
+    channels are zero-padded (downstream QC rejects windows with flat
+    channels).  Files where *none* of the target channels can be found are
+    skipped entirely.
+
     Set *force=True* to overwrite existing output files (e.g. after updating
     the channel-filtering logic).  The default (False) skips files that have
     already been written, which is useful for resuming an interrupted run.
@@ -651,13 +669,20 @@ def process_patient_to_edf(pacient: str, signals_path: str, clean_edf_path: str,
                 if _is_unwanted_channel(ch):
                     sig_dict.pop(ch, None)
 
+            # Skip files where none of the target channels are present
+            target_set = set(TARGET_MONTAGE)
+            if not (set(sig_dict.keys()) & target_set):
+                print(f"[chb{pacient}] {base}: no target channels found, skipping")
+                skipped += 1
+                continue
+
             meta = process_metadata(summary_path, base, fs=fs)
-            meta["channels"] = valid_channels
+            meta["channels"] = TARGET_MONTAGE
             meta["fs"] = fs
             meta["montage_set"] = set_id
 
             try:
-                write_clean_edf(out_path, valid_channels, sig_dict, meta)
+                write_clean_edf(out_path, TARGET_MONTAGE, sig_dict, meta)
             except Exception as e:
                 print(f"[chb{pacient}] Failed writing {base}: {e}")
                 skipped += 1

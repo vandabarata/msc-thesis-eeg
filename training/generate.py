@@ -8,7 +8,7 @@ Supports:
   - Training generators on single-split or specific LOPO folds
   - Generating synthetic windows at various ratios (25%, 50%, 100%, 200%)
   - Saving generator checkpoints for reproducibility
-  - Plugging directly into train.py via saved .npy synthetic window files
+  - Plugging directly into train.py via saved .npz synthetic window files
 
 Usage:
     # Train CVAE on single-split, generate at 100% ratio
@@ -53,6 +53,7 @@ def extract_ictal_windows(
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Extract all ictal windows from a dataset as numpy arrays.
+    Uses label index for O(ictal) access instead of iterating all windows.
 
     Returns:
         (windows, labels, patient_ids)
@@ -60,29 +61,39 @@ def extract_ictal_windows(
         labels: (N_ictal,) — all 1s
         patient_ids: (N_ictal,)
     """
-    windows = []
-    labels = []
-    pids = []
-    for w, l, p in dataset.windows:
-        if l == 1:
-            windows.append(w)
-            labels.append(l)
-            pids.append(p)
+    ictal_idx = np.where(dataset._all_labels == 1)[0]
+    n = len(ictal_idx)
+    windows = np.empty((n, N_CHANNELS, WINDOW_SAMPLES), dtype=np.float32)
+    pids = np.empty(n, dtype=np.int64)
 
-    return (
-        np.array(windows, dtype=np.float32),
-        np.array(labels, dtype=np.int64),
-        np.array(pids, dtype=np.int64),
-    )
+    for i, real_idx in enumerate(ictal_idx):
+        w, _, p = dataset._get_real_window(int(real_idx))
+        windows[i] = w
+        pids[i] = p
+
+    labels = np.ones(n, dtype=np.int64)
+    return windows, labels, pids
 
 
-def extract_all_windows(
+def extract_all_windows_batched(
     dataset: CHBMITDataset,
+    batch_size: int = 1024,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Extract all windows (ictal + interictal) from a dataset."""
-    windows = np.array([w for w, _, _ in dataset.windows], dtype=np.float32)
-    labels = np.array([l for _, l, _ in dataset.windows], dtype=np.int64)
-    pids = np.array([p for _, _, p in dataset.windows], dtype=np.int64)
+    """
+    Extract all windows into pre-allocated arrays, reading in batches.
+    Avoids the O(N) list-of-arrays approach that peaks at 2× memory.
+    """
+    n = dataset._n_real
+    windows = np.empty((n, N_CHANNELS, WINDOW_SAMPLES), dtype=np.float32)
+    labels = np.empty(n, dtype=np.int64)
+    pids = np.empty(n, dtype=np.int64)
+
+    for i in range(n):
+        w, l, p = dataset._get_real_window(i)
+        windows[i] = w
+        labels[i] = l
+        pids[i] = p
+
     return windows, labels, pids
 
 
@@ -128,8 +139,7 @@ def train_cvae(
     torch.manual_seed(seed)
     np.random.seed(seed)
 
-    # CVAE trains on all windows (conditioned on label)
-    windows, labels, pids = extract_all_windows(train_dataset)
+    windows, labels, pids = extract_all_windows_batched(train_dataset)
     if verbose:
         n_ictal = (labels == 1).sum()
         print(f"  Training CVAE on {len(windows)} windows ({n_ictal} ictal)")
@@ -171,8 +181,7 @@ def train_ldm(
     if verbose:
         print(f"  Loaded pretrained CVAE from {cvae_checkpoint}")
 
-    # Train on all windows
-    windows, labels, pids = extract_all_windows(train_dataset)
+    windows, labels, pids = extract_all_windows_batched(train_dataset)
     if verbose:
         n_ictal = (labels == 1).sum()
         print(f"  Training LDM on {len(windows)} windows ({n_ictal} ictal)")
@@ -253,6 +262,83 @@ def load_synthetic_windows(path: str) -> List[Tuple[np.ndarray, int, int]]:
     return [(windows[i], int(labels[i]), int(pids[i])) for i in range(len(windows))]
 
 
+def _run_single_split(args, device: str, experiment: str):
+    """Run generator training + synthesis on single-split."""
+    # normalize=False: generators produce µV-scale windows so the loader
+    # can normalize them alongside real data (avoids double normalization)
+    train_ds = CHBMITDataset(split="train", seed=args.seed, normalize=False)
+    n_ictal = train_ds._n_ictal
+    print(f"\n  Training set: {len(train_ds)} windows ({n_ictal} ictal)")
+
+    save_dir = RESULTS_DIR / experiment / f"seed_{args.seed}" / "single_split"
+
+    model = _train_generator(args, train_ds, device)
+    save_generator(model, save_dir, args.model)
+
+    for ratio in args.ratio:
+        synthetic = generate_synthetic(model, n_ictal, ratio, device)
+        save_synthetic_windows(synthetic, save_dir, ratio)
+
+    print(f"\nDone. Outputs in {save_dir}/")
+
+
+def _run_lopo(args, device: str, experiment: str):
+    """Run generator training + synthesis for each LOPO fold."""
+    import json as _json
+    split_config_path = _PROJECT_ROOT / "data" / "split_config.json"
+    with open(str(split_config_path)) as f:
+        split_config = _json.load(f)
+    lopo_folds = split_config["lopo_folds"]
+
+    folds = args.folds if args.folds is not None else list(range(len(lopo_folds)))
+
+    for fold in folds:
+        print(f"\n{'─' * 50}")
+        print(f"  Fold {fold}/22 — test subject: {lopo_folds[fold]['test_subject']}")
+        print(f"{'─' * 50}")
+
+        save_dir = RESULTS_DIR / experiment / f"seed_{args.seed}" / f"fold_{fold:02d}"
+
+        # Skip if already done
+        if (save_dir / f"{args.model}.pt").exists() and all(
+            (save_dir / f"synthetic_ratio_{r:.2f}.npz").exists() for r in args.ratio
+        ):
+            print(f"  Skipping fold {fold} — already complete")
+            continue
+
+        train_ds = CHBMITDataset(
+            split="train", fold=fold, seed=args.seed, normalize=False,
+        )
+        n_ictal = train_ds._n_ictal
+        print(f"  Training set: {len(train_ds)} windows ({n_ictal} ictal)")
+
+        if n_ictal < 2:
+            print(f"  Skipping fold {fold} — only {n_ictal} ictal windows")
+            continue
+
+        model = _train_generator(args, train_ds, device)
+        save_generator(model, save_dir, args.model)
+
+        for ratio in args.ratio:
+            synthetic = generate_synthetic(model, n_ictal, ratio, device)
+            save_synthetic_windows(synthetic, save_dir, ratio)
+
+    print(f"\nDone. Outputs in {RESULTS_DIR / experiment}/")
+
+
+def _train_generator(args, train_ds: CHBMITDataset, device: str):
+    """Dispatch to the right generator training function."""
+    if args.model == "timegan":
+        epochs = (args.n_epochs or 600, args.n_epochs or 600, args.n_epochs or 600)
+        return train_timegan(train_ds, args.seed, device, epochs)
+    elif args.model == "cvae":
+        return train_cvae(train_ds, args.seed, device, args.n_epochs or 500)
+    elif args.model == "ldm":
+        if not args.cvae_checkpoint:
+            raise ValueError("--cvae-checkpoint is required for LDM training")
+        return train_ldm(train_ds, args.cvae_checkpoint, args.seed, device, args.n_epochs or 500)
+
+
 # ── CLI ────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     import argparse
@@ -265,8 +351,8 @@ Examples:
   # Train CVAE on single-split, generate at 100% ratio
   python -m training.generate --model cvae --ratio 1.0
 
-  # Train TimeGAN
-  python -m training.generate --model timegan --ratio 1.0
+  # Train TimeGAN on LOPO folds 0-4
+  python -m training.generate --model timegan --mode lopo --folds 0 1 2 3 4
 
   # Train LDM (needs pretrained CVAE)
   python -m training.generate --model ldm --cvae-checkpoint results/e4/seed_42/single_split/cvae.pt
@@ -277,6 +363,9 @@ Examples:
     )
     parser.add_argument("--model", type=str, required=True,
                         choices=["timegan", "cvae", "ldm"])
+    parser.add_argument("--mode", type=str, default="single",
+                        choices=["single", "lopo"],
+                        help="single-split or LOPO (default: single)")
     parser.add_argument("--ratio", type=float, nargs="+", default=[1.0],
                         help="Synthetic:real ratios (default: 1.0)")
     parser.add_argument("--seed", type=int, default=42)
@@ -285,45 +374,25 @@ Examples:
                         help="Path to pretrained CVAE checkpoint (required for LDM)")
     parser.add_argument("--n-epochs", type=int, default=None,
                         help="Override default epoch count")
+    parser.add_argument("--folds", type=int, nargs="+", default=None,
+                        help="Specific LOPO folds (default: all 23)")
 
     args = parser.parse_args()
     device = args.device or ("cuda" if torch.cuda.is_available() else "cpu")
 
-    # Map model → experiment
     exp_map = {"timegan": "e3", "cvae": "e4", "ldm": "e5"}
     experiment = exp_map[args.model]
 
     print(f"\n{'=' * 60}")
     print(f"  Generator: {args.model.upper()}")
     print(f"  Experiment: {experiment.upper()}")
+    print(f"  Mode: {args.mode}")
     print(f"  Ratios: {args.ratio}")
     print(f"  Seed: {args.seed}")
     print(f"  Device: {device}")
     print(f"{'=' * 60}")
 
-    # Load training data
-    train_ds = CHBMITDataset(split="train", seed=args.seed)
-    n_ictal = train_ds._n_ictal
-    print(f"\n  Training set: {len(train_ds)} windows ({n_ictal} ictal)")
-
-    # Train generator
-    save_dir = RESULTS_DIR / experiment / f"seed_{args.seed}" / "single_split"
-
-    if args.model == "timegan":
-        epochs = (args.n_epochs or 600, args.n_epochs or 600, args.n_epochs or 600)
-        model = train_timegan(train_ds, args.seed, device, epochs)
-    elif args.model == "cvae":
-        model = train_cvae(train_ds, args.seed, device, args.n_epochs or 500)
-    elif args.model == "ldm":
-        if not args.cvae_checkpoint:
-            parser.error("--cvae-checkpoint is required for LDM training")
-        model = train_ldm(train_ds, args.cvae_checkpoint, args.seed, device, args.n_epochs or 500)
-
-    save_generator(model, save_dir, args.model)
-
-    # Generate at each ratio
-    for ratio in args.ratio:
-        synthetic = generate_synthetic(model, n_ictal, ratio, device)
-        save_synthetic_windows(synthetic, save_dir, ratio)
-
-    print(f"\nDone. Outputs in {save_dir}/")
+    if args.mode == "single":
+        _run_single_split(args, device, experiment)
+    else:
+        _run_lopo(args, device, experiment)
