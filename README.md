@@ -41,7 +41,7 @@ msc_thesis_code/
 │   └── ldm.py                     Latent Diffusion (UNet-1D + DDPM/DDIM, 2.3M params)
 │
 ├── training/                    Training, evaluation, and analysis
-│   ├── train.py                   Detector training loop (E1/E2), early stopping
+│   ├── train.py                   Detector training (E1-E5), early stopping
 │   ├── generate.py                Generator training + synthetic window production (E3-E5)
 │   ├── evaluate.py                AUPRC, AUROC, F1, per-patient, Wilcoxon test
 │   ├── visualize.py               PSD comparison, t-SNE, amplitude distributions
@@ -51,12 +51,16 @@ msc_thesis_code/
 ├── notebooks/                   Exploration
 │   └── chb-mit-analysis.ipynb     Full EDA notebook
 │
-├── clean_edfs/                  686 homogenized EDF+ files (not in git)
-├── results/                     Experiment outputs (not in git)
+├── run_e3.sh                    E3 launch script (TimeGAN generation + detector training)
+├── deploy_and_train.sh          Deploy code to remote machine and start training
+├── build_cache.py               Builds the flat-signal mmap cache from clean_edfs/
+│
+├── results/                     Experiment outputs (metrics + model checkpoints)
 ├── index.html                   Project website (GitHub Pages)
 ├── website/                     Website assets
 │   └── images/                    ISCTE/ISTA logos
-└── requirements.txt             Python dependencies
+├── requirements.txt             Python dependencies (CPU)
+└── requirements-gpu.txt         Python dependencies (CUDA)
 ```
 
 ---
@@ -91,13 +95,23 @@ Download the [CHB-MIT Scalp EEG Database](https://physionet.org/content/chbmit/1
 
 | Experiment | Description | Status |
 |:----------:|-------------|:------:|
-| **E1** | Baseline detector (real data, class-weighted CE) | Ready |
-| **E2** | Non-synthetic controls (SMOTE, ADASYN) | Ready |
-| **E3** | TimeGAN augmentation (25%, 50%, 100%, 200%) | Ready |
+| **E1** | Baseline 1D-CNN detector (real data, class-weighted cross-entropy) | Done |
+| **E2** | Non-synthetic controls (SMOTE, ADASYN) | Done |
+| **E3** | TimeGAN augmentation (25%, 50%, 100%, 200%) | Running |
 | **E4** | CVAE augmentation (same ratios) | Ready |
 | **E5** | Latent Diffusion augmentation (same ratios, needs trained CVAE) | After E4 |
 | **E6** | Cross-generator comparison (Wilcoxon signed-rank test) | After E1-E5 |
 | **E7** | Subject-identity analysis (linear probe on embeddings) | After E6 |
+
+### Results So Far (single-split development)
+
+| Experiment | Mean AUPRC | Mean Per-Patient AUPRC | Notes |
+|:----------:|:----------:|:----------------------:|-------|
+| **E1** Baseline | 0.1766 ± 0.0540 | 0.2263 ± 0.0646 | Anchor for all comparisons |
+| **E2b** SMOTE | 0.0685 ± 0.0620 | 0.0921 ± 0.0723 | Below baseline |
+| **E2c** ADASYN | 0.1078 ± 0.0729 | 0.1302 ± 0.0712 | Below baseline |
+
+Both non-synthetic controls underperform the baseline, with high variance across seeds. The bar for generative models (E3-E5) remains the E1 baseline. Full results on the [project website](https://vandabarata.github.io/msc-thesis-eeg/).
 
 <details>
 <summary>Protocol rules enforced in code</summary>
@@ -143,11 +157,27 @@ bash training/run_experiments.sh full
 results/<experiment>/
 ├── seed_42/
 │   ├── single_split/
-│   │   ├── best_model.pt        Model checkpoint
-│   │   └── results.json         Metrics + history
-│   ├── fold_00/ ... fold_22/    LOPO folds
-└── lopo_summary.json            Aggregated results
+│   │   ├── best_model.pt           Model checkpoint (or best_model_<aug>.pt for E2)
+│   │   └── results.json            Metrics + history (or results_<aug>.json for E2)
+│   ├── fold_00/ ... fold_22/       LOPO folds (same structure per fold)
+└── lopo_summary.json               Aggregated results
 ```
+
+---
+
+## Hardware
+
+All experiments run on a single university workstation via SSH:
+
+| | Spec |
+|---|---|
+| **GPU** | NVIDIA RTX 3080 Ti (12 GB VRAM) |
+| **CUDA** | 13.2 (Driver 595.58) |
+| **RAM** | 32 GB |
+| **Disk** | ~98 GB (shared with OS) |
+| **Python** | 3.12, PyTorch + CUDA |
+
+The 12 GB VRAM and 32 GB RAM constraints shaped the data pipeline design (memory-mapped flat-signal cache, on-the-fly windowing, per-batch GPU transfer for generators).
 
 ---
 

@@ -191,6 +191,7 @@ class Trainer:
         val_loader: DataLoader,
         class_weights: torch.Tensor,
         checkpoint_dir: Optional[Path] = None,
+        checkpoint_name: str = "best_model.pt",
     ) -> Tuple[SeizureDetector, Dict]:
         """
         Train a SeizureDetector to convergence with early stopping.
@@ -200,6 +201,7 @@ class Trainer:
             val_loader: validation DataLoader
             class_weights: (2,) tensor [w_interictal, w_ictal]
             checkpoint_dir: directory to save best model checkpoint
+            checkpoint_name: filename for the checkpoint
 
         Returns:
             (best_model, training_history)
@@ -295,7 +297,7 @@ class Trainer:
         # Save checkpoint
         if self.config.save_checkpoints and checkpoint_dir is not None and best_state is not None:
             checkpoint_dir.mkdir(parents=True, exist_ok=True)
-            ckpt_path = checkpoint_dir / "best_model.pt"
+            ckpt_path = checkpoint_dir / checkpoint_name
             torch.save({
                 "model_state_dict": best_state,
                 "best_epoch": best_epoch,
@@ -409,7 +411,8 @@ def train_single_split(
     print("\nTraining...")
     trainer = Trainer(config)
     checkpoint_dir = RESULTS_DIR / experiment / f"seed_{seed}" / "single_split"
-    model, history = trainer.train(train_loader, val_loader, class_weights, checkpoint_dir)
+    ckpt_name = f"best_model_{augmentation}.pt" if augmentation else "best_model.pt"
+    model, history = trainer.train(train_loader, val_loader, class_weights, checkpoint_dir, ckpt_name)
 
     # Evaluate on test set
     print("\nEvaluating on test set...")
@@ -428,7 +431,8 @@ def train_single_split(
 
     results_dir = RESULTS_DIR / experiment / f"seed_{seed}" / "single_split"
     results_dir.mkdir(parents=True, exist_ok=True)
-    with open(results_dir / "results.json", "w") as f:
+    results_filename = f"results_{augmentation}.json" if augmentation else "results.json"
+    with open(results_dir / results_filename, "w") as f:
         json.dump(results, f, indent=2, default=str)
 
     return results
@@ -567,8 +571,9 @@ def train_lopo(
             # Train
             trainer = Trainer(config)
             checkpoint_dir = RESULTS_DIR / experiment / f"seed_{seed}" / f"fold_{fold:02d}"
+            fold_ckpt_name = f"best_model_{augmentation}.pt" if augmentation else "best_model.pt"
             model, history = trainer.train(
-                train_loader, val_loader, class_weights, checkpoint_dir,
+                train_loader, val_loader, class_weights, checkpoint_dir, fold_ckpt_name,
             )
 
             # Evaluate on test set (held-out patient)
@@ -589,7 +594,8 @@ def train_lopo(
             # Save per-fold results incrementally
             fold_dir = RESULTS_DIR / experiment / f"seed_{seed}" / f"fold_{fold:02d}"
             fold_dir.mkdir(parents=True, exist_ok=True)
-            with open(fold_dir / "results.json", "w") as f:
+            fold_results_filename = f"results_{augmentation}.json" if augmentation else "results.json"
+            with open(fold_dir / fold_results_filename, "w") as f:
                 json.dump(seed_results[fold], f, indent=2, default=str)
 
         all_results[seed] = seed_results
@@ -641,7 +647,8 @@ def train_lopo(
 
     summary_dir = RESULTS_DIR / experiment
     summary_dir.mkdir(parents=True, exist_ok=True)
-    summary_path = summary_dir / "lopo_summary.json"
+    summary_filename = f"lopo_summary_{augmentation}.json" if augmentation else "lopo_summary.json"
+    summary_path = summary_dir / summary_filename
 
     # Merge with existing summary (allows split-machine runs)
     if summary_path.exists():

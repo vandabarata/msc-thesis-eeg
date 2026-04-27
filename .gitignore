@@ -11,10 +11,11 @@ __pycache__/
 *.pyc
 *.pyo
 
-# Results and checkpoints (regenerable)
-results/
+# Synthetic data (large, regenerable)
 *.npz
-*.pt
+
+# Results — track JSON metrics and model checkpoints, ignore the rest
+results/**/synthetic_*.npz
 
 # IDE / tool config
 CLAUDE.md
