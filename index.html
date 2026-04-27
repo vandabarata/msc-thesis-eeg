@@ -181,10 +181,13 @@ tailwind.config = {
     <div class="absolute top-0 left-0 right-0 h-96 opacity-5" style="mask-image: linear-gradient(to bottom, black, transparent); -webkit-mask-image: linear-gradient(to bottom, black, transparent); background-image: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2250%22><path d=%22M0 25 Q10 10 20 25 T40 25 T60 25 T80 25 T100 25%22 fill=%22none%22 stroke=%22white%22 stroke-width=%221%22/></svg>'); background-size: 100px 50px;"></div>
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 lg:pt-8 pb-4">
       <div>
-        <a href="#status" class="inline-flex items-center gap-2 bg-iscte-500/10 border border-iscte-500/20 rounded-full px-3 py-1.5 text-cyan-500 text-xs sm:text-sm mb-3 sm:mb-3 hover:bg-iscte-500/20 transition-colors">
-          <span class="w-2 h-2 bg-iscte-400 rounded-full animate-pulse shrink-0"></span>
-          MSc Thesis &middot; Running ~60%
-        </a>
+        <div class="flex flex-wrap items-center gap-3 mb-3 sm:mb-3">
+          <a href="#status" class="inline-flex items-center gap-2 bg-iscte-500/10 border border-iscte-500/20 rounded-full px-3 py-1.5 text-cyan-500 text-xs sm:text-sm hover:bg-iscte-500/20 transition-colors">
+            <span class="w-2 h-2 bg-iscte-400 rounded-full animate-pulse shrink-0"></span>
+            MSc Thesis &middot; Running ~60%
+          </a>
+          <span class="text-xs text-gray-600">Last updated: 27 April 2026</span>
+        </div>
         <h1 class="text-3xl sm:text-4xl lg:text-6xl font-extrabold text-white leading-tight mb-3 sm:mb-3">
           Synthetic Data in Healthcare:<br>
           <span class="bg-gradient-to-r from-iscte-400 to-rsch-400 bg-clip-text text-transparent">A Focus on EEG Signals</span>
@@ -192,32 +195,24 @@ tailwind.config = {
         <p class="text-base sm:text-lg text-gray-400 mb-3 sm:mb-3 leading-relaxed">
            Addressing class imbalance in seizure detection by synthesizing realistic ictal EEG with generative models - GAN, VAE, and Diffusion - trained on the <a href="https://physionet.org/content/chbmit/1.0.0/" target="_blank" class="text-gray-300 hover:text-cyan-400 hover:underline">CHB-MIT Scalp EEG Database</a>.
         </p>
-        <div class="grid grid-cols-3 sm:flex sm:flex-wrap gap-3 sm:gap-4 mb-3 sm:mb-3">
-          <div class="bg-gray-900 border border-gray-800 rounded-lg px-3 sm:px-5 py-3 text-center sm:text-left">
+        <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:gap-4 mb-3 sm:mb-3">
+          <a href="#dataset" class="bg-gray-900 border border-gray-800 rounded-lg px-3 sm:px-5 py-3 text-center sm:text-left hover:border-cyan-500/40 transition-colors">
             <div class="text-xl sm:text-2xl font-bold text-cyan-500" data-stat="unique-subjects">23</div>
             <div class="text-xs text-gray-500">Subjects</div>
             <div class="text-xs text-gray-600"><span data-stat="total-cases">24</span> cases</div>
-          </div>
-          <div class="bg-gray-900 border border-gray-800 rounded-lg px-3 sm:px-5 py-3 text-center sm:text-left">
-            <div class="text-xl sm:text-2xl font-bold text-cyan-500" data-stat="total-files">683</div>
-            <div class="text-xs text-gray-500">EDF Files</div>
-          </div>
-          <div class="bg-gray-900 border border-gray-800 rounded-lg px-3 sm:px-5 py-3 text-center sm:text-left">
-            <div class="text-xl sm:text-2xl font-bold text-rsch-400" data-stat="seizure-files">141</div>
-            <div class="text-xs text-gray-500">Seizure Files</div>
-          </div>
-          <div class="bg-gray-900 border border-gray-800 rounded-lg px-3 sm:px-5 py-3 text-center sm:text-left">
-            <div class="text-xl sm:text-2xl font-bold text-white" data-stat="sample-rate">256</div>
-            <div class="text-xs text-gray-500">Hz Sample Rate</div>
-          </div>
-          <div class="bg-gray-900 border border-gray-800 rounded-lg px-3 sm:px-5 py-3 text-center sm:text-left">
-            <div class="text-xl sm:text-2xl font-bold text-white" data-stat="n-channels">23</div>
-            <div class="text-xs text-gray-500">EEG Channels</div>
-          </div>
-          <div class="bg-gray-900 border border-gray-800 rounded-lg px-3 sm:px-5 py-3 text-center sm:text-left">
+          </a>
+          <a href="#dataset" class="bg-gray-900 border border-gray-800 rounded-lg px-3 sm:px-5 py-3 text-center sm:text-left hover:border-rsch-500/40 transition-colors">
+            <div class="text-xl sm:text-2xl font-bold text-rsch-400">&lt;0.4%</div>
+            <div class="text-xs text-gray-500">Seizure Time</div>
+          </a>
+          <a href="#models" class="bg-gray-900 border border-gray-800 rounded-lg px-3 sm:px-5 py-3 text-center sm:text-left hover:border-amber-500/40 transition-colors">
             <div class="text-xl sm:text-2xl font-bold text-amber-400" data-stat="n-models">3</div>
             <div class="text-xs text-gray-500">Gen. Models</div>
-          </div>
+          </a>
+          <a href="#roadmap" class="bg-gray-900 border border-gray-800 rounded-lg px-3 sm:px-5 py-3 text-center sm:text-left hover:border-rose-500/40 transition-colors">
+            <div class="text-xl sm:text-2xl font-bold text-rose-400">7</div>
+            <div class="text-xs text-gray-500">Experiments</div>
+          </a>
         </div>
         <div class="text-xs sm:text-sm text-gray-500 flex flex-wrap gap-x-3 gap-y-1">
           <span><span class="text-gray-400 font-medium">Author:</span> Vanda Barata</span>
@@ -225,8 +220,6 @@ tailwind.config = {
           <span><span class="text-gray-400 font-medium">Supervisors:</span> <a href="https://ciencia.iscte-iul.pt/authors/ana-de-almeida" target="_blank" class="text-gray-400 hover:text-cyan-400 hover:underline">Ana de Almeida</a>, <a href="https://ciencia.iscte-iul.pt/authors/luis-miguel-martins-nunes" target="_blank" class="text-gray-400 hover:text-cyan-400 hover:underline">Lu&iacute;s Nunes</a></span>
           <span class="text-gray-700 hidden sm:inline">&middot;</span>
           <span><span class="text-gray-400 font-medium">Dataset:</span> <a href="https://physionet.org/content/chbmit/1.0.0/" target="_blank" class="text-gray-400 hover:text-cyan-400 hover:underline">CHB-MIT (PhysioNet)</a></span>
-          <span class="text-gray-700 hidden sm:inline">&middot;</span>
-          <span><span class="text-gray-400 font-medium">Method:</span> <a href="#gl-crispdm" class="text-gray-400 hover:text-cyan-400 hover:underline">CRISP-DM</a></span>
         </div>
       </div>
     </div>
@@ -242,7 +235,7 @@ tailwind.config = {
     </div>
 
     <!-- Navigation cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-4">
       <a href="#methodology" class="stat-card group bg-gray-900 border border-gray-800 rounded-xl p-5 hover:border-cyan-500/40 cursor-pointer block">
         <div class="text-2xl mb-2 text-cyan-500">&#9670;</div>
         <h3 class="font-semibold text-white mb-1 group-hover:text-cyan-400 transition-colors">Methodology</h3>
@@ -268,10 +261,20 @@ tailwind.config = {
         <h3 class="font-semibold text-white mb-1 group-hover:text-emerald-400 transition-colors">Generative Models</h3>
         <p class="text-xs text-gray-500">TimeGAN, CVAE, LDM: how each generates synthetic EEG and their trade-offs</p>
       </a>
-      <a href="#status" class="stat-card group bg-gray-900 border border-gray-800 rounded-xl p-5 hover:border-rose-500/40 cursor-pointer block">
-        <div class="text-rose-400 font-bold text-2xl">7</div>
-        <div class="text-white font-semibold text-sm group-hover:text-rose-400 transition-colors">Experiments</div>
-        <p class="text-xs text-gray-500">7 experiments, implementation timeline, and current progress</p>
+      <a href="#design" class="stat-card group bg-gray-900 border border-gray-800 rounded-xl p-5 hover:border-cyan-500/40 cursor-pointer block">
+        <div class="text-2xl mb-2 text-cyan-500">&#9881;</div>
+        <h3 class="font-semibold text-white mb-1 group-hover:text-cyan-400 transition-colors">Design Decisions</h3>
+        <p class="text-xs text-gray-500">Hyperparameters, architecture choices, and their justifications</p>
+      </a>
+      <a href="#roadmap" class="stat-card group bg-gray-900 border border-gray-800 rounded-xl p-5 hover:border-rose-500/40 cursor-pointer block">
+        <div class="text-2xl mb-2 text-rose-400">&#9776;</div>
+        <h3 class="font-semibold text-white mb-1 group-hover:text-rose-400 transition-colors">Roadmap</h3>
+        <p class="text-xs text-gray-500">7 experiments (E1&ndash;E7), timeline, and protocol rules</p>
+      </a>
+      <a href="#status" class="stat-card group bg-gray-900 border border-gray-800 rounded-xl p-5 hover:border-iscte-500/40 cursor-pointer block">
+        <div class="text-2xl mb-2 text-iscte-400">&#9632;</div>
+        <h3 class="font-semibold text-white mb-1 group-hover:text-cyan-400 transition-colors">Status</h3>
+        <p class="text-xs text-gray-500">Implementation progress and experimental results so far</p>
       </a>
       <a href="#glossary" class="stat-card group bg-gray-900 border border-gray-800 rounded-xl p-5 hover:border-sky-500/40 cursor-pointer block">
         <div class="text-2xl mb-2 text-sky-400">&#9776;</div>
@@ -372,7 +375,7 @@ tailwind.config = {
         <p class="text-sm text-gray-400 mb-3">All experiments use <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> <a href="#gl-cv" class="text-cyan-600 hover:text-cyan-400 hover:underline">cross-validation</a> with a <a href="#gl-frozen" class="text-cyan-600 hover:text-cyan-400 hover:underline">frozen</a> 1D-CNN detector. Synthetic data enters training only - never validation or test.</p>
         <div class="space-y-2 text-sm">
           <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Primary metric:</strong> <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a> - sensitive to minority class performance</span></div>
-          <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Secondary:</strong> <a href="#gl-auroc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUROC</a>, F1 at optimal threshold, sensitivity at 95% specificity</span></div>
+          <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Secondary:</strong> <a href="#gl-auroc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUROC</a>, <a href="#gl-f1" class="text-cyan-600 hover:text-cyan-400 hover:underline">F1</a> at optimal threshold, <a href="#gl-sens95spec" class="text-cyan-600 hover:text-cyan-400 hover:underline">sensitivity at 95% specificity</a></span></div>
           <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Fidelity:</strong> <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a> comparison per frequency band, <a href="#gl-kl" class="text-cyan-600 hover:text-cyan-400 hover:underline">KL divergence</a> per band, <a href="#gl-discriminative" class="text-cyan-600 hover:text-cyan-400 hover:underline">discriminative score</a> (real-vs-synthetic classifier &rarr; 0.5 = indistinguishable)</span></div>
           <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Utility:</strong> <a href="#gl-tstr" class="text-cyan-600 hover:text-cyan-400 hover:underline">TSTR</a> evaluation - synthetic-only training as a standalone quality check</span></div>
           <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Statistical:</strong> <a href="#gl-wilcoxon" class="text-cyan-600 hover:text-cyan-400 hover:underline">Wilcoxon signed-rank test</a> across LOPO folds</span></div>
@@ -426,7 +429,7 @@ tailwind.config = {
         <div class="text-3xl font-bold text-cyan-500" data-stat="total-files">683</div><div class="text-xs text-gray-500 mt-1">EDF Files</div>
       </div>
       <div class="stat-card bg-gray-900 border border-gray-800 rounded-xl p-4 text-center flex flex-col justify-center">
-        <div class="text-3xl font-bold text-rsch-400" data-stat="seizure-files">141</div><div class="text-xs text-gray-500 mt-1">Seizure Files</div>
+        <div class="text-3xl font-bold text-rsch-400" data-stat="seizure-files">138</div><div class="text-xs text-gray-500 mt-1">Seizure Files</div>
       </div>
       <div class="stat-card bg-gray-900 border border-gray-800 rounded-xl p-4 text-center flex flex-col justify-center">
         <div class="text-3xl font-bold text-white" data-stat="sample-rate">256</div><div class="text-xs text-gray-500 mt-1">Hz Sampling</div>
@@ -435,7 +438,7 @@ tailwind.config = {
         <div class="text-3xl font-bold text-white" data-stat="n-channels">23</div><div class="text-xs text-gray-500 mt-1">EEG Channels</div>
       </div>
       <div class="stat-card bg-gray-900 border border-gray-800 rounded-xl p-4 text-center flex flex-col justify-center">
-        <div class="text-3xl font-bold text-amber-400" data-stat="seizure-rate">20.6%</div><div class="text-xs text-gray-500 mt-1">Seizure File Rate</div>
+        <div class="text-3xl font-bold text-amber-400" data-stat="seizure-rate">20.2%</div><div class="text-xs text-gray-500 mt-1">Files with Seizures</div><div class="text-xs text-gray-600">&lt;0.4% of recording time</div>
       </div>
     </div>
 
@@ -1151,7 +1154,7 @@ tailwind.config = {
             <tr><td class="py-2 px-3 text-gray-400">Sample diversity</td><td class="py-2 px-3 text-center text-amber-400">Variable</td><td class="py-2 px-3 text-center text-amber-400">Moderate</td><td class="py-2 px-3 text-center text-emerald-400">High</td></tr>
             <tr><td class="py-2 px-3 text-gray-400">Training stability</td><td class="py-2 px-3 text-center text-red-400">Unstable</td><td class="py-2 px-3 text-center text-emerald-400">Stable</td><td class="py-2 px-3 text-center text-emerald-400">Stable</td></tr>
             <tr><td class="py-2 px-3 text-gray-400">Inference speed</td><td class="py-2 px-3 text-center text-emerald-400">Fast</td><td class="py-2 px-3 text-center text-emerald-400">Fast</td><td class="py-2 px-3 text-center text-red-400">Slow</td></tr>
-            <tr><td class="py-2 px-3 text-gray-400">Temporal coherence</td><td class="py-2 px-3 text-center text-emerald-400">High ✓</td><td class="py-2 px-3 text-center text-amber-400">Moderate</td><td class="py-2 px-3 text-center text-emerald-400">High</td></tr>
+            <tr><td class="py-2 px-3 text-gray-400">Temporal coherence</td><td class="py-2 px-3 text-center text-emerald-400">High</td><td class="py-2 px-3 text-center text-amber-400">Moderate</td><td class="py-2 px-3 text-center text-emerald-400">High</td></tr>
             <tr><td class="py-2 px-3 text-gray-400">Patient conditioning</td><td class="py-2 px-3 text-center text-emerald-400">Yes</td><td class="py-2 px-3 text-center text-emerald-400">Yes (label)</td><td class="py-2 px-3 text-center text-emerald-400">Yes (guided)</td></tr>
             <tr><td class="py-2 px-3 text-gray-400">EEG literature depth</td><td class="py-2 px-3 text-center text-emerald-400">Most mature</td><td class="py-2 px-3 text-center text-amber-400">Moderate</td><td class="py-2 px-3 text-center text-cyan-500">Growing fast</td></tr>
             <tr><td class="py-2 px-3 text-gray-400">Mode collapse risk</td><td class="py-2 px-3 text-center text-red-400">High</td><td class="py-2 px-3 text-center text-emerald-400">Low</td><td class="py-2 px-3 text-center text-emerald-400">Low</td></tr>
@@ -1514,7 +1517,7 @@ tailwind.config = {
               <div class="space-y-2 text-xs text-gray-400">
                 <div class="flex gap-2"><span class="text-gray-500 shrink-0">1.</span><span><strong class="text-gray-300">Detector:</strong> A lightweight 1-D CNN classifier (3 conv blocks + dense head) serves as the downstream detector. Intentionally simple - the goal is to measure augmentation benefit, not maximise absolute performance.</span></div>
                 <div class="flex gap-2"><span class="text-gray-500 shrink-0">2.</span><span><strong class="text-gray-300">Baseline training:</strong> Real data only (no augmentation), with class-weighted cross-entropy loss to partially handle imbalance.</span></div>
-                <div class="flex gap-2"><span class="text-gray-500 shrink-0">3.</span><span><strong class="text-gray-300">Evaluation:</strong> <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">Leave-one-patient-out cross-validation (LOPO-CV)</a>. Per-patient and aggregate: <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a> (primary), <a href="#gl-auroc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUROC</a>, F1, sensitivity at 95% specificity.</span></div>
+                <div class="flex gap-2"><span class="text-gray-500 shrink-0">3.</span><span><strong class="text-gray-300">Evaluation:</strong> <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">Leave-one-patient-out cross-validation (LOPO-CV)</a>. Per-patient and aggregate: <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a> (primary), <a href="#gl-auroc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUROC</a>, <a href="#gl-f1" class="text-cyan-600 hover:text-cyan-400 hover:underline">F1</a>, <a href="#gl-sens95spec" class="text-cyan-600 hover:text-cyan-400 hover:underline">sensitivity at 95% specificity</a>.</span></div>
                 <div class="flex gap-2"><span class="text-gray-500 shrink-0">4.</span><span><strong class="text-gray-300">Anchor numbers:</strong> The &ldquo;no augmentation&rdquo; baseline - the floor all generative methods must beat.</span></div>
                 <div class="flex gap-2"><span class="text-gray-500 shrink-0">5.</span><span><strong class="text-gray-300">SMOTE control:</strong> <a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a> oversampling as a classical augmentation baseline for comparison.</span></div>
               </div>
@@ -1915,7 +1918,7 @@ tailwind.config = {
               <td class="py-2 font-semibold text-white">0.8767 &plusmn; 0.0353</td>
             </tr>
             <tr class="border-b border-gray-800/50">
-              <td class="py-2 pr-4 text-gray-300 font-medium"><a href="#gl-f1" class="text-cyan-600 hover:text-cyan-400 hover:underline">F1</a> (optimal)</td>
+              <td class="py-2 pr-4 text-gray-300 font-medium"><a href="#gl-f1" class="text-cyan-600 hover:text-cyan-400 hover:underline">F1</a></td>
               <td class="py-2 pr-4">0.1794</td><td class="py-2 pr-4">0.3281</td><td class="py-2 pr-4">0.3536</td>
               <td class="py-2 font-semibold text-white">0.2870 &plusmn; 0.0779</td>
             </tr>
@@ -1983,7 +1986,7 @@ tailwind.config = {
                 <td class="py-2 font-semibold text-white">0.5459 &plusmn; 0.1348</td>
               </tr>
               <tr class="border-b border-gray-800/50">
-                <td class="py-2 pr-4 text-gray-300 font-medium"><a href="#gl-f1" class="text-cyan-600 hover:text-cyan-400 hover:underline">F1</a> (optimal)</td>
+                <td class="py-2 pr-4 text-gray-300 font-medium"><a href="#gl-f1" class="text-cyan-600 hover:text-cyan-400 hover:underline">F1</a></td>
                 <td class="py-2 pr-4">0.3118</td><td class="py-2 pr-4">0.0307</td><td class="py-2 pr-4">0.1589</td>
                 <td class="py-2 font-semibold text-white">0.1671 &plusmn; 0.1150</td>
               </tr>
@@ -2037,7 +2040,7 @@ tailwind.config = {
                 <td class="py-2 font-semibold text-white">0.5558 &plusmn; 0.0341</td>
               </tr>
               <tr class="border-b border-gray-800/50">
-                <td class="py-2 pr-4 text-gray-300 font-medium"><a href="#gl-f1" class="text-cyan-600 hover:text-cyan-400 hover:underline">F1</a> (optimal)</td>
+                <td class="py-2 pr-4 text-gray-300 font-medium"><a href="#gl-f1" class="text-cyan-600 hover:text-cyan-400 hover:underline">F1</a></td>
                 <td class="py-2 pr-4">0.3873</td><td class="py-2 pr-4">0.0280</td><td class="py-2 pr-4">0.2829</td>
                 <td class="py-2 font-semibold text-white">0.2327 &plusmn; 0.1510</td>
               </tr>
@@ -2500,9 +2503,9 @@ tailwind.config = {
               </tr>
               <tr class="border-b border-gray-800/50">
                 <td class="py-3 pr-4 text-gray-300 font-medium">Secondary metrics</td>
-                <td class="py-3 pr-4"><a href="#gl-auroc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUROC</a>, F1, sensitivity@95%spec</td>
+                <td class="py-3 pr-4"><a href="#gl-auroc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUROC</a>, <a href="#gl-f1" class="text-cyan-600 hover:text-cyan-400 hover:underline">F1</a>, <a href="#gl-sens95spec" class="text-cyan-600 hover:text-cyan-400 hover:underline">Sens.&nbsp;@&nbsp;95%&nbsp;Spec.</a></td>
 
-                <td class="py-3">AUROC for comparability with prior EEG work (<a href="#cite-zhao2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Zhao et al., 2022</a>; <a href="#cite-chaibi2024" class="text-cyan-600 hover:text-cyan-400 hover:underline">Chaibi et al., 2024</a>). F1 at optimal threshold for a single operating-point summary. Sensitivity at 95% specificity as a clinically anchored trade-off.</td>
+                <td class="py-3">AUROC for comparability with prior EEG work (<a href="#cite-zhao2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Zhao et al., 2022</a>; <a href="#cite-chaibi2024" class="text-cyan-600 hover:text-cyan-400 hover:underline">Chaibi et al., 2024</a>). <a href="#gl-f1" class="text-cyan-600 hover:text-cyan-400 hover:underline">F1</a> at optimal threshold for a single operating-point summary. <a href="#gl-sens95spec" class="text-cyan-600 hover:text-cyan-400 hover:underline">Sensitivity at 95% specificity</a> as a clinically anchored trade-off.</td>
               </tr>
               <tr class="border-b border-gray-800/50">
                 <td class="py-3 pr-4 text-gray-300 font-medium">Seeds</td>
@@ -2674,6 +2677,11 @@ tailwind.config = {
           <div class="font-semibold text-cyan-500 mb-1">F1 Score</div>
           <p class="text-gray-400">The harmonic mean of precision and recall: F1 = 2 &times; (precision &times; recall) / (precision + recall). Provides a single number that balances false positives and false negatives. Reported here at the optimal classification threshold (the threshold that maximizes F1 on the validation set). A secondary metric alongside <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a>, useful for comparing operating points across experiments.</p>
           <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">F1 is a single grade that punishes you for <em>both</em> types of mistakes: crying wolf (flagging normal windows as seizures) and missing the real thing (not flagging actual seizures). A perfect F1 of 1.0 means you never make either mistake. It forces a balance &mdash; you can&rsquo;t cheat by just flagging everything or nothing.</p></details>
+        </div>
+        <div id="gl-sens95spec" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
+          <div class="font-semibold text-cyan-500 mb-1">Sensitivity @ 95% Specificity</div>
+          <p class="text-gray-400">The sensitivity (recall) of the model when its decision threshold is set so that specificity equals 95%. <strong class="text-white">Specificity = 95%</strong> means 95% of interictal windows are correctly classified as normal (only 5% false alarms). <strong class="text-white">Sensitivity</strong> then measures how many actual seizure windows the model catches at that false-alarm rate. This provides a single clinically anchored operating point: in practice, a detector with too many false alarms is unusable, so fixing specificity at a high level and measuring sensitivity answers &ldquo;how good is the detector at finding seizures when we limit false alarms to a tolerable rate?&rdquo;</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Imagine a smoke detector. If it goes off every time you cook toast (too many false alarms), you&rsquo;ll eventually ignore it. &ldquo;95% specificity&rdquo; means we set the alarm so it only goes off falsely 5% of the time. Then we ask: at that setting, what percentage of real fires does it catch? That&rsquo;s the sensitivity. A model with Sens. @ 95% Spec. = 0.60 catches 60% of real seizures while keeping false alarms at 5%.</p></details>
         </div>
       </div>
     </div>
