@@ -24,7 +24,7 @@ Usage:
     # E1: Full LOPO evaluation
     results = train_lopo(experiment="e1", seeds=[42, 123, 456])
 
-    # E2b: SMOTE augmentation
+    # E2: SMOTE augmentation
     results = train_single_split(experiment="e2", augmentation="smote", seed=42)
 """
 
@@ -688,10 +688,10 @@ Examples:
   # E1 baseline — full LOPO (final results)
   python train.py --experiment e1 --mode lopo
 
-  # E2b: SMOTE augmentation — single-split
+  # E2: SMOTE augmentation — single-split
   python train.py --experiment e2 --augmentation smote --mode single
 
-  # E2c: ADASYN augmentation — single-split
+  # E2: ADASYN augmentation — single-split
   python train.py --experiment e2 --augmentation adasyn --mode single
 
   # Specific seeds and folds

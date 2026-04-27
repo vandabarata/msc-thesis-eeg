@@ -126,7 +126,7 @@ tailwind.config = {
 
 <!-- Navigation -->
 <nav class="fixed top-0 w-full bg-[#0c0e1a]/90 backdrop-blur-md z-50" style="box-shadow: 0 1px 0 rgba(13,40,194,0.3), 0 2px 0 rgba(20,191,184,0.15)">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center h-20 gap-2">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center h-20 gap-2">
       <div class="shrink-0">
         <!-- ISCTE-IUL / ISTA logo -->
         <a href="#home" class="flex items-center gap-3 hover:opacity-80 transition-opacity" data-page="home">
@@ -141,6 +141,7 @@ tailwind.config = {
         <a href="#cleaning" class="nav-link px-1.5 py-1 text-gray-400 hover:text-cyan-500 transition-colors font-medium" data-page="cleaning">Cleaning</a>
         <a href="#preprocessing" class="nav-link px-1.5 py-1 text-gray-400 hover:text-cyan-500 transition-colors font-medium" data-page="preprocessing">Preprocessing</a>
         <a href="#models" class="nav-link px-1.5 py-1 text-gray-400 hover:text-cyan-500 transition-colors font-medium" data-page="models">Models</a>
+        <a href="#design" class="nav-link px-1.5 py-1 text-gray-400 hover:text-cyan-500 transition-colors font-medium" data-page="design">Design</a>
         <a href="#roadmap" class="nav-link px-1.5 py-1 text-gray-400 hover:text-cyan-500 transition-colors font-medium" data-page="roadmap">Roadmap</a>
         <a href="#status" class="nav-link px-1.5 py-1 text-gray-400 hover:text-cyan-500 transition-colors font-medium" data-page="status">Status</a>
         <a href="#glossary" class="nav-link px-1.5 py-1 text-gray-400 hover:text-cyan-500 transition-colors font-medium" data-page="glossary">Glossary</a>
@@ -163,6 +164,7 @@ tailwind.config = {
   <a href="#cleaning" class="nav-link mobile-nav-link block py-3 text-gray-400 hover:text-cyan-500 transition-colors font-medium border-b border-gray-800/50 text-sm" data-page="cleaning">Cleaning</a>
   <a href="#preprocessing" class="nav-link mobile-nav-link block py-3 text-gray-400 hover:text-cyan-500 transition-colors font-medium border-b border-gray-800/50 text-sm" data-page="preprocessing">Preprocessing</a>
   <a href="#models" class="nav-link mobile-nav-link block py-3 text-gray-400 hover:text-cyan-500 transition-colors font-medium border-b border-gray-800/50 text-sm" data-page="models">Models</a>
+  <a href="#design" class="nav-link mobile-nav-link block py-3 text-gray-400 hover:text-cyan-500 transition-colors font-medium border-b border-gray-800/50 text-sm" data-page="design">Design</a>
   <a href="#roadmap" class="nav-link mobile-nav-link block py-3 text-gray-400 hover:text-cyan-500 transition-colors font-medium border-b border-gray-800/50 text-sm" data-page="roadmap">Roadmap</a>
   <a href="#status" class="nav-link mobile-nav-link block py-3 text-gray-400 hover:text-cyan-500 transition-colors font-medium border-b border-gray-800/50 text-sm" data-page="status">Status</a>
   <a href="#glossary" class="nav-link mobile-nav-link block py-3 text-gray-400 hover:text-cyan-500 transition-colors font-medium border-b border-gray-800/50 text-sm" data-page="glossary">Glossary</a>
@@ -179,10 +181,10 @@ tailwind.config = {
     <div class="absolute top-0 left-0 right-0 h-96 opacity-5" style="mask-image: linear-gradient(to bottom, black, transparent); -webkit-mask-image: linear-gradient(to bottom, black, transparent); background-image: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2250%22><path d=%22M0 25 Q10 10 20 25 T40 25 T60 25 T80 25 T100 25%22 fill=%22none%22 stroke=%22white%22 stroke-width=%221%22/></svg>'); background-size: 100px 50px;"></div>
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 lg:pt-8 pb-4">
       <div>
-        <div class="inline-flex items-center gap-2 bg-iscte-500/10 border border-iscte-500/20 rounded-full px-3 py-1.5 text-cyan-500 text-xs sm:text-sm mb-3 sm:mb-3">
+        <a href="#status" class="inline-flex items-center gap-2 bg-iscte-500/10 border border-iscte-500/20 rounded-full px-3 py-1.5 text-cyan-500 text-xs sm:text-sm mb-3 sm:mb-3 hover:bg-iscte-500/20 transition-colors">
           <span class="w-2 h-2 bg-iscte-400 rounded-full animate-pulse shrink-0"></span>
-          MSc Thesis &middot; In Progress
-        </div>
+          MSc Thesis &middot; Running ~60%
+        </a>
         <h1 class="text-3xl sm:text-4xl lg:text-6xl font-extrabold text-white leading-tight mb-3 sm:mb-3">
           Synthetic Data in Healthcare:<br>
           <span class="bg-gradient-to-r from-iscte-400 to-rsch-400 bg-clip-text text-transparent">A Focus on EEG Signals</span>
@@ -1044,8 +1046,8 @@ tailwind.config = {
            <span class="text-white font-semibold text-xs">TimeGAN</span>
            <span class="text-gray-500 text-xs">(<a href="#cite-yoon2019" class="text-cyan-600 hover:text-cyan-400 hover:underline">Yoon et al., 2019</a>)</span>
          </div>
-         <p class="text-xs text-gray-400 mb-3 leading-relaxed">TimeGAN adds a <em>supervised loss</em> that forces the generator to respect step-wise temporal dynamics, solving the main weakness of vanilla GANs on time-series. It jointly trains an embedder, recovery, generator, and discriminator in a shared <a href="#gl-latentspace" class="text-cyan-600 hover:text-cyan-400 hover:underline">latent space</a> — making it the strongest GAN-family baseline for multi-channel EEG synthesis.</p>
-         <p class="text-xs text-gray-500 mb-3 leading-relaxed"><strong class="text-gray-400">Why not cGAN or WGAN-GP?</strong> TimeGAN's supervised loss directly targets temporal coherence, which is critical for EEG. WGAN-GP improves training stability but does not specifically address time-series structure.</p>
+         <p class="text-xs text-gray-400 mb-3 leading-relaxed"><a href="#gl-timegan" class="text-cyan-600 hover:text-cyan-400 hover:underline">TimeGAN</a> adds a <em>supervised <a href="#gl-loss" class="text-cyan-600 hover:text-cyan-400 hover:underline">loss</a></em> that forces the generator to respect step-wise temporal dynamics, solving the main weakness of vanilla <a href="#gl-gan" class="text-cyan-600 hover:text-cyan-400 hover:underline">GANs</a> on time-series. It jointly trains an embedder, recovery, generator, and discriminator in a shared <a href="#gl-latentspace" class="text-cyan-600 hover:text-cyan-400 hover:underline">latent space</a> — making it the strongest GAN-family baseline for multi-channel <a href="#gl-eeg" class="text-cyan-600 hover:text-cyan-400 hover:underline">EEG</a> synthesis.</p>
+         <p class="text-xs text-gray-500 mb-3 leading-relaxed"><strong class="text-gray-400">Why not cGAN or WGAN-GP?</strong> TimeGAN's supervised <a href="#gl-loss" class="text-cyan-600 hover:text-cyan-400 hover:underline">loss</a> directly targets temporal coherence, which is critical for EEG. WGAN-GP improves training stability but does not specifically address time-series structure.</p>
         <div class="space-y-2 text-xs mb-3">
           <div class="font-semibold text-gray-300">Relevant EEG literature</div>
           <div class="flex gap-2"><span class="text-rsch-400">&#9679;</span><span class="text-gray-400"><em><a href="#cite-boukhennoufa2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Boukhennoufa et al., 2023</a></em> - WGAN-GP for EEG data augmentation in motor-imagery BCI; significant downstream improvement.</span></div>
@@ -1258,7 +1260,7 @@ tailwind.config = {
             <span class="font-semibold text-white text-sm">Non-Stationarity</span>
           </div>
           <p class="text-xs text-gray-400 leading-relaxed">EEG is non-stationary at multiple time-scales: within a recording, across sessions, and across the montage changes seen in 10 patients. Generative models must capture temporal dynamics, not just spectral distributions.</p>
-          <div class="mt-auto pt-3 text-xs text-rsch-400">TimeGAN uses GRU for temporal dynamics; CVAE/LDM use 1D-Conv</div>
+          <div class="mt-auto pt-3 text-xs text-rsch-400"><a href="#gl-timegan" class="text-cyan-600 hover:text-cyan-400 hover:underline">TimeGAN</a> uses <a href="#gl-gru" class="text-cyan-600 hover:text-cyan-400 hover:underline">GRU</a> for temporal dynamics; <a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a>/<a href="#gl-ldm" class="text-cyan-600 hover:text-cyan-400 hover:underline">LDM</a> use 1D-Conv</div>
         </div>
 
         <div class="bg-gray-900 border border-cyan-500/30 rounded-xl p-5 flex flex-col">
@@ -1276,7 +1278,7 @@ tailwind.config = {
             <span class="font-semibold text-white text-sm">Synthetic Data Leakage</span>
           </div>
           <p class="text-xs text-gray-400 leading-relaxed">If patient identity is shared between train/test sets, evaluation becomes optimistic. With 24 cases and chb01/chb21 being the same subject, any patient-level <a href="#gl-cv" class="text-cyan-600 hover:text-cyan-400 hover:underline">cross-validation</a> split must keep both cases together. Synthetic data generated from chb01 must not appear in a test set that also evaluates chb21.</p>
-          <div class="mt-auto pt-3 text-xs text-emerald-400">Enforced in code: patient-level splits, synthetic blocked from val/test</div>
+          <div class="mt-auto pt-3 text-xs text-emerald-400">Enforced in code: patient-level splits, synthetic blocked from validation/test</div>
         </div>
 
         <div class="bg-gray-900 border border-sky-500/30 rounded-xl p-5 flex flex-col">
@@ -1328,9 +1330,8 @@ tailwind.config = {
               </div>
               <p class="text-xs text-gray-400 mb-3">Establishes the bar that generators must clear. Any claim that synthetic EEG &ldquo;helps&rdquo; must beat standard oversampling, not just the raw baseline. <a href="#cite-carrle2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Carrle et al., 2023</a> showed noise augmentation matched GANs; <a href="#cite-zhao2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Zhao et al., 2022</a> showed CB focal loss was competitive.</p>
               <div class="flex flex-wrap gap-2 text-xs">
-                <span class="px-2 py-1 bg-gray-800 rounded text-gray-400">E2a: Class-weighted loss (= E1)</span>
-                <span class="px-2 py-1 bg-gray-800 rounded text-gray-400">E2b: SMOTE (k=5)</span>
-                <span class="px-2 py-1 bg-gray-800 rounded text-gray-400">E2c: ADASYN</span>
+                <span class="px-2 py-1 bg-gray-800 rounded text-gray-400">SMOTE (k=5)</span>
+                <span class="px-2 py-1 bg-gray-800 rounded text-gray-400">ADASYN</span>
               </div>
             </div>
           </div>
@@ -1348,7 +1349,7 @@ tailwind.config = {
               </div>
               <p class="text-xs text-gray-400 mb-3">First generative model. TimeGAN (<a href="#cite-yoon2019" class="text-cyan-600 hover:text-cyan-400 hover:underline">Yoon et al., 2019</a>) models temporal dynamics via supervised embedding-recovery. Trained on ictal windows from training patients only. <a href="#gl-syntheticratio" class="text-cyan-600 hover:text-cyan-400 hover:underline">Synthetic ratio</a> ablation: 25%, 50%, 100%, 200%. <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a> comparison mandatory.</p>
               <div class="flex flex-wrap gap-2 text-xs">
-                <span class="px-2 py-1 bg-gray-800 rounded text-gray-400">TimeGAN (GRU-based)</span>
+                <span class="px-2 py-1 bg-gray-800 rounded text-gray-400"><a href="#gl-timegan" class="text-gray-400 hover:text-cyan-400 hover:underline">TimeGAN</a> (<a href="#gl-gru" class="text-gray-400 hover:text-cyan-400 hover:underline">GRU</a>-based)</span>
                 <span class="px-2 py-1 bg-gray-800 rounded text-gray-400">Ratio sweep: 25/50/100/200%</span>
                 <span class="px-2 py-1 bg-gray-800 rounded text-gray-400"><a href="#gl-psd" class="text-gray-400 hover:text-cyan-400 hover:underline">PSD</a> per band</span>
                 <span class="px-2 py-1 bg-gray-800 rounded text-gray-400"><a href="#gl-discriminative" class="text-gray-400 hover:text-cyan-400 hover:underline">Discriminative score</a></span>
@@ -1540,7 +1541,7 @@ tailwind.config = {
               <div class="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">Steps</div>
               <div class="space-y-2 text-xs text-gray-400">
                 <div class="flex gap-2"><span class="text-rsch-400 shrink-0">1.</span><span><strong class="text-gray-300">Architecture:</strong> <a href="#gl-timegan" class="text-cyan-600 hover:text-cyan-400 hover:underline">TimeGAN</a> (<a href="#gl-gru" class="text-cyan-600 hover:text-cyan-400 hover:underline">GRU</a>-based, input: 23 channels &times; 1024 time steps).</span></div>
-                <div class="flex gap-2"><span class="text-rsch-400 shrink-0">2.</span><span><strong class="text-gray-300">Training &amp; tuning:</strong> Initial iteration on a single patient (chb01). Hyperparameters: learning rate, batch size, embedding dimension, GRU hidden size. <a href="#gl-modecollapse" class="text-cyan-600 hover:text-cyan-400 hover:underline">Mode collapse</a> monitored via sample diversity metric.</span></div>
+                <div class="flex gap-2"><span class="text-rsch-400 shrink-0">2.</span><span><strong class="text-gray-300">Training &amp; tuning:</strong> Initial iteration on a single patient (chb01). Hyperparameters: learning rate, batch size, embedding dimension, <a href="#gl-gru" class="text-cyan-600 hover:text-cyan-400 hover:underline">GRU</a> hidden size. <a href="#gl-modecollapse" class="text-cyan-600 hover:text-cyan-400 hover:underline">Mode collapse</a> monitored via sample diversity metric.</span></div>
                 <div class="flex gap-2"><span class="text-rsch-400 shrink-0">3.</span><span><strong class="text-gray-300">Scaling:</strong> Training expanded to all training patients - one model per patient (patient-specific) and one pooled model (cross-patient).</span></div>
                 <div class="flex gap-2"><span class="text-rsch-400 shrink-0">4.</span><span><strong class="text-gray-300">Quality evaluation:</strong> <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a> comparison (per channel and average), <a href="#gl-discriminative" class="text-cyan-600 hover:text-cyan-400 hover:underline">discriminative score</a>, inter-channel coherence, <a href="#gl-tsne" class="text-cyan-600 hover:text-cyan-400 hover:underline">t-SNE</a> of real vs synthetic windows in feature space.</span></div>
                 <div class="flex gap-2"><span class="text-rsch-400 shrink-0">5.</span><span><strong class="text-gray-300">TSTR &amp; augmentation:</strong> <a href="#gl-tstr" class="text-cyan-600 hover:text-cyan-400 hover:underline">TSTR</a> (Train on Synthetic, Test on Real): E1 classifier trained on synthetic ictal + real interictal, compared to E1 baseline. Augmented run: real + synthetic combined (100% <a href="#gl-syntheticratio" class="text-cyan-600 hover:text-cyan-400 hover:underline">synthetic ratio</a>).</span></div>
@@ -1732,6 +1733,91 @@ tailwind.config = {
         </div>
       </div>
     </div>
+
+    <!-- Getting Started -->
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mt-3">
+      <h3 class="font-semibold text-white mb-1 text-base">Getting Started: Recommended Order</h3>
+      <p class="text-gray-500 text-xs mb-3">Each step builds on the previous one. The venv must be active: <code class="text-cyan-500">source .venv/bin/activate</code></p>
+
+      <div class="space-y-3">
+        <!-- Step 1 -->
+        <div class="flex gap-4">
+          <div class="shrink-0 w-8 h-8 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-sm font-bold">1</div>
+          <div class="min-w-0">
+            <div class="flex items-start gap-2 flex-wrap">
+              <span class="text-white font-medium text-sm">E1 Baseline</span>
+              <span class="text-xs text-gray-500">~15&ndash;30 min</span>
+            </div>
+            <p class="text-gray-400 text-xs mt-1">The baseline everything else is compared against. Trains the 49K-param detector on real data only. Expected low sensitivity (~30&ndash;50%) and high specificity (~95%+) - confirming the imbalance problem is real.</p>
+            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">python -m training.train --experiment e1 --mode single --seeds 42 123 456</code>
+          </div>
+        </div>
+        <!-- Step 2 -->
+        <div class="flex gap-4">
+          <div class="shrink-0 w-8 h-8 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-sm font-bold">2</div>
+          <div class="min-w-0">
+            <div class="flex items-start gap-2 flex-wrap">
+              <span class="text-white font-medium text-sm">E2 Controls (SMOTE + ADASYN)</span>
+              <span class="text-xs text-gray-500">~15&ndash;40 min each</span>
+            </div>
+            <p class="text-gray-400 text-xs mt-1">Non-synthetic baselines. Any generator must beat these to be useful. <a href="#cite-carrle2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Carrle et al., 2023</a> showed noise augmentation matched GANs in some cases.</p>
+            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">python -m training.train --experiment e2 --augmentation smote --mode single --seeds 42 123 456</code>
+            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-1 overflow-x-auto">python -m training.train --experiment e2 --augmentation adasyn --mode single --seeds 42 123 456</code>
+          </div>
+        </div>
+        <!-- Step 3 -->
+        <div class="flex gap-4">
+          <div class="shrink-0 w-8 h-8 rounded-full bg-rsch-500/10 border border-rsch-500/30 flex items-center justify-center text-rsch-400 text-sm font-bold">3</div>
+          <div class="min-w-0">
+            <div class="flex items-start gap-2 flex-wrap">
+              <span class="text-white font-medium text-sm">E3 TimeGAN</span>
+              <span class="text-xs text-gray-500">~3&ndash;8 hours</span>
+            </div>
+            <p class="text-gray-400 text-xs mt-1">First generator (independent, no dependencies). <a href="#gl-gru" class="text-cyan-600 hover:text-cyan-400 hover:underline"><code class="text-cyan-500">GRU</code></a>-based with 3 sequential training phases (autoencoder, supervisor, joint adversarial). Early results inform whether the generative approach is promising.</p>
+            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">python -m training.generate --model timegan --ratio 1.0 --seed 42</code>
+            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-1 overflow-x-auto">python -m training.train --experiment e3 --synthetic-windows results/e3/seed_42/single_split/synthetic_ratio_1.00.npz --mode single --seeds 42 123 456</code>
+          </div>
+        </div>
+        <!-- Step 4 -->
+        <div class="flex gap-4">
+          <div class="shrink-0 w-8 h-8 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-sm font-bold">4</div>
+          <div class="min-w-0">
+            <div class="flex items-start gap-2 flex-wrap">
+              <span class="text-white font-medium text-sm">E4 CVAE</span>
+              <span class="text-xs text-cyan-400 font-medium">Fastest generator</span>
+              <span class="text-xs text-gray-500">~1&ndash;3 hours</span>
+            </div>
+            <p class="text-gray-400 text-xs mt-1">All convolutions (no recurrence, no multi-phase training). Most stable training (no adversarial dynamics). Also produces the encoder checkpoint needed for the LDM next.</p>
+            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">python -m training.generate --model cvae --ratio 1.0 --seed 42</code>
+            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-1 overflow-x-auto">python -m training.train --experiment e4 --synthetic-windows results/e4/seed_42/single_split/synthetic_ratio_1.00.npz --mode single --seeds 42 123 456</code>
+          </div>
+        </div>
+        <!-- Step 5 -->
+        <div class="flex gap-4">
+          <div class="shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-sm font-bold">5</div>
+          <div class="min-w-0">
+            <div class="flex items-start gap-2 flex-wrap">
+              <span class="text-white font-medium text-sm">E5 LDM</span>
+              <span class="text-xs text-gray-500">~2&ndash;4 hours (after CVAE)</span>
+            </div>
+            <p class="text-gray-400 text-xs mt-1">Requires the CVAE checkpoint from Step 4. The UNet denoiser trains in <a href="#gl-latentspace" class="text-cyan-600 hover:text-cyan-400 hover:underline">latent space</a> (small and fast), but DDPM sampling is slow. DDIM (50 steps) is used by default for generation.</p>
+            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">python -m training.generate --model ldm --cvae-checkpoint results/e4/seed_42/single_split/cvae.pt --ratio 1.0 --seed 42</code>
+            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-1 overflow-x-auto">python -m training.train --experiment e5 --synthetic-windows results/e5/seed_42/single_split/synthetic_ratio_1.00.npz --mode single --seeds 42 123 456</code>
+          </div>
+        </div>
+        <!-- Step 6 -->
+        <div class="flex gap-4">
+          <div class="shrink-0 w-8 h-8 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-sm font-bold">6</div>
+          <div class="min-w-0">
+            <div class="flex items-start gap-2 flex-wrap">
+              <span class="text-white font-medium text-sm">Full ratios + seeds + LOPO</span>
+            </div>
+            <p class="text-gray-400 text-xs mt-1">Full run with all 4 ratios (25%, 50%, 100%, 200%), 3 seeds (42, 123, 456), and full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> <a href="#gl-cv" class="text-cyan-600 hover:text-cyan-400 hover:underline">cross-validation</a> (23 folds). This produces the final thesis results.</p>
+            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">bash training/run_experiments.sh full</code>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 </div>
 
@@ -1739,7 +1825,67 @@ tailwind.config = {
 <div id="page-status" class="page">
   <section class="max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12">
     <h1 class="text-3xl font-bold text-white mb-2">Current Status</h1>
-    <p class="text-gray-500 mb-3">Implementation progress, design decisions, and next steps. Last updated: 27 April 2026. See the <a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">Roadmap</a> for the full experiment plan and timeline.</p>
+    <p class="text-gray-500 mb-3">Implementation progress and experimental results. Last updated: 27 April 2026. See <a href="#design" class="text-cyan-600 hover:text-cyan-400 hover:underline">Design Decisions</a> for parameter justifications and <a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">Roadmap</a> for the full experiment plan.</p>
+
+    <!-- Progress overview -->
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-3">
+      <div class="flex items-center gap-4 mb-3">
+        <h3 class="font-semibold text-white">Overall Thesis Progress</h3>
+        <span class="text-2xl font-bold text-cyan-500">~60%</span>
+      </div>
+      <div class="w-full bg-gray-800 rounded-full h-4 mb-3 overflow-hidden">
+        <div class="h-full rounded-full bg-gradient-to-r from-iscte-500 to-cyan-500 relative" style="width: 60%">
+          <div class="absolute inset-0 bg-white/10 animate-pulse rounded-full"></div>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs">
+        <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3">
+          <div class="text-emerald-400 font-bold text-lg">2</div>
+          <div class="text-gray-400">Phases Complete</div>
+        </div>
+        <div class="bg-iscte-500/10 border border-iscte-500/30 rounded-lg p-3">
+          <div class="text-cyan-400 font-bold text-lg">1</div>
+          <div class="text-gray-400">Phase Active</div>
+        </div>
+        <div class="bg-gray-800/60 border border-gray-700 rounded-lg p-3">
+          <div class="text-gray-400 font-bold text-lg">3</div>
+          <div class="text-gray-400">Phases Remaining</div>
+        </div>
+        <div class="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
+          <div class="text-amber-400 font-bold text-lg"><a href="https://github.com/vandabarata/msc-thesis-eeg" target="_blank" class="hover:text-amber-300 transition-colors">GitHub</a></div>
+          <div class="text-gray-400">Source Code</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- What's done vs what's left -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+      <div class="bg-gray-900 border border-emerald-500/20 rounded-xl p-5">
+        <h3 class="font-semibold text-white mb-3 text-sm">What's Done</h3>
+        <div class="space-y-2 text-xs">
+          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><strong class="text-emerald-400">Data pipeline complete</strong> &mdash; <a href="#gl-edf" class="text-cyan-600 hover:text-cyan-400 hover:underline">EDF</a> <a href="#gl-homogenization" class="text-cyan-600 hover:text-cyan-400 hover:underline">homogenization</a>, PyTorch Dataset with <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a>, preprocessing, QC, leakage-safe normalization, flat-signal mmap cache</span></div>
+          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><strong class="text-emerald-400">All models written</strong> &mdash; <a href="#gl-frozen" class="text-cyan-600 hover:text-cyan-400 hover:underline">Frozen 1D-CNN</a> detector (49K params), <a href="#gl-timegan" class="text-cyan-600 hover:text-cyan-400 hover:underline">TimeGAN</a> (1.6M), <a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a> (1.9M), <a href="#gl-ldm" class="text-cyan-600 hover:text-cyan-400 hover:underline">LDM</a> (2.3M)</span></div>
+          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><strong class="text-emerald-400">E1 + E2 complete</strong> &mdash; baseline and <a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a>/<a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400 hover:underline">ADASYN</a> controls, 3 seeds each (results below)</span></div>
+          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><strong class="text-emerald-400">Training infrastructure ready</strong> &mdash; <a href="#gl-earlystopping" class="text-cyan-600 hover:text-cyan-400 hover:underline">early stopping</a>, LOPO + <a href="#gl-singlesplit" class="text-cyan-600 hover:text-cyan-400 hover:underline">single-split</a>, per-fold resume, full metric suite, visualization tools</span></div>
+        </div>
+      </div>
+      <div class="bg-gray-900 border border-amber-500/20 rounded-xl p-5">
+        <h3 class="font-semibold text-white mb-3 text-sm">What's Left</h3>
+        <div class="space-y-2 text-xs">
+          <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-1 mb-1">Generator experiments</div>
+          <div class="flex items-start gap-2"><span class="text-cyan-400 shrink-0 animate-pulse">&#9679;</span><span class="text-gray-400"><strong class="text-cyan-400">E3 TimeGAN running</strong> (<a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E3</a>) &mdash; single-split, 3 seeds, on university GPU</span></div>
+          <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">CVAE training (<a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E4</a>) &mdash; also produces encoder for LDM</span></div>
+          <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">LDM training (<a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E5</a>) &mdash; after CVAE, reuses its encoder</span></div>
+          <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-3 mb-1">Analysis &amp; writing</div>
+          <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">Full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> evaluation (23 folds &times; 3 seeds per experiment)</span></div>
+          <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">Cross-generator comparison (<a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E6</a>) and subject-identity analysis (<a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E7</a>)</span></div>
+          <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-3 mb-1">Thesis document (Chapters 1&ndash;5 written, 29 pages)</div>
+          <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">Results &amp; Discussion chapter (after E3&ndash;E5 complete)</span></div>
+          <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">Expand Chapter 6 &mdash; conclusions, limitations, future work</span></div>
+          <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">Abstracts (Portuguese + English)</span></div>
+        </div>
+      </div>
+    </div>
 
     <!-- E1 Results -->
     <div class="bg-gray-900 border border-emerald-500/30 rounded-xl p-5 mb-3">
@@ -1747,7 +1893,7 @@ tailwind.config = {
         <div class="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-sm shrink-0">E1</div>
         <div>
           <h3 class="font-semibold text-white text-sm">Baseline Results &mdash; 1D-CNN Detector (single-split, no augmentation)</h3>
-          <p class="text-xs text-gray-500">Completed 26 Apr 2026 &mdash; 3 seeds, class-weighted cross-entropy loss, early stopping on val <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></p>
+          <p class="text-xs text-gray-500">Completed 26 Apr 2026 &mdash; 3 seeds, class-weighted cross-entropy loss, early stopping on validation <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></p>
         </div>
         <span class="ml-auto text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded">DONE</span>
       </div>
@@ -1787,17 +1933,17 @@ tailwind.config = {
         <div class="bg-gray-800/40 rounded p-2 text-center">
           <div class="text-gray-500">Seed 42</div>
           <div class="text-gray-400">Best epoch 3/13</div>
-          <div class="text-gray-500">val_auprc 0.6135</div>
+          <div class="text-gray-500">Validation AUPRC 0.6135</div>
         </div>
         <div class="bg-gray-800/40 rounded p-2 text-center">
           <div class="text-gray-500">Seed 123</div>
           <div class="text-gray-400">Best epoch 8/18</div>
-          <div class="text-gray-500">val_auprc 0.6398</div>
+          <div class="text-gray-500">Validation AUPRC 0.6398</div>
         </div>
         <div class="bg-gray-800/40 rounded p-2 text-center">
           <div class="text-gray-500">Seed 456</div>
           <div class="text-gray-400">Best epoch 10/20</div>
-          <div class="text-gray-500">val_auprc 0.6904</div>
+          <div class="text-gray-500">Validation AUPRC 0.6904</div>
         </div>
       </div>
       <div class="mt-3 text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-2">
@@ -1811,14 +1957,14 @@ tailwind.config = {
         <div class="w-8 h-8 rounded-full bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 font-bold text-sm shrink-0">E2</div>
         <div>
           <h3 class="font-semibold text-white text-sm">Non-Synthetic Control Results (single-split)</h3>
-          <p class="text-xs text-gray-500">Completed 27 Apr 2026 &mdash; <a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a> and <a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400 hover:underline">ADASYN</a>, 3 seeds each, class-weighted cross-entropy loss, early stopping on val <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></p>
+          <p class="text-xs text-gray-500">Completed 27 Apr 2026 &mdash; <a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a> and <a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400 hover:underline">ADASYN</a>, 3 seeds each, class-weighted cross-entropy loss, early stopping on validation <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></p>
         </div>
         <span class="ml-auto text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded">DONE</span>
       </div>
 
-      <!-- E2b: SMOTE -->
+      <!-- E2: SMOTE -->
       <div class="mb-4">
-        <h4 class="text-xs font-semibold text-sky-400 mb-2">E2b &mdash; SMOTE (k=5)</h4>
+        <h4 class="text-xs font-semibold text-sky-400 mb-2">E2 &mdash; SMOTE (k=5)</h4>
         <div class="overflow-x-auto">
           <table class="w-full text-xs">
             <thead><tr class="border-b border-gray-700 text-left text-gray-500"><th class="py-2 pr-4">Metric</th><th class="py-2 pr-4">Seed 42</th><th class="py-2 pr-4">Seed 123</th><th class="py-2 pr-4">Seed 456</th><th class="py-2 font-semibold text-gray-400">Mean &plusmn; Std</th></tr></thead>
@@ -1855,24 +2001,24 @@ tailwind.config = {
           <div class="bg-gray-800/40 rounded p-2 text-center">
             <div class="text-gray-500">Seed 42</div>
             <div class="text-gray-400">Best epoch 3/13</div>
-            <div class="text-gray-500">val_auprc 0.2125</div>
+            <div class="text-gray-500">Validation AUPRC 0.2125</div>
           </div>
           <div class="bg-gray-800/40 rounded p-2 text-center">
             <div class="text-gray-500">Seed 123</div>
             <div class="text-gray-400">Best epoch 9/19</div>
-            <div class="text-gray-500">val_auprc 0.2870</div>
+            <div class="text-gray-500">Validation AUPRC 0.2870</div>
           </div>
           <div class="bg-gray-800/40 rounded p-2 text-center">
             <div class="text-gray-500">Seed 456</div>
             <div class="text-gray-400">Best epoch 8/18</div>
-            <div class="text-gray-500">val_auprc 0.3800</div>
+            <div class="text-gray-500">Validation AUPRC 0.3800</div>
           </div>
         </div>
       </div>
 
-      <!-- E2c: ADASYN -->
+      <!-- E2: ADASYN -->
       <div class="mb-3">
-        <h4 class="text-xs font-semibold text-sky-400 mb-2">E2c &mdash; ADASYN</h4>
+        <h4 class="text-xs font-semibold text-sky-400 mb-2">E2 &mdash; ADASYN</h4>
         <div class="overflow-x-auto">
           <table class="w-full text-xs">
             <thead><tr class="border-b border-gray-700 text-left text-gray-500"><th class="py-2 pr-4">Metric</th><th class="py-2 pr-4">Seed 42</th><th class="py-2 pr-4">Seed 123</th><th class="py-2 pr-4">Seed 456</th><th class="py-2 font-semibold text-gray-400">Mean &plusmn; Std</th></tr></thead>
@@ -1909,68 +2055,37 @@ tailwind.config = {
           <div class="bg-gray-800/40 rounded p-2 text-center">
             <div class="text-gray-500">Seed 42</div>
             <div class="text-gray-400">Best epoch 7/17</div>
-            <div class="text-gray-500">val_auprc 0.2296</div>
+            <div class="text-gray-500">Validation AUPRC 0.2296</div>
           </div>
           <div class="bg-gray-800/40 rounded p-2 text-center">
             <div class="text-gray-500">Seed 123</div>
             <div class="text-gray-400">Best epoch 2/12</div>
-            <div class="text-gray-500">val_auprc 0.3720</div>
+            <div class="text-gray-500">Validation AUPRC 0.3720</div>
           </div>
           <div class="bg-gray-800/40 rounded p-2 text-center">
             <div class="text-gray-500">Seed 456</div>
             <div class="text-gray-400">Best epoch 5/15</div>
-            <div class="text-gray-500">val_auprc 0.3158</div>
+            <div class="text-gray-500">Validation AUPRC 0.3158</div>
           </div>
         </div>
       </div>
 
-      <div class="text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-2">
-        <strong class="text-gray-400">Interpretation:</strong> Both <a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a> and <a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400 hover:underline">ADASYN</a> underperform the E1 baseline across all metrics. Mean AUPRC drops from 0.1766 (E1) to 0.0685 (SMOTE) and 0.1078 (ADASYN). Variance across seeds is extremely high &mdash; seed 123 collapses to near-zero test performance for both methods despite reasonable validation AUPRC, suggesting the synthetic feature-space samples overfit to training-set patterns that do not generalize. Val AUPRC trajectories are highly unstable (oscillating epoch-to-epoch), unlike the smoother E1 curves. This confirms that interpolation-based oversampling in the flattened feature space fails to capture the complex temporal dynamics of ictal EEG. The bar for generative models (E3&ndash;E5) remains the E1 baseline, not these controls.
-      </div>
-    </div>
-
-    <!-- Pipeline hardening -->
-    <div class="bg-gray-900 border border-gray-700/40 rounded-xl p-5 mb-3">
-      <div class="flex items-center gap-3 mb-2">
-        <h3 class="font-semibold text-white text-sm">Pipeline Hardening (26 Apr 2026)</h3>
-        <span class="text-xs text-gray-500">Proactive audit of E3&ndash;E7 code before training begins</span>
-      </div>
-      <p class="text-xs text-gray-400">Comprehensive code audit ahead of generator experiments. Key areas addressed: GPU memory management for 12 GB VRAM constraints, data normalization correctness for generator training, <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> fold resume and partial-run merging, <a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a>/<a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400 hover:underline">ADASYN</a> memory optimization, and subject-identity probe input validation. All issues resolved before E2 training began.</p>
-    </div>
-
-    <!-- Progress overview -->
-    <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-3">
-      <div class="flex items-center gap-4 mb-3">
-        <h3 class="font-semibold text-white">Overall Thesis Progress</h3>
-        <span class="text-2xl font-bold text-cyan-500">~60%</span>
-      </div>
-      <div class="w-full bg-gray-800 rounded-full h-4 mb-3 overflow-hidden">
-        <div class="h-full rounded-full bg-gradient-to-r from-iscte-500 to-cyan-500 relative" style="width: 60%">
-          <div class="absolute inset-0 bg-white/10 animate-pulse rounded-full"></div>
-        </div>
-      </div>
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs">
-        <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3">
-          <div class="text-emerald-400 font-bold text-lg">2</div>
-          <div class="text-gray-400">Phases Complete</div>
-        </div>
-        <div class="bg-iscte-500/10 border border-iscte-500/30 rounded-lg p-3">
-          <div class="text-cyan-400 font-bold text-lg">1</div>
-          <div class="text-gray-400">Phase Active</div>
-        </div>
-        <div class="bg-gray-800/60 border border-gray-700 rounded-lg p-3">
-          <div class="text-gray-400 font-bold text-lg">3</div>
-          <div class="text-gray-400">Phases Remaining</div>
-        </div>
-        <div class="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
-          <div class="text-amber-400 font-bold text-lg"><a href="https://github.com/vandabarata/msc-thesis-eeg" target="_blank" class="hover:text-amber-300 transition-colors">GitHub</a></div>
-          <div class="text-gray-400">Source Code</div>
-        </div>
+      <div class="text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-3 space-y-2">
+        <strong class="text-gray-400">Interpretation:</strong>
+        <p>Both <a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a> and <a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400 hover:underline">ADASYN</a> underperform the E1 baseline across all metrics. Mean <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a> drops from 0.1766 (E1) to 0.0685 (SMOTE) and 0.1078 (ADASYN).</p>
+        <p><strong class="text-gray-400">Why do these methods hurt?</strong> SMOTE and ADASYN are tabular oversampling methods &mdash; they create new samples by interpolating between existing ones in feature space. EEG windows are 23 channels &times; 1,024 time steps (23,552 dimensions). In this high-dimensional space:</p>
+        <ul class="list-disc list-inside space-y-1 pl-2">
+          <li><strong class="text-gray-400">Temporal coherence is destroyed.</strong> The <a href="#gl-cnn" class="text-cyan-600 hover:text-cyan-400 hover:underline">1D-CNN</a> detector learns local temporal patterns via convolution. Interpolated signals mix the timing of features from two different windows, producing waveforms that look nothing like real seizures &mdash; sharp spikes and rhythmic discharges get averaged out.</li>
+          <li><strong class="text-gray-400">Curse of dimensionality.</strong> In 23K-dimensional space, k-nearest neighbors (k=5 for SMOTE) may not be meaningfully similar. The interpolation path between them passes through regions that don&rsquo;t correspond to real EEG.</li>
+          <li><strong class="text-gray-400">E1 already handles imbalance.</strong> The <a href="#gl-classweighted" class="text-cyan-600 hover:text-cyan-400 hover:underline">class-weighted</a> cross-entropy loss upweights seizure samples in the gradient. Adding low-quality synthetic samples on top dilutes the real signal rather than reinforcing it.</li>
+          <li><strong class="text-gray-400">Seed instability confirms the problem.</strong> SMOTE seed 123 collapses to AUPRC 0.0047 &mdash; near-chance. A single bad set of synthetic neighbors can derail the entire training run. Validation AUPRC trajectories oscillate epoch-to-epoch, unlike the smoother E1 curves.</li>
+        </ul>
+        <p>This is exactly why the thesis tests generative models &mdash; <a href="#gl-timegan" class="text-cyan-600 hover:text-cyan-400 hover:underline">TimeGAN</a>, <a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a>, and <a href="#gl-ldm" class="text-cyan-600 hover:text-cyan-400 hover:underline">LDM</a> can learn the temporal structure of ictal EEG and produce windows that preserve spectral and morphological characteristics, rather than blending signals in flat feature space. The bar for generative models (E3&ndash;E5) remains the E1 baseline, not these controls.</p>
       </div>
     </div>
 
     <!-- Hardware -->
-    <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-3">
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
       <h3 class="font-semibold text-white mb-3 text-sm">Experiment Hardware</h3>
       <p class="text-xs text-gray-500 mb-3">All training runs on a single university-owned workstation accessed via SSH. No cloud or multi-node compute.</p>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
@@ -1995,58 +2110,17 @@ tailwind.config = {
           <div class="text-gray-400">PyTorch + CUDA</div>
         </div>
       </div>
-      <p class="text-xs text-gray-500 mt-3">The 12 GB VRAM and 32 GB RAM constraints shaped several design decisions &mdash; see <a href="#design-caching" class="text-cyan-600 hover:text-cyan-400 hover:underline">Data Caching</a> for how the pipeline fits within these limits.</p>
+      <p class="text-xs text-gray-500 mt-3">The 12 GB VRAM and 32 GB RAM constraints shaped several <a href="#design" class="text-cyan-600 hover:text-cyan-400 hover:underline">design decisions</a> &mdash; see <a href="#design-caching" class="text-cyan-600 hover:text-cyan-400 hover:underline">Data Caching</a> for how the pipeline fits within these limits.</p>
     </div>
 
-    <!-- What's done vs what's left -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-      <div class="bg-gray-900 border border-emerald-500/20 rounded-xl p-5">
-        <h3 class="font-semibold text-white mb-3 text-sm">What's Done</h3>
-        <div class="space-y-2 text-xs">
-          <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-1 mb-1">Data pipeline</div>
-          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">homogenize.py</code> - <a href="#gl-edf" class="text-cyan-600 hover:text-cyan-400 hover:underline">EDF</a> <a href="#gl-homogenization" class="text-cyan-600 hover:text-cyan-400 hover:underline">homogenization</a> (683 files cleaned to 23-channel target montage)</span></div>
-          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">loader.py</code> - PyTorch Dataset with <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a>, preprocessing, QC, leakage-safe normalization, synthetic safeguards</span></div>
-          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">split_config.json</code> - 23 <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> folds + <a href="#gl-singlesplit" class="text-cyan-600 hover:text-cyan-400 hover:underline">single split</a>, chb01/chb21 grouped</span></div>
-          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">chb-mit-analysis.ipynb</code> - Full EDA notebook (executed)</span></div>
-          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">clean_edfs/</code> - 683 homogenized EDF+ files, 38 patient/set directories</span></div>
-          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">signal_cache/</code> - flat-signal mmap cache (~35-40 GB, ~40% less than pre-windowed)</span></div>
-          <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-3 mb-1">Models</div>
-          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">detector.py</code> - <a href="#gl-frozen" class="text-cyan-600 hover:text-cyan-400 hover:underline">Frozen 1D-CNN</a> seizure detector (49K params, E1&ndash;E5)</span></div>
-          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">timegan.py</code> - TimeGAN with 5 GRU sub-networks (1.6M params, <a href="#cite-yoon2019" class="text-cyan-600 hover:text-cyan-400 hover:underline">Yoon et al., 2019</a>)</span></div>
-          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">cvae.py</code> - Conditional VAE with 1D-Conv encoder/decoder (1.9M params, 128-dim latent)</span></div>
-          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">ldm.py</code> - Latent Diffusion with UNet-1D denoiser + <a href="#gl-ddpm" class="text-cyan-600 hover:text-cyan-400 hover:underline">DDPM/DDIM</a> (2.3M params)</span></div>
-          <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-3 mb-1">Training &amp; evaluation</div>
-          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><strong class="text-emerald-400">E1 baseline complete</strong> &mdash; frozen 1D-CNN detector, 3 seeds, single-split. Mean AUPRC 0.1766 &plusmn; 0.0540 (<a href="#status" class="text-cyan-600 hover:text-cyan-400 hover:underline">details above</a>)</span></div>
-          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><strong class="text-emerald-400">E2 controls complete</strong> &mdash; <a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a> and <a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400 hover:underline">ADASYN</a>, 3 seeds each. Both underperform E1 baseline (<a href="#status" class="text-cyan-600 hover:text-cyan-400 hover:underline">details above</a>)</span></div>
-          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">train.py</code> - Training pipeline with <a href="#gl-earlystopping" class="text-cyan-600 hover:text-cyan-400 hover:underline">early stopping</a>, E1/E2 + synthetic injection, <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> + single-split, per-fold resume (skip completed folds), summary merge for split-machine runs</span></div>
-          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">evaluate.py</code> - Full metric suite (<a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a>, <a href="#gl-auroc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUROC</a>, F1, per-patient, <a href="#gl-wilcoxon" class="text-cyan-600 hover:text-cyan-400 hover:underline">Wilcoxon</a>)</span></div>
-          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">generate.py</code> - Generator training + synthetic window production (all 3 models), <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> per-fold training CLI, memory-safe ictal extraction, &micro;V-scale training (no double normalization)</span></div>
-          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">visualize.py</code> - <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a> comparison, <a href="#gl-tsne" class="text-cyan-600 hover:text-cyan-400 hover:underline">t-SNE</a>, amplitude distributions, <a href="#gl-kl" class="text-cyan-600 hover:text-cyan-400 hover:underline">KL divergence</a></span></div>
-          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><code class="text-cyan-500">subject_identity.py</code> - E7 <a href="#gl-linearprobe" class="text-cyan-600 hover:text-cyan-400 hover:underline">linear probe</a> for subject-identity analysis</span></div>
-        </div>
-      </div>
-      <div class="bg-gray-900 border border-amber-500/20 rounded-xl p-5">
-        <h3 class="font-semibold text-white mb-3 text-sm">What's Left</h3>
-        <div class="space-y-2 text-xs">
-          <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-1 mb-1">Generator experiments</div>
-          <div class="flex items-start gap-2"><span class="text-cyan-400 shrink-0 animate-pulse">&#9679;</span><span class="text-gray-400"><strong class="text-cyan-400">E3 TimeGAN running</strong> (<a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E3</a>) - single-split, 3 seeds, on university GPU</span></div>
-          <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">CVAE training (<a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E4</a>) - also produces encoder for LDM</span></div>
-          <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">LDM training (<a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E5</a>) - after CVAE, reuses its encoder</span></div>
-          <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-3 mb-1">Analysis &amp; writing</div>
-          <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">Full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> evaluation (23 folds &times; 3 seeds per experiment)</span></div>
-          <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">Cross-generator comparison (<a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E6</a>) and subject-identity analysis (<a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E7</a>)</span></div>
-          <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-3 mb-1">Thesis document (Chapters 1&ndash;5 written, 29 pages)</div>
-          <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">Results &amp; Discussion chapter (after E3&ndash;E5 complete)</span></div>
-          <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">Expand Chapter 6 &mdash; conclusions, limitations, future work</span></div>
-          <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">Abstracts (Portuguese + English)</span></div>
-        </div>
-      </div>
-    </div>
+  </section>
+</div>
 
-    <!-- ═══ Design Decisions & Parameter Justifications ═══ -->
-    <div class="mb-3">
-      <h2 class="text-xl font-bold text-white mb-2">Design Decisions &amp; Parameter Justifications</h2>
-      <p class="text-gray-500 text-sm mb-3">Every parameter is either grounded in the literature (indicated by inline citations) or is an implementation decision where the literature does not prescribe a specific value (indicated as <em class="text-gray-400">project-specific</em> in the justification). Each decision is independently justifiable in a thesis defence.</p>
+<!-- ============ DESIGN PAGE ============ -->
+<div id="page-design" class="page">
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12">
+    <h1 class="text-3xl font-bold text-white mb-2">Design Decisions</h1>
+    <p class="text-gray-500 mb-3">Every parameter is either grounded in the literature (indicated by inline citations) or is an implementation decision where the literature does not prescribe a specific value (indicated as <em class="text-gray-400">project-specific</em> in the justification). Each decision is independently justifiable in a thesis defence.</p>
 
       <!-- Framework -->
       <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-3">
@@ -2056,7 +2130,7 @@ tailwind.config = {
           <div><strong class="text-gray-300">MNE-Python / pyedflib</strong> - The standard library for reading EEG data in EDF/EDF+ format, used across the neuroscience community.</div>
           <div><strong class="text-gray-300">scikit-learn + imbalanced-learn</strong> - Standard implementations of SMOTE/ADASYN (<a href="#cite-zhao2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Zhao et al., 2022</a>) and evaluation metrics (AUPRC, AUROC). Using canonical implementations ensures comparability with the literature.</div>
           <div><strong class="text-gray-300">SciPy signal processing</strong> - <a href="#gl-butterworth" class="text-cyan-600 hover:text-cyan-400 hover:underline">Butterworth</a> filters, <code class="text-cyan-500">filtfilt</code> for zero-phase filtering, Welch <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a> estimation. Standard DSP tools with no reason to reimplement.</div>
-          <div><strong class="text-gray-300">1D raw signals</strong> (not 2D spectrograms) - The spectrogram representation was deliberately dropped (v10 scope cut). Working directly on raw 1D signals keeps the pipeline simpler and avoids the confound of &ldquo;did the improvement come from the augmentation or from the representation change?&rdquo;</div>
+          <div><strong class="text-gray-300">1D raw signals</strong> (not 2D spectrograms) - Working directly on raw 1D signals keeps the pipeline simpler and avoids the confound of &ldquo;did the improvement come from the augmentation or from the representation change?&rdquo;</div>
         </div>
       </div>
 
@@ -2232,7 +2306,7 @@ tailwind.config = {
               </tr>
               <tr class="border-b border-gray-800/50">
                 <td class="py-3 pr-4 text-gray-300 font-medium">Early stopping</td>
-                <td class="py-3 pr-4">Val AUPRC, patience=10, max 100 epochs</td>
+                <td class="py-3 pr-4">Validation AUPRC, patience=10, max 100 epochs</td>
 
                 <td class="py-3">Monitors the primary metric (<a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a>) as recommended by <a href="#cite-dakshit2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Dakshit et al., 2023</a>. Patience=10 balances convergence time against overfitting.</td>
               </tr>
@@ -2265,7 +2339,7 @@ tailwind.config = {
                 <td class="py-3 pr-4 text-gray-300 font-medium">Input reshape</td>
                 <td class="py-3 pr-4">(23, 1024) &rarr; (64, 368)</td>
 
-                <td class="py-3"><code class="text-cyan-500">GRU</code>s struggle with 1024-step sequences (vanishing gradients, slow). 64 timesteps of 16-sample segments at 256 Hz = 62.5ms - fine-grained enough for EEG temporal patterns. Standard in TimeGAN implementations.</td>
+                <td class="py-3"><a href="#gl-gru" class="text-cyan-600 hover:text-cyan-400 hover:underline"><code class="text-cyan-500">GRU</code></a>s struggle with 1024-step sequences (vanishing gradients, slow). 64 timesteps of 16-sample segments at 256 Hz = 62.5ms - fine-grained enough for EEG temporal patterns. Standard in <a href="#gl-timegan" class="text-cyan-600 hover:text-cyan-400 hover:underline">TimeGAN</a> implementations.</td>
               </tr>
               <tr class="border-b border-gray-800/50">
                 <td class="py-3 pr-4 text-gray-300 font-medium">Hidden dim</td>
@@ -2274,7 +2348,7 @@ tailwind.config = {
                 <td class="py-3">Matches detector embedding size and CVAE latent dim. Keeps generator proportional to detector.</td>
               </tr>
               <tr class="border-b border-gray-800/50">
-                <td class="py-3 pr-4 text-gray-300 font-medium"><code class="text-cyan-500">GRU</code> layers</td>
+                <td class="py-3 pr-4 text-gray-300 font-medium"><a href="#gl-gru" class="text-cyan-600 hover:text-cyan-400 hover:underline"><code class="text-cyan-500">GRU</code></a> layers</td>
                 <td class="py-3 pr-4">3 (main), 2 (supervisor)</td>
 
                 <td class="py-3">Follows original <a href="#cite-yoon2019" class="text-cyan-600 hover:text-cyan-400 hover:underline">Yoon et al., 2019</a>. Supervisor is simpler because it only predicts one step ahead.</td>
@@ -2472,92 +2546,6 @@ tailwind.config = {
           </table>
         </div>
       </div>
-    </div>
-
-    <!-- Getting Started -->
-    <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-      <h3 class="font-semibold text-white mb-1 text-base">Getting Started: Recommended Order</h3>
-      <p class="text-gray-500 text-xs mb-3">Each step builds on the previous one. The venv must be active: <code class="text-cyan-500">source .venv/bin/activate</code></p>
-
-      <div class="space-y-3">
-        <!-- Step 1 -->
-        <div class="flex gap-4">
-          <div class="shrink-0 w-8 h-8 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-sm font-bold">1</div>
-          <div class="min-w-0">
-            <div class="flex items-start gap-2 flex-wrap">
-              <span class="text-white font-medium text-sm">E1 Baseline</span>
-              <span class="text-xs text-gray-500">~15&ndash;30 min</span>
-            </div>
-            <p class="text-gray-400 text-xs mt-1">The baseline everything else is compared against. Trains the 49K-param detector on real data only. Expected low sensitivity (~30&ndash;50%) and high specificity (~95%+) - confirming the imbalance problem is real.</p>
-            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">python -m training.train --experiment e1 --mode single --seeds 42 123 456</code>
-          </div>
-        </div>
-        <!-- Step 2 -->
-        <div class="flex gap-4">
-          <div class="shrink-0 w-8 h-8 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-sm font-bold">2</div>
-          <div class="min-w-0">
-            <div class="flex items-start gap-2 flex-wrap">
-              <span class="text-white font-medium text-sm">E2 Controls (SMOTE + ADASYN)</span>
-              <span class="text-xs text-gray-500">~15&ndash;40 min each</span>
-            </div>
-            <p class="text-gray-400 text-xs mt-1">Non-synthetic baselines. Any generator must beat these to be useful. <a href="#cite-carrle2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Carrle et al., 2023</a> showed noise augmentation matched GANs in some cases.</p>
-            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">python -m training.train --experiment e2 --augmentation smote --mode single --seeds 42 123 456</code>
-            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-1 overflow-x-auto">python -m training.train --experiment e2 --augmentation adasyn --mode single --seeds 42 123 456</code>
-          </div>
-        </div>
-        <!-- Step 3 -->
-        <div class="flex gap-4">
-          <div class="shrink-0 w-8 h-8 rounded-full bg-rsch-500/10 border border-rsch-500/30 flex items-center justify-center text-rsch-400 text-sm font-bold">3</div>
-          <div class="min-w-0">
-            <div class="flex items-start gap-2 flex-wrap">
-              <span class="text-white font-medium text-sm">E3 TimeGAN</span>
-              <span class="text-xs text-gray-500">~3&ndash;8 hours</span>
-            </div>
-            <p class="text-gray-400 text-xs mt-1">First generator (independent, no dependencies). <code class="text-cyan-500">GRU</code>-based with 3 sequential training phases (autoencoder, supervisor, joint adversarial). Early results inform whether the generative approach is promising.</p>
-            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">python -m training.generate --model timegan --ratio 1.0 --seed 42</code>
-            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-1 overflow-x-auto">python -m training.train --experiment e3 --synthetic-windows results/e3/seed_42/single_split/synthetic_ratio_1.00.npz --mode single --seeds 42 123 456</code>
-          </div>
-        </div>
-        <!-- Step 4 -->
-        <div class="flex gap-4">
-          <div class="shrink-0 w-8 h-8 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-sm font-bold">4</div>
-          <div class="min-w-0">
-            <div class="flex items-start gap-2 flex-wrap">
-              <span class="text-white font-medium text-sm">E4 CVAE</span>
-              <span class="text-xs text-cyan-400 font-medium">Fastest generator</span>
-              <span class="text-xs text-gray-500">~1&ndash;3 hours</span>
-            </div>
-            <p class="text-gray-400 text-xs mt-1">All convolutions (no recurrence, no multi-phase training). Most stable training (no adversarial dynamics). Also produces the encoder checkpoint needed for the LDM next.</p>
-            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">python -m training.generate --model cvae --ratio 1.0 --seed 42</code>
-            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-1 overflow-x-auto">python -m training.train --experiment e4 --synthetic-windows results/e4/seed_42/single_split/synthetic_ratio_1.00.npz --mode single --seeds 42 123 456</code>
-          </div>
-        </div>
-        <!-- Step 5 -->
-        <div class="flex gap-4">
-          <div class="shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-sm font-bold">5</div>
-          <div class="min-w-0">
-            <div class="flex items-start gap-2 flex-wrap">
-              <span class="text-white font-medium text-sm">E5 LDM</span>
-              <span class="text-xs text-gray-500">~2&ndash;4 hours (after CVAE)</span>
-            </div>
-            <p class="text-gray-400 text-xs mt-1">Requires the CVAE checkpoint from Step 4. The UNet denoiser trains in <a href="#gl-latentspace" class="text-cyan-600 hover:text-cyan-400 hover:underline">latent space</a> (small and fast), but DDPM sampling is slow. DDIM (50 steps) is used by default for generation.</p>
-            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">python -m training.generate --model ldm --cvae-checkpoint results/e4/seed_42/single_split/cvae.pt --ratio 1.0 --seed 42</code>
-            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-1 overflow-x-auto">python -m training.train --experiment e5 --synthetic-windows results/e5/seed_42/single_split/synthetic_ratio_1.00.npz --mode single --seeds 42 123 456</code>
-          </div>
-        </div>
-        <!-- Step 6 -->
-        <div class="flex gap-4">
-          <div class="shrink-0 w-8 h-8 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-sm font-bold">6</div>
-          <div class="min-w-0">
-            <div class="flex items-start gap-2 flex-wrap">
-              <span class="text-white font-medium text-sm">Full ratios + seeds + LOPO</span>
-            </div>
-            <p class="text-gray-400 text-xs mt-1">Full run with all 4 ratios (25%, 50%, 100%, 200%), 3 seeds (42, 123, 456), and full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> <a href="#gl-cv" class="text-cyan-600 hover:text-cyan-400 hover:underline">cross-validation</a> (23 folds). This produces the final thesis results.</p>
-            <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">bash training/run_experiments.sh full</code>
-          </div>
-        </div>
-      </div>
-    </div>
 
   </section>
 </div>
@@ -2601,6 +2589,7 @@ tailwind.config = {
         <a href="#gl-latentspace" class="text-cyan-600 hover:text-cyan-400">Latent Space</a>
         <a href="#gl-ldm" class="text-cyan-600 hover:text-cyan-400">LDM</a>
         <a href="#gl-linearprobe" class="text-cyan-600 hover:text-cyan-400">Linear Probe</a>
+        <a href="#gl-loss" class="text-cyan-600 hover:text-cyan-400">Loss Function</a>
         <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400">LOPO</a>
         <a href="#gl-modecollapse" class="text-cyan-600 hover:text-cyan-400">Mode Collapse</a>
         <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400">PSD</a>
@@ -2626,51 +2615,61 @@ tailwind.config = {
         <div id="gl-crispdm" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">CRISP-DM <span class="text-gray-600 font-normal">(CRoss-Industry Standard Process for Data Mining)</span></div>
           <p class="text-gray-400">A structured methodology for data science projects consisting of six iterative phases: Business Understanding, Data Understanding, Data Preparation, Modeling, Evaluation, and Deployment. Widely used in both industry and academia. This thesis maps each CRISP-DM phase to a thesis chapter.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">A recipe for doing data science projects. It says: first understand the problem, then look at the data, then clean and prepare it, then build your model, then check if it works, then deploy it. And if something doesn&rsquo;t work, go back a step. Each chapter of this thesis follows one of those recipe steps.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-wirth2000" class="text-cyan-600 hover:text-cyan-400 hover:underline">Wirth &amp; Hipp, 2000</a>.</p>
         </div>
         <div id="gl-lopo" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">LOPO <span class="text-gray-600 font-normal">(Leave-One-Patient-Out Cross-Validation)</span></div>
           <p class="text-gray-400">An evaluation protocol where each fold holds out one patient&rsquo;s entire data as the test set and trains on all remaining patients. This is repeated for every patient (23 folds for 23 unique subjects). LOPO simulates the real clinical scenario: the model must detect seizures in a patient it has never seen during training. It is the gold standard for assessing cross-subject generalization in patient-dependent EEG tasks, and much harder than within-patient evaluation where the model has already seen recordings from the same person.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Imagine studying for a test with 23 friends. LOPO says: &ldquo;Let&rsquo;s see if you can answer <em>this friend&rsquo;s</em> questions, having only studied everyone else&rsquo;s.&rdquo; Then repeat, leaving out a different friend each time. It&rsquo;s the hardest fair test: you can&rsquo;t memorize any one person&rsquo;s quirks because you never know who will be left out. In our case, the model must detect seizures in a patient whose brain patterns it has never encountered.</p></details>
           <p class="text-gray-600 text-sm mt-2">Used by <a href="#cite-zhao2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Zhao et al., 2022</a> for seizure onset zone classification; identified as the recommended protocol in <a href="#cite-you2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">You et al., 2025</a>.</p>
         </div>
         <div id="gl-singlesplit" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">Single-Split vs LOPO <span class="text-gray-600 font-normal">(Two-Stage Evaluation Strategy)</span></div>
-          <p class="text-gray-400">This thesis uses a two-stage approach: a <strong class="text-white">single fixed split</strong> (18 train / 2 val / 4 test patients) for fast development and debugging, followed by <strong class="text-white">full LOPO</strong> (23 folds &times; 3 seeds = 69 runs per experiment) for statistically rigorous final results. Single-split enables rapid iteration; LOPO provides the publication-quality evaluation.</p>
+          <p class="text-gray-400">This thesis uses a two-stage approach: a <strong class="text-white">single fixed split</strong> (18 train / 2 validation / 4 test patients) for fast development and debugging, followed by <strong class="text-white">full LOPO</strong> (23 folds &times; 3 seeds = 69 runs per experiment) for statistically rigorous final results. Single-split enables rapid iteration; LOPO provides the publication-quality evaluation.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">First you do a quick draft (single-split): pick a few patients for testing and use the rest for training, just to make sure everything works. Then you do the real exam (<a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a>): repeat the whole thing 23 times, leaving out a different patient each time, with 3 different random seeds. The draft is fast; the real exam is thorough and publishable.</p></details>
           <p class="text-gray-600 text-sm mt-2">The two-stage strategy is standard practice: <a href="#cite-carrle2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Carrle et al., 2023</a> used leave-two-subjects-out CV for final results after initial development on a fixed split.</p>
         </div>
         <div id="gl-auprc" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">AUPRC <span class="text-gray-600 font-normal">(Area Under the Precision-Recall Curve)</span></div>
           <p class="text-gray-400">A metric that summarizes the trade-off between precision (of all windows flagged as seizure, how many truly are?) and recall (of all actual seizure windows, how many were flagged?). Unlike AUROC, AUPRC is <strong class="text-white">sensitive to the minority class</strong>: when seizure windows are &lt;1% of the dataset, AUROC can look high even with a trivial model, but AUPRC will not. This is why AUPRC is the primary metric for this thesis.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Imagine a fire alarm. Precision asks: &ldquo;When it rings, is there actually a fire?&rdquo; Recall asks: &ldquo;When there <em>is</em> a fire, does it ring?&rdquo; AUPRC summarizes this trade-off into a single number. It&rsquo;s especially useful when fires are very rare (like seizures in our data) &mdash; a broken alarm that <em>never</em> rings would score great on most metrics (it&rsquo;s right 99.6% of the time!), but AUPRC would correctly give it a terrible score.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-saito2015" class="text-cyan-600 hover:text-cyan-400 hover:underline">Saito &amp; Rehmsmeier, 2015</a>. Recommended for imbalanced clinical tasks by <a href="#cite-dakshit2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Dakshit et al., 2023</a>.</p>
         </div>
         <div id="gl-auroc" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">AUROC <span class="text-gray-600 font-normal">(Area Under the Receiver Operating Characteristic Curve)</span></div>
           <p class="text-gray-400">A metric that summarizes the trade-off between true positive rate and false positive rate across all classification thresholds. Measures overall discrimination ability. Reported as a secondary metric alongside AUPRC because it is more widely recognized but less informative for severely imbalanced tasks.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">AUROC answers: &ldquo;If I pick one seizure window and one normal window at random, how often will the model give a higher score to the seizure one?&rdquo; A score of 1.0 means it always ranks seizures higher; 0.5 means it&rsquo;s guessing randomly. It&rsquo;s a useful overview, but when seizures are &lt;1% of the data, a model can get a high AUROC while still missing most actual seizures &mdash; which is why we primarily rely on AUPRC instead.</p></details>
           <p class="text-gray-600 text-sm mt-2">Used as the primary metric in <a href="#cite-zhao2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Zhao et al., 2022</a> and <a href="#cite-bing2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Bing et al., 2022</a>. Included as a complementary metric alongside AUPRC.</p>
         </div>
         <div id="gl-wilcoxon" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">Wilcoxon Signed-Rank Test</div>
-          <p class="text-gray-400">A non-parametric statistical test for comparing paired samples. Used here to test whether per-patient AUPRC improvements from augmentation are statistically significant across the 23 LOPO folds. Unlike a t-test, it does not assume normality, which is appropriate given the small sample size (22&ndash;23 paired observations).</p>
+          <p class="text-gray-400">A non-parametric statistical test for comparing paired samples. Used here to test whether per-patient <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a> improvements from augmentation are statistically significant across the 23 <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> folds. Unlike a t-test, it does not assume normality, which is appropriate given the small sample size (22&ndash;23 paired observations).</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Suppose you try a new study method with 23 students. Each student takes the test twice: once with the old method, once with the new. The Wilcoxon test looks at all 23 pairs and asks: &ldquo;Did the new method consistently improve scores, or could the differences be random luck?&rdquo; It doesn&rsquo;t assume the scores follow any particular pattern (unlike a t-test), making it safer for small groups.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-wilcoxon1945" class="text-cyan-600 hover:text-cyan-400 hover:underline">Wilcoxon, 1945</a>. Applied to EEG fold comparisons by <a href="#cite-zhao2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Zhao et al., 2022</a> (Friedman test, same family).</p>
         </div>
         <div id="gl-cv" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">Cross-Validation</div>
-          <p class="text-gray-400">An evaluation technique that systematically rotates which subset of the data is held out for testing. Each rotation (fold) trains on the remaining data and evaluates on the held-out portion. The final result is the average across all folds. LOPO is a specific type of cross-validation where each fold holds out one patient.</p>
+          <p class="text-gray-400">An evaluation technique that systematically rotates which subset of the data is held out for testing. Each rotation (fold) trains on the remaining data and evaluates on the held-out portion. The final result is the average across all folds. <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> is a specific type of cross-validation where each fold holds out one patient.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Instead of testing a model once on a single chunk of data (which might be unusually easy or hard), you take turns: each chunk gets to be the test while everything else is used for training. The final score is the average. This gives a much more honest picture of how well the model really works, rather than getting lucky (or unlucky) on one particular test set.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-kohavi1995" class="text-cyan-600 hover:text-cyan-400 hover:underline">Kohavi, 1995</a>.</p>
         </div>
         <div id="gl-tstr" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">TSTR / TRTS</div>
           <p class="text-gray-400"><strong class="text-white">TSTR</strong> (Train on Synthetic, Test on Real): train a classifier entirely on synthetic data and test on real data. Measures whether synthetic data alone can replace real data. <strong class="text-white">TRTS</strong> (Train on Real, Test on Synthetic): the reverse. Both are used to assess synthetic data quality independently of downstream augmentation utility.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">TSTR asks: &ldquo;If you&rsquo;ve only ever studied from fake textbooks, can you still pass the real exam?&rdquo; If yes, the fake textbooks are very good. TRTS asks the reverse: &ldquo;If you studied from real textbooks, can you recognize the fake ones?&rdquo; Together they tell you how realistic and useful the synthetic data is.</p></details>
           <p class="text-gray-600 text-sm mt-2">Introduced by <a href="#cite-esteban2017" class="text-cyan-600 hover:text-cyan-400 hover:underline">Esteban et al., 2017</a>. Applied in <a href="#cite-carrle2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Carrle et al., 2023</a> and <a href="#cite-you2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">You et al., 2025</a>.</p>
         </div>
         <div id="gl-discriminative" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">Discriminative Score <span class="text-gray-600 font-normal">(C2ST - Classifier Two-Sample Test)</span></div>
           <p class="text-gray-400">A binary classifier is trained to distinguish real from synthetic samples. If it achieves ~50% accuracy (i.e. chance level), the synthetic data is indistinguishable from real data in the feature space the classifier uses. Higher accuracy indicates detectable differences. This is a post-hoc fidelity metric - a complement to spectral checks like <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a>, testing whether the joint distribution is realistic rather than just marginal frequency content.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">You mix fake EEG signals with real ones and ask a computer: &ldquo;Can you tell which is which?&rdquo; If it can only guess right about half the time (50%), the fakes are excellent. If it easily spots the fakes (say 90% accuracy), the generator still has obvious tells, like a counterfeiter whose fake bills are always slightly the wrong colour.</p></details>
           <p class="text-gray-600 text-sm mt-2">Introduced alongside TimeGAN by <a href="#cite-yoon2019" class="text-cyan-600 hover:text-cyan-400 hover:underline">Yoon et al., 2019</a>. Applied to EEG generation by <a href="#cite-lange2024" class="text-cyan-600 hover:text-cyan-400 hover:underline">Lange et al., 2024</a>.</p>
         </div>
         <div id="gl-f1" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">F1 Score</div>
           <p class="text-gray-400">The harmonic mean of precision and recall: F1 = 2 &times; (precision &times; recall) / (precision + recall). Provides a single number that balances false positives and false negatives. Reported here at the optimal classification threshold (the threshold that maximizes F1 on the validation set). A secondary metric alongside <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a>, useful for comparing operating points across experiments.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">F1 is a single grade that punishes you for <em>both</em> types of mistakes: crying wolf (flagging normal windows as seizures) and missing the real thing (not flagging actual seizures). A perfect F1 of 1.0 means you never make either mistake. It forces a balance &mdash; you can&rsquo;t cheat by just flagging everything or nothing.</p></details>
         </div>
       </div>
     </div>
@@ -2682,52 +2681,62 @@ tailwind.config = {
         <div id="gl-eeg" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">EEG <span class="text-gray-600 font-normal">(Electroencephalography)</span></div>
           <p class="text-gray-400">A non-invasive technique that records electrical activity of the brain via electrodes placed on the scalp. Scalp EEG is the standard diagnostic tool for epilepsy - clinicians identify seizures by characteristic patterns such as rhythmic theta/alpha discharges, spike-wave complexes, and electrodecremental events. The signal is multichannel (this thesis uses a 23-channel bipolar montage), sampled at 256 Hz, and highly non-stationary.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Small sensors (electrodes) are placed on the scalp like a cap. They pick up the tiny electrical signals produced by brain activity &mdash; think of it like putting a microphone on the outside of a concert hall. You can hear the music, but it&rsquo;s muffled and mixed together. Each sensor picks up a slightly different &ldquo;view&rdquo; of the brain, and doctors look at all 23 channels together to spot seizure patterns.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-niedermeyer2011" class="text-cyan-600 hover:text-cyan-400 hover:underline">Niedermeyer &amp; da Silva, 2011</a>.</p>
         </div>
         <div id="gl-chbmit" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">CHB-MIT <span class="text-gray-600 font-normal">(CHB-MIT Scalp EEG Database)</span></div>
           <p class="text-gray-400">A public dataset of continuous scalp <a href="#gl-eeg" class="text-cyan-600 hover:text-cyan-400 hover:underline">EEG</a> recordings from 24 pediatric epilepsy cases (23 unique patients; chb01 and chb21 are the same person recorded 1.5 years apart). Contains 686 <a href="#gl-edf" class="text-cyan-600 hover:text-cyan-400 hover:underline">EDF+</a> files totaling ~980 hours with 198 annotated seizures. The most widely used benchmark for seizure detection research.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">A free, publicly available collection of brain recordings from 23 children with epilepsy, recorded at Boston Children&rsquo;s Hospital. It&rsquo;s like the &ldquo;standard textbook&rdquo; that most seizure-detection researchers use, so everyone can compare their results against the same data. It contains about 980 hours of recording with 198 labelled seizures.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-shoeb2009" class="text-cyan-600 hover:text-cyan-400 hover:underline">Shoeb, 2009</a>. Available via PhysioNet.</p>
         </div>
         <div id="gl-ica" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">ICA <span class="text-gray-600 font-normal">(Independent Component Analysis)</span></div>
           <p class="text-gray-400">A blind source separation technique that decomposes multichannel EEG into independent components, allowing removal of artifacts (eye blinks, muscle noise, heartbeat). Requires expert judgment or automated classifiers to identify which components are artifacts. This thesis deliberately omits ICA because it introduces a learned, data-dependent transform that would violate the strict preprocessing invariance required for fair generator comparison.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Imagine recording a room with 23 microphones while several people talk at once. ICA tries to &ldquo;unmix&rdquo; the recordings back into individual voices, so you can remove the ones that are just noise (like someone coughing). It&rsquo;s powerful but requires judgment calls about what&rsquo;s noise and what&rsquo;s signal. We skip it here to keep preprocessing fully automatic and identical for every experiment.</p></details>
           <p class="text-gray-600 text-sm mt-2">ICA for EEG: <a href="#cite-sobhani2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">Sobhani et al., 2025</a>. Omitted here for methodological reasons - see the <a href="#preprocessing" class="text-cyan-600 hover:text-cyan-400 hover:underline">preprocessing design decisions</a>.</p>
         </div>
         <div id="gl-edf" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">EDF / EDF+ <span class="text-gray-600 font-normal">(European Data Format)</span></div>
-          <p class="text-gray-400">The standard file format for storing multichannel biosignal recordings (EEG, ECG, etc.). EDF stores raw signal data with metadata (channel names, sampling rate, calibration). <strong class="text-white">EDF+</strong> extends it with annotation support, used here for storing seizure onset/offset markers alongside the signal data.</p>
+          <p class="text-gray-400">The standard file format for storing multichannel biosignal recordings (<a href="#gl-eeg" class="text-cyan-600 hover:text-cyan-400 hover:underline">EEG</a>, ECG, etc.). EDF stores raw signal data with metadata (channel names, sampling rate, calibration). <strong class="text-white">EDF+</strong> extends it with annotation support, used here for storing seizure onset/offset markers alongside the signal data.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Think of EDF as the &ldquo;.mp3 for brain recordings.&rdquo; It&rsquo;s a standard file format that stores the actual signals plus metadata like which electrode is which and how fast the data was recorded. EDF+ adds the ability to include timestamps for events &mdash; in our case, &ldquo;seizure started here, ended there.&rdquo;</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-kemp1992" class="text-cyan-600 hover:text-cyan-400 hover:underline">Kemp et al., 1992</a>. EDF+ extension: <a href="#cite-kemp2003" class="text-cyan-600 hover:text-cyan-400 hover:underline">Kemp &amp; Olivan, 2003</a>.</p>
         </div>
         <div id="gl-homogenization" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">Homogenization</div>
-          <p class="text-gray-400">The process of making all recordings conform to the same channel layout and file format, regardless of the original electrode configuration. In CHB-MIT, different patients use slightly different channel sets (some have ECG, VNS, or reference channels) and some undergo montage changes mid-recording. Homogenization removes non-EEG channels, maps all files to a fixed 23-channel target bipolar montage (<code class="text-cyan-500">TARGET_MONTAGE</code> in <code class="text-cyan-500">homogenize.py</code>), zero-pads missing channels, drops extra channels, and outputs standardized EDF+ files. Files with no usable bipolar channels (e.g. common-reference recordings) are dropped entirely. QC later rejects windows where zero-padded channels produce flat signals.</p>
+          <p class="text-gray-400">The process of making all recordings conform to the same channel layout and file format, regardless of the original electrode configuration. In <a href="#gl-chbmit" class="text-cyan-600 hover:text-cyan-400 hover:underline">CHB-MIT</a>, different patients use slightly different channel sets (some have ECG, VNS, or reference channels) and some undergo montage changes mid-recording. Homogenization removes non-EEG channels, maps all files to a fixed 23-channel target bipolar montage (<code class="text-cyan-500">TARGET_MONTAGE</code> in <code class="text-cyan-500">homogenize.py</code>), zero-pads missing channels, drops extra channels, and outputs standardized <a href="#gl-edf" class="text-cyan-600 hover:text-cyan-400 hover:underline">EDF+</a> files. Files with no usable bipolar channels (e.g. common-reference recordings) are dropped entirely. QC later rejects windows where zero-padded channels produce flat signals.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Different patients had their electrodes arranged slightly differently &mdash; like getting reports from 24 people who each used a different spreadsheet template. Homogenization reformats them all into one standard layout so the model sees the same structure every time: same 23 channels, same order, same format. If a channel is missing, it gets filled with zeros (and we flag those windows for removal later).</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-shoeb2009" class="text-cyan-600 hover:text-cyan-400 hover:underline">Shoeb, 2009</a>: CHB-MIT has heterogeneous montages across patients requiring standardization before uniform processing.</p>
         </div>
         <div id="gl-slidingwindow" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">Sliding Window Segmentation</div>
-          <p class="text-gray-400">Continuous EEG is cut into fixed-length segments by &ldquo;sliding&rdquo; a window along the signal. This thesis uses <strong class="text-white">4-second windows</strong> (1024 samples at 256&thinsp;Hz) with <strong class="text-white">50% overlap</strong>, meaning each window shares half its samples with the next. Overlap increases the number of training examples and avoids losing events that straddle window boundaries. A window is labeled <strong class="text-white">ictal</strong> (seizure) if &ge;50% of its samples fall within an annotated seizure interval; otherwise it is <strong class="text-white">interictal</strong>.</p>
+          <p class="text-gray-400">Continuous <a href="#gl-eeg" class="text-cyan-600 hover:text-cyan-400 hover:underline">EEG</a> is cut into fixed-length segments by &ldquo;sliding&rdquo; a window along the signal. This thesis uses <strong class="text-white">4-second windows</strong> (1024 samples at 256&thinsp;Hz) with <strong class="text-white">50% overlap</strong>, meaning each window shares half its samples with the next. Overlap increases the number of training examples and avoids losing events that straddle window boundaries. A window is labeled <strong class="text-white">ictal</strong> (seizure) if &ge;50% of its samples fall within an annotated seizure interval; otherwise it is <strong class="text-white">interictal</strong>.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Imagine reading a book through a magnifying glass that shows exactly 4 lines at a time. You read lines 1&ndash;4, then slide down to lines 3&ndash;6 (50% overlap), then 5&ndash;8, and so on. Each &ldquo;view&rdquo; is one window. The overlap means you never miss something that happens at the boundary between two windows. Each window gets a label: &ldquo;seizure&rdquo; if most of it falls during a seizure, &ldquo;normal&rdquo; otherwise.</p></details>
           <p class="text-gray-600 text-sm mt-2">Standard approach in EEG analysis. 4-second windows used by <a href="#cite-carrle2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Carrle et al., 2023</a>; <a href="#cite-zhao2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Zhao et al., 2022</a> used 10-second segments. The 50% overlap convention follows <a href="#cite-ahuja2024" class="text-cyan-600 hover:text-cyan-400 hover:underline">Ahuja et al., 2024</a>.</p>
         </div>
         <div id="gl-psd" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">PSD <span class="text-gray-600 font-normal">(Power Spectral Density)</span></div>
-          <p class="text-gray-400">Shows how much signal power is present at each frequency. For EEG, this reveals the characteristic spectral signature of different brain states (e.g., seizure activity produces elevated theta/alpha power). Used here to compare real vs synthetic EEG: if a generator produces signals with the wrong spectral profile, its synthetic data is not realistic even if it looks plausible in the time domain.</p>
+          <p class="text-gray-400">Shows how much signal power is present at each frequency. For <a href="#gl-eeg" class="text-cyan-600 hover:text-cyan-400 hover:underline">EEG</a>, this reveals the characteristic spectral signature of different brain states (e.g., seizure activity produces elevated theta/alpha power). Used here to compare real vs synthetic EEG: if a generator produces signals with the wrong spectral profile, its synthetic data is not realistic even if it looks plausible in the time domain.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Think of an audio equalizer showing bass, mid, and treble levels. PSD does the same for brain signals: it shows how much &ldquo;bass&rdquo; (slow waves) and &ldquo;treble&rdquo; (fast waves) are present. A seizure has a recognizable pattern on this display. If synthetic signals have the wrong pattern, they&rsquo;re not realistic &mdash; even if they look OK when you just view the raw squiggly line.</p></details>
           <p class="text-gray-600 text-sm mt-2">PSD comparison as a fidelity metric for synthetic EEG: <a href="#cite-carrle2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Carrle et al., 2023</a> showed GANs produce smoothed spectral peaks. <a href="#cite-you2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">You et al., 2025</a> list PSD as a standard evaluation metric.</p>
         </div>
         <div id="gl-butterworth" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">Butterworth Filter</div>
-          <p class="text-gray-400">A type of signal filter with maximally flat magnitude response in the passband (no amplitude ripples), making it the standard choice for EEG where preserving relative band power is important. This thesis uses a <strong class="text-white">4th-order Butterworth bandpass</strong> (0.5&ndash;40&thinsp;Hz), which provides a good balance between sharp frequency cutoff and computational simplicity.</p>
+          <p class="text-gray-400">A type of signal filter with maximally flat magnitude response in the passband (no amplitude ripples), making it the standard choice for <a href="#gl-eeg" class="text-cyan-600 hover:text-cyan-400 hover:underline">EEG</a> where preserving relative band power is important. This thesis uses a <strong class="text-white">4th-order Butterworth bandpass</strong> (0.5&ndash;40&thinsp;Hz), which provides a good balance between sharp frequency cutoff and computational simplicity.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">A Butterworth filter is like a pair of audio headphones with a very smooth, even sound &mdash; it doesn&rsquo;t boost or cut any frequency more than it should. We use it to keep only the brain-relevant frequencies (0.5&ndash;40 Hz) and throw away everything outside that range (very slow drift and high-frequency electrical noise), without distorting the signal in the process.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-butterworth1930" class="text-cyan-600 hover:text-cyan-400 hover:underline">Butterworth, 1930</a>. Applied to EEG by <a href="#cite-sobhani2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">Sobhani et al., 2025</a>; <a href="#cite-carrle2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Carrle et al., 2023</a> used similar 1&ndash;40 Hz range.</p>
         </div>
         <div id="gl-iirfir" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">IIR / FIR <span class="text-gray-600 font-normal">(Infinite / Finite Impulse Response)</span></div>
-          <p class="text-gray-400">Two categories of digital filters. <strong class="text-white">IIR</strong> filters use feedback (recursion), making them computationally efficient but potentially phase-distorting. <strong class="text-white">FIR</strong> filters use only feedforward computation, guaranteeing linear phase but requiring much higher order for the same frequency selectivity. This thesis uses an IIR Butterworth filter with forward-backward application (<code class="text-cyan-500">filtfilt</code>) to achieve zero-phase response, combining IIR efficiency with FIR-like phase behaviour.</p>
+          <p class="text-gray-400">Two categories of digital filters. <strong class="text-white">IIR</strong> filters use feedback (recursion), making them computationally efficient but potentially phase-distorting. <strong class="text-white">FIR</strong> filters use only feedforward computation, guaranteeing linear phase but requiring much higher order for the same frequency selectivity. This thesis uses an IIR <a href="#gl-butterworth" class="text-cyan-600 hover:text-cyan-400 hover:underline">Butterworth</a> filter with forward-backward application (<code class="text-cyan-500">filtfilt</code>) to achieve zero-phase response, combining IIR efficiency with FIR-like phase behaviour.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">IIR is the fast, cheap filter that might slightly shift your signal in time; FIR is the slow, expensive one that keeps timing perfect. We use a trick: run the fast IIR filter forward, then backward. The forward pass shifts things one way, the backward pass shifts them back, and the result is perfectly timed <em>and</em> fast. Best of both worlds.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-sobhani2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">Sobhani et al., 2025</a> advocate for FIR filters for &ldquo;linear phase properties.&rdquo; We use IIR + <code class="text-cyan-500">filtfilt</code> to achieve equivalent zero-phase response at lower computational cost, as detailed in the <a href="#preprocessing" class="text-cyan-600 hover:text-cyan-400 hover:underline">bandpass filter rationale</a>.</p>
         </div>
         <div id="gl-qfactor" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">Quality Factor (Q)</div>
           <p class="text-gray-400">The ratio of a filter&rsquo;s center frequency to its bandwidth. For the notch filter at 60&thinsp;Hz with Q=30, the notch is 60/30 = 2&thinsp;Hz wide. A higher Q makes the notch narrower and more surgical, preserving more of the adjacent neural signal while removing only the powerline interference.</p>
-          <p class="text-gray-600 text-sm mt-2">Standard DSP concept. Applied to EEG powerline removal following common practice documented in <a href="#cite-you2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">You et al., 2025</a>.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Power lines hum at exactly 60 Hz, and that hum leaks into EEG recordings. A notch filter cuts out that one frequency, like muting a single annoying note on a piano. The Q factor controls how many neighbouring notes also get muted: a high Q (30) mutes just the offending note and leaves everything else untouched. A low Q would mute a wider range, potentially removing useful brain signal too.</p></details>
+          <p class="text-gray-600 text-sm mt-2">Standard DSP concept. Applied to <a href="#gl-eeg" class="text-cyan-600 hover:text-cyan-400 hover:underline">EEG</a> powerline removal following common practice documented in <a href="#cite-you2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">You et al., 2025</a>.</p>
         </div>
       </div>
     </div>
@@ -2739,120 +2748,149 @@ tailwind.config = {
         <div id="gl-cnn" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">CNN / 1D-CNN <span class="text-gray-600 font-normal">(Convolutional Neural Network)</span></div>
           <p class="text-gray-400">A neural network that applies learned convolutional filters to detect local patterns in data. A <strong class="text-white">1D-CNN</strong> slides filters along the time axis of a signal. In this thesis, the frozen seizure detector is a 1D-CNN with 3 convolutional blocks (23&rarr;32&rarr;64&rarr;128 channels) followed by adaptive average pooling and a 2-class dense head (49K parameters). Intentionally lightweight - the detector is a measuring instrument, not the subject of optimization.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">A regular neural network connects every input to every neuron &mdash; it has no sense of structure and treats the first data point the same as the last. A CNN instead uses small &ldquo;sliding windows&rdquo; (filters) that scan across the input looking for patterns. The same filter is reused at every position, so the network can recognize a pattern (e.g., a seizure spike) regardless of <em>where</em> it appears. Think of it like dragging a magnifying glass across a signal: the glass is the same, but it can spot the same shape anywhere along the line. &ldquo;1D&rdquo; simply means the filter slides in one direction (along time), as opposed to 2D filters that slide across images (height and width).</p></details>
         </div>
         <div id="gl-gru" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">GRU <span class="text-gray-600 font-normal">(Gated Recurrent Unit)</span></div>
-          <p class="text-gray-400">A type of recurrent neural network (RNN) that processes sequential data step by step, maintaining a hidden state that captures temporal context. Compared to LSTMs, GRUs use fewer parameters (two gates instead of three) while achieving similar performance. <a href="#gl-timegan" class="text-cyan-600 hover:text-cyan-400 hover:underline">TimeGAN</a> uses GRUs in all five sub-networks because their step-wise processing naturally models EEG temporal dynamics.</p>
+          <p class="text-gray-400">A type of recurrent neural network (RNN) that processes sequential data step by step, maintaining a hidden state that captures temporal context. Compared to LSTMs, GRUs use fewer parameters (two gates instead of three) while achieving similar performance. <a href="#gl-timegan" class="text-cyan-600 hover:text-cyan-400 hover:underline">TimeGAN</a> uses GRUs in all five sub-networks because their step-wise processing naturally models <a href="#gl-eeg" class="text-cyan-600 hover:text-cyan-400 hover:underline">EEG</a> temporal dynamics.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">A <a href="#gl-cnn" class="text-cyan-600 hover:text-cyan-400 hover:underline">CNN</a> looks at a fixed-size chunk of data at once; a GRU reads data one time step at a time, like reading a sentence word by word. It keeps a &ldquo;mental note&rdquo; (hidden state) that updates at each step, letting it remember earlier context. This makes it good at learning sequences &mdash; like how the next part of an EEG signal depends on what came before.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-yoon2019" class="text-cyan-600 hover:text-cyan-400 hover:underline">Yoon et al., 2019</a> uses GRU-based networks for all TimeGAN components.</p>
         </div>
         <div id="gl-unet" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">UNet <span class="text-gray-600 font-normal">(U-shaped Encoder-Decoder with Skip Connections)</span></div>
           <p class="text-gray-400">An encoder-decoder architecture where skip connections link corresponding encoder and decoder layers, preserving fine-grained detail during upsampling. Originally designed for image segmentation, adapted here as a <strong class="text-white">1D-UNet</strong> denoiser for the <a href="#gl-ldm" class="text-cyan-600 hover:text-cyan-400 hover:underline">LDM</a>. The UNet predicts the noise added at each diffusion step, with sinusoidal time-step embeddings and patient conditioning via additive embedding.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">A UNet is shaped like the letter U: the left side squeezes the signal down to a compact summary (encoder), the right side expands it back to full size (decoder), and &ldquo;bridges&rdquo; across the U pass fine details directly from left to right. Without those bridges, the decoder would have to reconstruct detail from memory alone, like trying to repaint a photo from a blurry thumbnail. In our case, the UNet&rsquo;s job is to look at a noisy signal and predict exactly what noise was added, so it can be subtracted.</p></details>
           <p class="text-gray-600 text-sm mt-2">Used as the denoiser in <a href="#cite-ho2020" class="text-cyan-600 hover:text-cyan-400 hover:underline">Ho et al., 2020</a> and <a href="#cite-rombach2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Rombach et al., 2022</a>.</p>
         </div>
         <div id="gl-gan" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">GAN <span class="text-gray-600 font-normal">(Generative Adversarial Network)</span></div>
           <p class="text-gray-400">A generative framework where two networks are trained in opposition: a <strong class="text-white">generator</strong> produces synthetic data, and a <strong class="text-white">discriminator</strong> tries to distinguish real from synthetic. The generator improves by learning to fool the discriminator. GANs can produce high-fidelity samples but are prone to <a href="#gl-modecollapse" class="text-cyan-600 hover:text-cyan-400 hover:underline">mode collapse</a> and training instability. <a href="#gl-timegan" class="text-cyan-600 hover:text-cyan-400 hover:underline">TimeGAN</a> extends the GAN framework with supervised and embedding losses for time-series.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Imagine an art forger (generator) and a detective (discriminator). The forger tries to make fake paintings that pass as real; the detective tries to spot fakes. As the detective gets better, the forger is forced to improve. Eventually the forger becomes so good that even the detective can&rsquo;t tell the difference. That&rsquo;s a GAN &mdash; except instead of paintings, we&rsquo;re generating fake seizure EEG signals that look like real ones.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-goodfellow2014" class="text-cyan-600 hover:text-cyan-400 hover:underline">Goodfellow et al., 2014</a>. Reviewed for EEG in <a href="#cite-boukhennoufa2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Boukhennoufa et al., 2023</a> and <a href="#cite-pezoulas2024" class="text-cyan-600 hover:text-cyan-400 hover:underline">Pezoulas et al., 2024</a>.</p>
         </div>
         <div id="gl-vae" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">VAE <span class="text-gray-600 font-normal">(Variational Autoencoder)</span></div>
           <p class="text-gray-400">A generative model that learns a compressed <a href="#gl-latentspace" class="text-cyan-600 hover:text-cyan-400 hover:underline">latent representation</a> of the data. An encoder maps inputs to a distribution in latent space; a decoder reconstructs from samples of that distribution. Trained by maximizing the <a href="#gl-elbo" class="text-cyan-600 hover:text-cyan-400 hover:underline">ELBO</a> (balancing reconstruction quality and latent regularity). Unlike GANs, VAEs have stable training but may produce blurrier outputs. <a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a> adds class/patient conditioning.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Think of a VAE as a zip file for data. The encoder compresses each signal into a tiny summary (like a recipe with a few key numbers). The decoder takes that summary and reconstructs the full signal. During training, the model learns to make the summaries smooth and organized, so you can also <em>invent</em> new summaries that weren&rsquo;t in the original data and decode them into brand-new, realistic signals. It&rsquo;s more predictable than a GAN, but the outputs can be slightly &ldquo;blurry&rdquo; &mdash; less sharp detail.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-kingma2014" class="text-cyan-600 hover:text-cyan-400 hover:underline">Kingma &amp; Welling, 2014</a>. Applied to EEG by <a href="#cite-bing2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Bing et al., 2022</a>.</p>
         </div>
         <div id="gl-timegan" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">TimeGAN <span class="text-gray-600 font-normal">(Time-series Generative Adversarial Network)</span></div>
           <p class="text-gray-400">A <a href="#gl-gan" class="text-cyan-600 hover:text-cyan-400 hover:underline">GAN</a> architecture designed for time-series. Adds an <strong class="text-white">embedding network</strong> (maps signals to a latent space), a <strong class="text-white">recovery network</strong> (reconstructs signals), and a <strong class="text-white">supervisor</strong> (enforces step-wise temporal dynamics). This combination of adversarial, supervised, and reconstruction losses helps capture both the distribution and the temporal structure of the data. Uses <a href="#gl-gru" class="text-cyan-600 hover:text-cyan-400 hover:underline">GRU</a>-based sub-networks. Used in this thesis as E3.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">A regular GAN can generate data that <em>looks</em> right overall, but has no understanding of time &mdash; it might put the end of a pattern before the beginning. TimeGAN fixes this by adding a &ldquo;coach&rdquo; (the supervisor) that checks whether each time step follows logically from the previous one. It&rsquo;s like the difference between generating a realistic photo of a sentence vs. generating a sentence that actually reads left to right and makes grammatical sense.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-yoon2019" class="text-cyan-600 hover:text-cyan-400 hover:underline">Yoon et al., 2019</a>. Applied to EEG by <a href="#cite-bing2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Bing et al., 2022</a> and <a href="#cite-lange2024" class="text-cyan-600 hover:text-cyan-400 hover:underline">Lange et al., 2024</a>.</p>
         </div>
         <div id="gl-cvae" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">CVAE <span class="text-gray-600 font-normal">(Conditional Variational Autoencoder)</span></div>
           <p class="text-gray-400">A <a href="#gl-vae" class="text-cyan-600 hover:text-cyan-400 hover:underline">VAE</a> extended with conditioning information (e.g., class label, patient ID) so that generation can be controlled. In this thesis, the CVAE uses 1D-convolutional encoder/decoder with a 128-dimensional latent space, conditioned on patient and ictal/interictal class. Its trained encoder is also reused as the latent space for the <a href="#gl-ldm" class="text-cyan-600 hover:text-cyan-400 hover:underline">LDM</a>. Used as E4.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">A regular VAE generates random signals with no control over <em>what kind</em> you get. A CVAE lets you attach labels: &ldquo;generate a seizure signal for patient 5.&rdquo; It&rsquo;s like the difference between a vending machine that drops a random snack vs. one where you press a button to choose exactly what you want.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-sohn2015" class="text-cyan-600 hover:text-cyan-400 hover:underline">Sohn et al., 2015</a>. Conditional generation for EEG: <a href="#cite-bing2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Bing et al., 2022</a>.</p>
         </div>
         <div id="gl-ldm" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">LDM <span class="text-gray-600 font-normal">(Latent Diffusion Model)</span></div>
           <p class="text-gray-400">A <a href="#gl-ddpm" class="text-cyan-600 hover:text-cyan-400 hover:underline">diffusion model</a> that operates in a compressed <a href="#gl-latentspace" class="text-cyan-600 hover:text-cyan-400 hover:underline">latent space</a> rather than directly on raw signals. First, a pre-trained <a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a> encoder compresses EEG windows to 128-dim latent codes. Then a <a href="#gl-unet" class="text-cyan-600 hover:text-cyan-400 hover:underline">1D-UNet</a> denoiser learns the diffusion process in that latent space. Generation reverses the process: sample noise &rarr; denoise &rarr; decode to signal. Expected highest fidelity at highest compute cost. Used as E5.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Diffusion models work by slowly destroying a real signal with noise until it&rsquo;s pure static, then learning to reverse the process step by step. But doing this on a full 23-channel &times; 1024-sample signal is extremely slow. An LDM cheats smartly: it first squashes the signal into a tiny summary (using the CVAE encoder), does all the noising/denoising in that small space, then expands the result back to a full signal. Same quality, much faster &mdash; like editing a thumbnail instead of a 50-megapixel photo.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-rombach2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Rombach et al., 2022</a>.</p>
         </div>
         <div id="gl-smote" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">SMOTE <span class="text-gray-600 font-normal">(Synthetic Minority Over-sampling Technique)</span></div>
           <p class="text-gray-400">A classical oversampling method that creates new minority-class samples by interpolating between existing ones and their <em>k</em> nearest neighbors in feature space. For EEG, windows are flattened to vectors, SMOTE generates interpolated points, and the results are reshaped back. It is the standard non-deep-learning baseline for class imbalance: any generative model must outperform SMOTE to justify its complexity.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">You have very few seizure examples. SMOTE creates new fake ones by picking two real seizure signals and blending them &mdash; like mixing two paint colors to get a new shade. It&rsquo;s simple and fast, but the blended signals may not look like real brain activity. The deep learning generators (TimeGAN, CVAE, LDM) are the &ldquo;expensive paint&rdquo; &mdash; they should produce more realistic signals, and SMOTE is the bar they need to clear to be worth the effort.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-chawla2002" class="text-cyan-600 hover:text-cyan-400 hover:underline">Chawla et al., 2002</a>. Used as baseline by <a href="#cite-zhao2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Zhao et al., 2022</a> and <a href="#cite-dakshit2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Dakshit et al., 2023</a>.</p>
         </div>
         <div id="gl-adasyn" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">ADASYN <span class="text-gray-600 font-normal">(Adaptive Synthetic Sampling)</span></div>
-          <p class="text-gray-400">An adaptive variant of SMOTE that generates more synthetic samples for minority-class instances that are harder to learn (those near the decision boundary or surrounded by majority-class neighbors). This focuses augmentation where it is most needed rather than uniformly across the minority class.</p>
+          <p class="text-gray-400">An adaptive variant of <a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a> that generates more synthetic samples for minority-class instances that are harder to learn (those near the decision boundary or surrounded by majority-class neighbors). This focuses augmentation where it is most needed rather than uniformly across the minority class.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">SMOTE creates the same number of fake examples everywhere. ADASYN is smarter: it creates <em>more</em> fake examples in the difficult areas (where seizure and normal signals look similar and the model keeps getting confused) and fewer in the easy areas. It&rsquo;s like a tutor spending more time on the topics you struggle with rather than giving equal time to everything.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-he2008" class="text-cyan-600 hover:text-cyan-400 hover:underline">He et al., 2008</a>. Used alongside SMOTE by <a href="#cite-zhao2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Zhao et al., 2022</a>.</p>
         </div>
         <div id="gl-syntheticratio" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">Synthetic Ratio (25/50/100/200%)</div>
           <p class="text-gray-400">The amount of generated synthetic data relative to real ictal (seizure) training windows. If there are 100 real ictal windows: <strong class="text-white">25%</strong> = add 25 synthetic, <strong class="text-white">100%</strong> = add 100 synthetic (doubling the ictal count), <strong class="text-white">200%</strong> = add 200 synthetic (tripling it). The literature shows an optimal ratio exists and varies by dataset - more synthetic data eventually degrades performance due to distribution shift.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">How much fake data do you add to the real data? At 100%, you double the number of seizure examples. At 200%, you triple it. You might think &ldquo;more is better,&rdquo; but at some point the fake examples start to outnumber and distort the real ones &mdash; like adding too much water to juice. There&rsquo;s a sweet spot, and finding it is part of the experiment.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-carrle2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Carrle et al., 2023</a> tested 50%, 100%, and 200% ratios, finding no further gains beyond 100%. Diminishing returns confirmed across 27 studies in their review (r=&minus;0.37 correlation between baseline accuracy and improvement).</p>
         </div>
         <div id="gl-frozen" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">Frozen Detector</div>
-          <p class="text-gray-400">The 1D-CNN seizure detector uses the same architecture, hyperparameters, and training procedure across all experiments (E1&ndash;E5). &ldquo;Frozen&rdquo; means these are <strong class="text-white">controlled variables</strong>: any performance differences between experiments can only be attributed to the training data composition (real-only vs augmented), not to classifier tuning. This isolates the augmentation effect.</p>
+          <p class="text-gray-400">The <a href="#gl-cnn" class="text-cyan-600 hover:text-cyan-400 hover:underline">1D-CNN</a> seizure detector uses the same architecture, hyperparameters, and training procedure across all experiments (E1&ndash;E5). &ldquo;Frozen&rdquo; means these are <strong class="text-white">controlled variables</strong>: any performance differences between experiments can only be attributed to the training data composition (real-only vs augmented), not to classifier tuning. This isolates the augmentation effect.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">In a cooking competition, if every contestant uses a different oven, you can&rsquo;t tell whether the best cake won because of better ingredients or a better oven. By &ldquo;freezing&rdquo; the detector (same oven for everyone), any improvement can only come from the training data (the ingredients). That&rsquo;s how we know whether synthetic data actually helps.</p></details>
           <p class="text-gray-600 text-sm mt-2">Standard experimental design practice. <a href="#cite-carrle2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Carrle et al., 2023</a> use a fixed classifier across all augmentation conditions for comparable evaluation.</p>
+        </div>
+        <div id="gl-loss" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
+          <div class="font-semibold text-cyan-500 mb-1">Loss Function</div>
+          <p class="text-gray-400">A mathematical formula that measures how wrong the model&rsquo;s predictions are. During training, the model adjusts its internal parameters to make this number as small as possible. Different tasks use different loss functions: classification tasks typically use <strong class="text-white">cross-entropy</strong>, while generative models may use <strong class="text-white">reconstruction loss</strong>, <strong class="text-white">adversarial loss</strong>, or combinations thereof. The loss is the model&rsquo;s only feedback signal &mdash; it never &ldquo;sees&rdquo; whether its output looks good; it only knows whether the loss went up or down.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Imagine you&rsquo;re playing &ldquo;hot or cold&rdquo; with a blindfold on. After each guess, someone tells you a number: a big number means you&rsquo;re far from the target (cold), a small number means you&rsquo;re close (hot). That number is the loss. The model never removes the blindfold &mdash; it can only try to move in a direction that makes the number smaller. Over thousands of guesses, it learns to get very close to the target. If you choose the wrong scoring system (wrong loss function), the model optimizes for the wrong thing, like navigating by a broken compass.</p></details>
         </div>
         <div id="gl-classweighted" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">Class-Weighted Cross-Entropy</div>
           <p class="text-gray-400"><strong class="text-white">Cross-entropy</strong> is a loss function that measures how well predicted probabilities match true labels. <strong class="text-white">Class-weighting</strong> multiplies the loss for minority-class samples by a factor proportional to their rarity, so misclassifying a rare seizure window is penalized much more heavily than misclassifying a common interictal window. This helps the model pay attention to the rare class despite its tiny prevalence (~0.4% of windows).</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Normally the model gets the same penalty for every mistake. But seizure windows are less than 1% of the data &mdash; so the model could ignore them entirely and still score well on most windows. Class-weighting says: &ldquo;getting a seizure window wrong costs you 250&times; more than getting a normal window wrong.&rdquo; Now the model <em>has</em> to care about the rare class, because those mistakes are expensive.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-zhao2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Zhao et al., 2022</a> used class-balanced focal loss (a variant). Standard practice for imbalanced medical classification; see <a href="#cite-king2001" class="text-cyan-600 hover:text-cyan-400 hover:underline">King &amp; Zeng, 2001</a>.</p>
         </div>
         <div id="gl-earlystopping" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">Early Stopping</div>
           <p class="text-gray-400">Training is halted when the validation metric (AUPRC) stops improving for a set number of consecutive epochs. In this thesis, <strong class="text-white">patience=10</strong> means: if AUPRC on the validation set does not improve for 10 epochs in a row, stop training and revert to the best checkpoint. This prevents overfitting to the training data.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">A student studying for an exam improves at first, then hits a point where more studying starts hurting (they memorize answers instead of understanding concepts). Early stopping is like a parent saying: &ldquo;If your practice test scores don&rsquo;t improve for 10 days in a row, stop studying and go with your best score so far.&rdquo; It keeps the model from memorizing the training data instead of learning general patterns.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-prechelt1998" class="text-cyan-600 hover:text-cyan-400 hover:underline">Prechelt, 1998</a>. Patience=10 is a common default in PyTorch practice.</p>
         </div>
         <div id="gl-modecollapse" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">Mode Collapse</div>
           <p class="text-gray-400">A failure mode specific to GANs where the generator learns to produce only a narrow subset of the possible outputs, ignoring the full diversity of the training data. For seizure EEG, this would mean the generator always produces the same seizure pattern instead of capturing the variety of ictal morphologies across different patients and seizure types.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Imagine asking a chef to learn an entire cookbook, but they discover the judge really likes pasta. So they start making only pasta &mdash; and the judge keeps approving it. Eventually the chef &ldquo;forgets&rdquo; how to make anything else. That&rsquo;s mode collapse: the generator finds one type of output that fools the discriminator and keeps making variations of just that, ignoring the full diversity it was supposed to learn.</p></details>
           <p class="text-gray-600 text-sm mt-2">Documented by <a href="#cite-boukhennoufa2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Boukhennoufa et al., 2023</a> who found 97.3% of generated data collapsed to a single segment. Addressed by their TS-SGAN architecture with dual discriminators. Also identified as a risk in <a href="#cite-you2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">You et al., 2025</a>.</p>
         </div>
         <div id="gl-tsne" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">t-SNE <span class="text-gray-600 font-normal">(t-distributed Stochastic Neighbor Embedding)</span></div>
-          <p class="text-gray-400">A dimensionality reduction technique that compresses high-dimensional data into a 2D scatter plot while preserving local neighborhood structure: points that are similar in high dimensions remain close in the plot. Used here to visually check whether synthetic EEG windows overlap with real ones in feature space, or form separate clusters (which would indicate the generator is producing unrealistic data).</p>
+          <p class="text-gray-400">A dimensionality reduction technique that compresses high-dimensional data into a 2D scatter plot while preserving local neighborhood structure: points that are similar in high dimensions remain close in the plot. Used here to visually check whether synthetic <a href="#gl-eeg" class="text-cyan-600 hover:text-cyan-400 hover:underline">EEG</a> windows overlap with real ones in feature space, or form separate clusters (which would indicate the generator is producing unrealistic data).</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Each EEG window has 23,552 numbers &mdash; impossible to visualize. t-SNE squashes all that down to just two numbers (x, y), so you can draw a dot for each window on a flat map. Similar windows end up as nearby dots. If the fake (synthetic) dots overlap with the real dots, the generator is doing a good job. If they cluster separately, something&rsquo;s off.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-vandermaaten2008" class="text-cyan-600 hover:text-cyan-400 hover:underline">van der Maaten &amp; Hinton, 2008</a>. Used for synthetic EEG evaluation by <a href="#cite-zhao2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Zhao et al., 2022</a> and <a href="#cite-you2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">You et al., 2025</a>.</p>
         </div>
         <div id="gl-fid" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">FID <span class="text-gray-600 font-normal">(Fr&eacute;chet Inception Distance)</span></div>
-          <p class="text-gray-400">Measures the statistical distance between the distributions of real and synthetic data in a learned feature space. Lower FID means the two distributions are more similar. Originally designed for images (using Inception-Net features). For EEG, FID requires replacing the feature extractor, and <a href="#cite-you2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">You et al., 2025</a> and <a href="#cite-ibrahim2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">Ibrahim et al., 2025</a> explicitly warn it is &ldquo;not a true assessment of EEG quality.&rdquo; This thesis uses <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a>-based metrics and <a href="#gl-discriminative" class="text-cyan-600 hover:text-cyan-400 hover:underline">discriminative score</a> instead.</p>
+          <p class="text-gray-400">Measures the statistical distance between the distributions of real and synthetic data in a learned feature space. Lower FID means the two distributions are more similar. Originally designed for images (using Inception-Net features). For <a href="#gl-eeg" class="text-cyan-600 hover:text-cyan-400 hover:underline">EEG</a>, FID requires replacing the feature extractor, and <a href="#cite-you2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">You et al., 2025</a> and <a href="#cite-ibrahim2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">Ibrahim et al., 2025</a> explicitly warn it is &ldquo;not a true assessment of EEG quality.&rdquo; This thesis uses <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a>-based metrics and <a href="#gl-discriminative" class="text-cyan-600 hover:text-cyan-400 hover:underline">discriminative score</a> instead.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">FID is a single number that says &ldquo;how far apart are the real and fake data distributions?&rdquo; Lower = more similar = better fakes. It was designed for images and works great there, but for EEG data it&rsquo;s unreliable because it depends on a feature extractor that was trained on photos, not brain signals. That&rsquo;s why we use other metrics instead.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-heusel2017" class="text-cyan-600 hover:text-cyan-400 hover:underline">Heusel et al., 2017</a>.</p>
         </div>
         <div id="gl-kl" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">KL Divergence <span class="text-gray-600 font-normal">(Kullback-Leibler Divergence)</span></div>
-          <p class="text-gray-400">A measure of how one probability distribution differs from another. In this thesis it serves two purposes: (1) as part of the VAE training loss (regularizing the latent space to follow a standard distribution), and (2) as a spectral evaluation metric (measuring how different the PSD of synthetic data is from real data, per frequency band).</p>
+          <p class="text-gray-400">A measure of how one probability distribution differs from another. In this thesis it serves two purposes: (1) as part of the <a href="#gl-vae" class="text-cyan-600 hover:text-cyan-400 hover:underline">VAE</a> training <a href="#gl-loss" class="text-cyan-600 hover:text-cyan-400 hover:underline">loss</a> (regularizing the <a href="#gl-latentspace" class="text-cyan-600 hover:text-cyan-400 hover:underline">latent space</a> to follow a standard distribution), and (2) as a spectral evaluation metric (measuring how different the <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a> of synthetic data is from real data, per frequency band).</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">KL divergence answers: &ldquo;How surprised would I be if I thought the data came from distribution A, but it actually came from distribution B?&rdquo; If the two distributions are identical, the answer is zero (no surprise). If they&rsquo;re very different, the number is large. We use it both to train the VAE and to check whether synthetic signals have the same frequency profile as real ones.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-kullback1951" class="text-cyan-600 hover:text-cyan-400 hover:underline">Kullback &amp; Leibler, 1951</a>. Used as a VAE objective component by <a href="#cite-kingma2014" class="text-cyan-600 hover:text-cyan-400 hover:underline">Kingma &amp; Welling, 2014</a>.</p>
         </div>
         <div id="gl-latentspace" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">Latent Space</div>
           <p class="text-gray-400">A compressed, lower-dimensional representation of the data learned by an encoder network. Instead of generating directly in the high-dimensional signal space (23 channels &times; 1024 samples = 23,552 values), models like CVAE and LDM work in a much smaller latent space (e.g., 128 dimensions), then decode back to signal space. This makes generation faster and more stable because the model only needs to learn the structure of a compact representation, not every sample value.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">A latent space is like a set of sliders on a mixing board. Each slider controls one abstract property of the signal (maybe one controls &ldquo;spikiness,&rdquo; another controls &ldquo;speed&rdquo;). Instead of working with the full 23,552-number signal directly, the model learns to describe it with just 128 slider positions. Moving the sliders creates new, valid signals &mdash; and because there are only 128 to worry about instead of 23,552, the model&rsquo;s job becomes much easier.</p></details>
           <p class="text-gray-600 text-sm mt-2">Concept formalized for generation by <a href="#cite-kingma2014" class="text-cyan-600 hover:text-cyan-400 hover:underline">Kingma &amp; Welling, 2014</a> and <a href="#cite-rombach2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Rombach et al., 2022</a>. Applied to EEG by <a href="#cite-bing2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Bing et al., 2022</a> with their HealthGen conditional dynamical VAE.</p>
         </div>
         <div id="gl-linearprobe" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">Linear Probe</div>
           <p class="text-gray-400">A simple linear classifier trained on top of frozen feature representations (embeddings) from a neural network. Used to test <em>what information those representations encode</em> without modifying the network itself. In E7, a linear probe trained to identify patients from detector embeddings reveals whether the detector relies on subject-specific signatures.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Imagine you trained a dog to fetch &ldquo;seizure balls.&rdquo; A linear probe asks: &ldquo;Can the dog also tell which person threw the ball, even though we never taught it that?&rdquo; If yes, the dog is secretly using person-specific cues (like smell) rather than just ball-related cues. In E7, we check whether our seizure detector is secretly recognizing <em>which patient</em> the signal belongs to, rather than learning truly general seizure patterns.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-alain2017" class="text-cyan-600 hover:text-cyan-400 hover:underline">Alain &amp; Bengio, 2017</a>. Used here for subject-identity memorization detection (E7).</p>
         </div>
         <div id="gl-elbo" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">ELBO <span class="text-gray-600 font-normal">(Evidence Lower Bound)</span></div>
           <p class="text-gray-400">The training objective for Variational Autoencoders. It balances two goals: (1) reconstruction quality (the decoded output should match the input) and (2) latent space regularity (the encoder should produce latent codes that follow a smooth, standard distribution). KL annealing is a technique to gradually increase the weight of the regularity term, preventing the common failure mode of &ldquo;posterior collapse&rdquo; where the model ignores the latent space entirely.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">The VAE has two competing homework assignments: (1) &ldquo;make the output look like the input&rdquo; (reconstruction), and (2) &ldquo;keep the summaries organized and tidy&rdquo; (regularity). If you only care about #1, the summaries become chaotic and you can&rsquo;t generate new data. If you only care about #2, the outputs are blurry. ELBO is the combined grade that balances both. KL annealing is like easing into assignment #2 slowly so the model doesn&rsquo;t panic and give up on the summaries entirely.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-kingma2014" class="text-cyan-600 hover:text-cyan-400 hover:underline">Kingma &amp; Welling, 2014</a>. KL annealing: <a href="#cite-bowman2016" class="text-cyan-600 hover:text-cyan-400 hover:underline">Bowman et al., 2016</a>.</p>
         </div>
         <div id="gl-ddpm" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">DDPM / DDIM <span class="text-gray-600 font-normal">(Denoising Diffusion Probabilistic/Implicit Model)</span></div>
           <p class="text-gray-400">Diffusion models work in two phases: the <strong class="text-white">forward process</strong> gradually adds random noise to real data over many steps until it becomes pure noise; the <strong class="text-white">reverse process</strong> trains a neural network to undo each noise step, effectively learning to generate data by denoising. <strong class="text-white">DDPM</strong> is the original stochastic formulation. <strong class="text-white">DDIM</strong> is a deterministic variant that produces the same quality in far fewer steps (e.g., 50 instead of 1000), making generation much faster. The LDM in this thesis applies diffusion in a compressed latent space rather than directly on the 23&times;1024 signal.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Take a clean photo and gradually add TV static to it, frame by frame, until it&rsquo;s pure noise. Now train a neural network to watch the process in reverse: given a noisy image, predict what it looked like one step earlier. After training, you can start with pure random noise and ask the network to &ldquo;clean it up&rdquo; step by step &mdash; and out comes a brand-new, realistic image (or in our case, an EEG signal) that never existed before. DDIM is a shortcut version that skips steps to get there faster.</p></details>
           <p class="text-gray-600 text-sm mt-2">DDPM: <a href="#cite-ho2020" class="text-cyan-600 hover:text-cyan-400 hover:underline">Ho et al., 2020</a>. Improved DDPM (cosine schedule): <a href="#cite-nichol2021" class="text-cyan-600 hover:text-cyan-400 hover:underline">Nichol &amp; Dhariwal, 2021</a>. DDIM: <a href="#cite-song2021" class="text-cyan-600 hover:text-cyan-400 hover:underline">Song et al., 2021</a>. Latent diffusion: <a href="#cite-rombach2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Rombach et al., 2022</a>.</p>
         </div>
         <div id="gl-slr" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">SLR <span class="text-gray-600 font-normal">(Systematic Literature Review)</span></div>
-          <p class="text-gray-400">A structured, reproducible method for surveying existing research on a topic. Follows PRISMA guidelines: define search queries, screen results against inclusion criteria, extract relevant data, and synthesize findings. This thesis reviewed 26 articles on synthetic data for healthcare time-series, with a focus on EEG.</p>
+          <p class="text-gray-400">A structured, reproducible method for surveying existing research on a topic. Follows PRISMA guidelines: define search queries, screen results against inclusion criteria, extract relevant data, and synthesize findings. This thesis reviewed 26 articles on synthetic data for healthcare time-series, with a focus on <a href="#gl-eeg" class="text-cyan-600 hover:text-cyan-400 hover:underline">EEG</a>.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Instead of googling randomly and reading whatever comes up, an SLR is like a structured investigation: you define exactly what you&rsquo;re looking for, search specific databases, apply strict criteria to decide which papers to include, and document every step so someone else could repeat it and get the same results. It&rsquo;s the difference between casually browsing and doing a proper audit.</p></details>
           <p class="text-gray-600 text-sm mt-2">PRISMA: <a href="#cite-page2021" class="text-cyan-600 hover:text-cyan-400 hover:underline">Page et al., 2021</a>. </p>
         </div>
         <div id="gl-eda" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">EDA <span class="text-gray-600 font-normal">(Exploratory Data Analysis)</span></div>
-          <p class="text-gray-400">The initial investigation of a dataset to understand its structure, distributions, anomalies, and patterns before formal modeling. For CHB-MIT, this involved analyzing file counts, seizure durations, channel configurations, and patient demographics.</p>
+          <p class="text-gray-400">The initial investigation of a dataset to understand its structure, distributions, anomalies, and patterns before formal modeling. For <a href="#gl-chbmit" class="text-cyan-600 hover:text-cyan-400 hover:underline">CHB-MIT</a>, this involved analyzing file counts, seizure durations, channel configurations, and patient demographics.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Before building anything, you look at the data and ask basic questions: &ldquo;How much do we have? Are there any obvious problems? What does the typical example look like?&rdquo; It&rsquo;s like inspecting the ingredients before you start cooking &mdash; you want to know what you&rsquo;re working with before committing to a recipe.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-tukey1977" class="text-cyan-600 hover:text-cyan-400 hover:underline">Tukey, 1977</a>. </p>
         </div>
       </div>
@@ -3148,7 +3186,7 @@ function navigate() {
   let targetPage = null;
   let targetAnchor = null;
 
-  const pageNames = ['home','methodology','dataset','cleaning','preprocessing','models','roadmap','status','glossary','references'];
+  const pageNames = ['home','methodology','dataset','cleaning','preprocessing','models','design','roadmap','status','glossary','references'];
   if (pageNames.includes(hash)) {
     targetPage = hash;
   } else {

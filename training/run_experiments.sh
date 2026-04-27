@@ -30,11 +30,11 @@ case "$MODE" in
     python -m training.train --experiment e1 --mode single --seeds 42
 
     echo ""
-    echo "--- E2b: SMOTE (single-split, seed 42) ---"
+    echo "--- E2: SMOTE (single-split, seed 42) ---"
     python -m training.train --experiment e2 --augmentation smote --mode single --seeds 42
 
     echo ""
-    echo "--- E2c: ADASYN (single-split, seed 42) ---"
+    echo "--- E2: ADASYN (single-split, seed 42) ---"
     python -m training.train --experiment e2 --augmentation adasyn --mode single --seeds 42
     ;;
 
@@ -44,11 +44,11 @@ case "$MODE" in
     python -m training.train --experiment e1 --mode lopo --seeds 42 123 456
 
     echo ""
-    echo "--- E2b: SMOTE (LOPO, 3 seeds) ---"
+    echo "--- E2: SMOTE (LOPO, 3 seeds) ---"
     python -m training.train --experiment e2 --augmentation smote --mode lopo --seeds 42 123 456
 
     echo ""
-    echo "--- E2c: ADASYN (LOPO, 3 seeds) ---"
+    echo "--- E2: ADASYN (LOPO, 3 seeds) ---"
     python -m training.train --experiment e2 --augmentation adasyn --mode lopo --seeds 42 123 456
     ;;
 
@@ -66,11 +66,11 @@ case "$MODE" in
 
   e2-single)
     echo ""
-    echo "--- E2b: SMOTE (single-split, 3 seeds) ---"
+    echo "--- E2: SMOTE (single-split, 3 seeds) ---"
     python -m training.train --experiment e2 --augmentation smote --mode single --seeds 42 123 456
 
     echo ""
-    echo "--- E2c: ADASYN (single-split, 3 seeds) ---"
+    echo "--- E2: ADASYN (single-split, 3 seeds) ---"
     python -m training.train --experiment e2 --augmentation adasyn --mode single --seeds 42 123 456
     ;;
 

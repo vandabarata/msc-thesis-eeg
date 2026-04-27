@@ -108,8 +108,8 @@ Download the [CHB-MIT Scalp EEG Database](https://physionet.org/content/chbmit/1
 | Experiment | Mean AUPRC | Mean Per-Patient AUPRC | Notes |
 |:----------:|:----------:|:----------------------:|-------|
 | **E1** Baseline | 0.1766 ± 0.0540 | 0.2263 ± 0.0646 | Anchor for all comparisons |
-| **E2b** SMOTE | 0.0685 ± 0.0620 | 0.0921 ± 0.0723 | Below baseline |
-| **E2c** ADASYN | 0.1078 ± 0.0729 | 0.1302 ± 0.0712 | Below baseline |
+| **E2** SMOTE | 0.0685 ± 0.0620 | 0.0921 ± 0.0723 | Below baseline |
+| **E2** ADASYN | 0.1078 ± 0.0729 | 0.1302 ± 0.0712 | Below baseline |
 
 Both non-synthetic controls underperform the baseline, with high variance across seeds. The bar for generative models (E3-E5) remains the E1 baseline. Full results on the [project website](https://vandabarata.github.io/msc-thesis-eeg/).
 
