@@ -379,7 +379,7 @@ tailwind.config = {
           <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Fidelity:</strong> <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a> comparison per frequency band, <a href="#gl-kl" class="text-cyan-600 hover:text-cyan-400 hover:underline">KL divergence</a> per band, <a href="#gl-discriminative" class="text-cyan-600 hover:text-cyan-400 hover:underline">discriminative score</a> (real-vs-synthetic classifier &rarr; 0.5 = indistinguishable)</span></div>
           <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Utility:</strong> <a href="#gl-tstr" class="text-cyan-600 hover:text-cyan-400 hover:underline">TSTR</a> evaluation - synthetic-only training as a standalone quality check</span></div>
           <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Statistical:</strong> <a href="#gl-wilcoxon" class="text-cyan-600 hover:text-cyan-400 hover:underline">Wilcoxon signed-rank test</a> across LOPO folds</span></div>
-          <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Stability:</strong> Per-patient AUPRC dispersion, 3 seeds per experiment</span></div>
+          <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Stability:</strong> Per-patient <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a> dispersion, 3 seeds per experiment</span></div>
         </div>
       </div>
 
@@ -1688,12 +1688,13 @@ tailwind.config = {
           <div class="text-xs font-semibold text-gray-400 mt-4 mb-2 uppercase tracking-wide">Key Dates</div>
           <div class="space-y-1 text-xs text-gray-500">
             <div>30 Mar 2026 - Plan start (Phase 0)</div>
-            <div>21 Apr 2026 - E1+E2 baselines (Phase 1)</div>
-            <div>28 Apr 2026 - TimeGAN training begins (E3)</div>
-            <div>19 May 2026 - CVAE training begins (E4)</div>
-            <div>9 Jun 2026 - LDM training begins (E5, uses CVAE encoder)</div>
-            <div>30 Jun 2026 - Comparison + subject-ID (E6, E7)</div>
-            <div>11 Jul 2026 - All experiments complete</div>
+            <div>21 Apr 2026 - E1+E2 baselines complete (Phase 1)</div>
+            <div>26 Apr 2026 - TimeGAN training complete (E3)</div>
+            <div>28 Apr 2026 - CVAE training begins (E4)</div>
+            <div class="text-gray-400 italic">&mdash; projected &mdash;</div>
+            <div>May 2026 - LDM training (E5, uses CVAE encoder)</div>
+            <div>Jun 2026 - Comparison + subject-ID (E6, E7)</div>
+            <div>Jul 2026 - All experiments complete</div>
             <div>26 Jul 2026 - Thesis writing deadline</div>
           </div>
         </div>
@@ -1812,7 +1813,7 @@ tailwind.config = {
             <div class="flex-1">
               <div class="flex items-center gap-3 flex-wrap mb-2">
                 <div class="font-semibold text-white">TimeGAN Augmentation</div>
-                <span class="px-2 py-0.5 bg-cyan-500/20 rounded text-cyan-400 text-xs animate-pulse">Running</span>
+                <span class="px-2 py-0.5 bg-emerald-500/20 rounded text-emerald-400 text-xs">Done</span>
                 <span class="px-2 py-0.5 bg-rsch-500/20 rounded text-rsch-400 text-xs">Generative</span>
                 <span data-tooltip-ref="RQ2,RQ3" class="px-1.5 py-0.5 bg-gray-800 rounded text-gray-500 text-xs hover:text-cyan-400">RQ2, RQ3</span>
               </div>
@@ -1835,6 +1836,7 @@ tailwind.config = {
             <div class="flex-1">
               <div class="flex items-center gap-3 flex-wrap mb-2">
                 <div class="font-semibold text-white">CVAE Augmentation</div>
+                <span class="px-2 py-0.5 bg-cyan-500/20 rounded text-cyan-400 text-xs animate-pulse">Running</span>
                 <span class="px-2 py-0.5 bg-rsch-500/20 rounded text-rsch-400 text-xs">Generative</span>
                 <span data-tooltip-ref="RQ2,RQ3" class="px-1.5 py-0.5 bg-gray-800 rounded text-gray-500 text-xs hover:text-cyan-400">RQ2, RQ3</span>
               </div>
@@ -1989,7 +1991,7 @@ tailwind.config = {
               <div class="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">Deliverables</div>
               <div class="space-y-1.5 text-xs">
                 <div class="flex items-start gap-2"><span class="text-gray-500 shrink-0">▸</span><span class="text-gray-400"><code class="text-cyan-500">models/detector.py</code> — 1-D CNN architecture, reusable for all experiments</span></div>
-                <div class="flex items-start gap-2"><span class="text-gray-500 shrink-0">▸</span><span class="text-gray-400">Baseline results table: AUPRC, AUROC, F1, sensitivity@95%spec per patient and mean &plusmn; std</span></div>
+                <div class="flex items-start gap-2"><span class="text-gray-500 shrink-0">▸</span><span class="text-gray-400">Baseline results table: <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a>, <a href="#gl-auroc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUROC</a>, <a href="#gl-f1" class="text-cyan-600 hover:text-cyan-400 hover:underline">F1</a>, <a href="#gl-sens95spec" class="text-cyan-600 hover:text-cyan-400 hover:underline">sensitivity@95%spec</a> per patient and mean &plusmn; std</span></div>
                 <div class="flex items-start gap-2"><span class="text-gray-500 shrink-0">▸</span><span class="text-gray-400">SMOTE baseline results for comparison</span></div>
               </div>
               <div class="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide mt-4">Expected outcome</div>
@@ -2385,12 +2387,12 @@ tailwind.config = {
               <td class="py-2 font-semibold text-white">0.2870 &plusmn; 0.0779</td>
             </tr>
             <tr class="border-b border-gray-800/50">
-              <td class="py-2 pr-4 text-gray-300 font-medium">Sens. @ 95% Spec.</td>
+              <td class="py-2 pr-4 text-gray-300 font-medium"><a href="#gl-sens95spec" class="text-cyan-600 hover:text-cyan-400 hover:underline">Sens. @ 95% Spec.</a></td>
               <td class="py-2 pr-4">0.4829</td><td class="py-2 pr-4">0.6639</td><td class="py-2 pr-4">0.7064</td>
               <td class="py-2 font-semibold text-white">0.6177 &plusmn; 0.0965</td>
             </tr>
             <tr class="border-b border-gray-800/50">
-              <td class="py-2 pr-4 text-gray-300 font-medium">Per-patient AUPRC</td>
+              <td class="py-2 pr-4 text-gray-300 font-medium">Per-patient <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></td>
               <td class="py-2 pr-4">0.1366</td><td class="py-2 pr-4">0.2567</td><td class="py-2 pr-4">0.2857</td>
               <td class="py-2 font-semibold text-white">0.2263 &plusmn; 0.0646</td>
             </tr>
@@ -2453,12 +2455,12 @@ tailwind.config = {
                 <td class="py-2 font-semibold text-white">0.1671 &plusmn; 0.1150</td>
               </tr>
               <tr class="border-b border-gray-800/50">
-                <td class="py-2 pr-4 text-gray-300 font-medium">Sens. @ 95% Spec.</td>
+                <td class="py-2 pr-4 text-gray-300 font-medium"><a href="#gl-sens95spec" class="text-cyan-600 hover:text-cyan-400 hover:underline">Sens. @ 95% Spec.</a></td>
                 <td class="py-2 pr-4">0.4938</td><td class="py-2 pr-4">0.0562</td><td class="py-2 pr-4">0.3498</td>
                 <td class="py-2 font-semibold text-white">0.2999 &plusmn; 0.1823</td>
               </tr>
               <tr class="border-b border-gray-800/50">
-                <td class="py-2 pr-4 text-gray-300 font-medium">Per-patient AUPRC</td>
+                <td class="py-2 pr-4 text-gray-300 font-medium">Per-patient <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></td>
                 <td class="py-2 pr-4">0.1831</td><td class="py-2 pr-4">0.0063</td><td class="py-2 pr-4">0.0868</td>
                 <td class="py-2 font-semibold text-white">0.0921 &plusmn; 0.0723</td>
               </tr>
@@ -2507,12 +2509,12 @@ tailwind.config = {
                 <td class="py-2 font-semibold text-white">0.2327 &plusmn; 0.1510</td>
               </tr>
               <tr class="border-b border-gray-800/50">
-                <td class="py-2 pr-4 text-gray-300 font-medium">Sens. @ 95% Spec.</td>
+                <td class="py-2 pr-4 text-gray-300 font-medium"><a href="#gl-sens95spec" class="text-cyan-600 hover:text-cyan-400 hover:underline">Sens. @ 95% Spec.</a></td>
                 <td class="py-2 pr-4">0.3992</td><td class="py-2 pr-4">0.1824</td><td class="py-2 pr-4">0.3388</td>
                 <td class="py-2 font-semibold text-white">0.3068 &plusmn; 0.0912</td>
               </tr>
               <tr class="border-b border-gray-800/50">
-                <td class="py-2 pr-4 text-gray-300 font-medium">Per-patient AUPRC</td>
+                <td class="py-2 pr-4 text-gray-300 font-medium">Per-patient <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></td>
                 <td class="py-2 pr-4">0.2258</td><td class="py-2 pr-4">0.0545</td><td class="py-2 pr-4">0.1104</td>
                 <td class="py-2 font-semibold text-white">0.1302 &plusmn; 0.0712</td>
               </tr>
@@ -2582,12 +2584,12 @@ tailwind.config = {
               <td class="py-2 font-semibold text-white">0.2612 &plusmn; 0.0840</td>
             </tr>
             <tr class="border-b border-gray-800/50">
-              <td class="py-2 pr-4 text-gray-300 font-medium">Sens. @ 95% Spec.</td>
+              <td class="py-2 pr-4 text-gray-300 font-medium"><a href="#gl-sens95spec" class="text-cyan-600 hover:text-cyan-400 hover:underline">Sens. @ 95% Spec.</a></td>
               <td class="py-2 pr-4">0.5432</td><td class="py-2 pr-4">0.3114</td><td class="py-2 pr-4">0.5898</td>
               <td class="py-2 font-semibold text-white">0.4815 &plusmn; 0.1218</td>
             </tr>
             <tr class="border-b border-gray-800/50">
-              <td class="py-2 pr-4 text-gray-300 font-medium">Per-patient AUPRC</td>
+              <td class="py-2 pr-4 text-gray-300 font-medium">Per-patient <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></td>
               <td class="py-2 pr-4">0.1360</td><td class="py-2 pr-4">0.1035</td><td class="py-2 pr-4">0.3434</td>
               <td class="py-2 font-semibold text-white">0.1943 &plusmn; 0.1063</td>
             </tr>
