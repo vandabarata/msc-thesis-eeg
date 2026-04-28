@@ -75,21 +75,36 @@ def extract_ictal_windows(
     return windows, labels, pids
 
 
-def extract_all_windows_batched(
+def extract_balanced_windows(
     dataset: CHBMITDataset,
-    batch_size: int = 1024,
+    interictal_ratio: int = 10,
+    seed: int = 42,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
-    Extract all windows into pre-allocated arrays, reading in batches.
-    Avoids the O(N) list-of-arrays approach that peaks at 2× memory.
+    Extract all ictal windows + subsampled interictal windows.
+
+    Keeps all ictal windows and randomly samples interictal_ratio × n_ictal
+    interictal windows, keeping memory feasible for conditional models
+    (CVAE, LDM) that need both classes.
     """
-    n = dataset._n_real
+    all_labels = dataset._all_labels[:dataset._n_real]
+    ictal_idx = np.where(all_labels == 1)[0]
+    interictal_idx = np.where(all_labels == 0)[0]
+
+    rng = np.random.RandomState(seed)
+    n_inter = min(len(interictal_idx), interictal_ratio * len(ictal_idx))
+    inter_sample = rng.choice(interictal_idx, size=n_inter, replace=False)
+
+    selected = np.concatenate([ictal_idx, inter_sample])
+    rng.shuffle(selected)
+
+    n = len(selected)
     windows = np.empty((n, N_CHANNELS, WINDOW_SAMPLES), dtype=np.float32)
     labels = np.empty(n, dtype=np.int64)
     pids = np.empty(n, dtype=np.int64)
 
-    for i in range(n):
-        w, l, p = dataset._get_real_window(i)
+    for i, real_idx in enumerate(selected):
+        w, l, p = dataset._get_real_window(int(real_idx))
         windows[i] = w
         labels[i] = l
         pids[i] = p
@@ -133,13 +148,13 @@ def train_cvae(
     n_epochs: int = 500,
     verbose: bool = True,
 ) -> "CVAE":
-    """Train CVAE on all windows (ictal + interictal) from the training dataset."""
+    """Train CVAE on balanced windows (all ictal + subsampled interictal)."""
     from models.cvae import CVAE
 
     torch.manual_seed(seed)
     np.random.seed(seed)
 
-    windows, labels, pids = extract_all_windows_batched(train_dataset)
+    windows, labels, pids = extract_balanced_windows(train_dataset, seed=seed)
     if verbose:
         n_ictal = (labels == 1).sum()
         print(f"  Training CVAE on {len(windows)} windows ({n_ictal} ictal)")
@@ -181,7 +196,7 @@ def train_ldm(
     if verbose:
         print(f"  Loaded pretrained CVAE from {cvae_checkpoint}")
 
-    windows, labels, pids = extract_all_windows_batched(train_dataset)
+    windows, labels, pids = extract_balanced_windows(train_dataset, seed=seed)
     if verbose:
         n_ictal = (labels == 1).sum()
         print(f"  Training LDM on {len(windows)} windows ({n_ictal} ictal)")

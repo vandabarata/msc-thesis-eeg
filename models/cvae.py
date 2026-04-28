@@ -221,6 +221,7 @@ class CVAE(nn.Module):
     @staticmethod
     def reparameterize(mu: torch.Tensor, log_var: torch.Tensor) -> torch.Tensor:
         """Reparameterization trick: z = mu + std * eps."""
+        log_var = torch.clamp(log_var, min=-20.0, max=20.0)
         std = torch.exp(0.5 * log_var)
         eps = torch.randn_like(std)
         return mu + std * eps
@@ -350,6 +351,7 @@ class CVAE(nn.Module):
 
                 optimizer.zero_grad()
                 total.backward()
+                torch.nn.utils.clip_grad_norm_(self.parameters(), max_norm=1.0)
                 optimizer.step()
 
                 epoch_total += total.item()
