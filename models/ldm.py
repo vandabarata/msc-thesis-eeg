@@ -566,6 +566,9 @@ class LatentDiffusion(nn.Module):
 
         # Only optimize UNet parameters
         optimizer = torch.optim.AdamW(self.unet.parameters(), lr=lr)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer, mode="min", factor=0.5, patience=10, min_lr=1e-6,
+        )
         history = {"loss": []}
 
         for epoch in range(n_epochs):
@@ -581,6 +584,12 @@ class LatentDiffusion(nn.Module):
 
                 loss = self.p_losses(z_0, y)
 
+                if torch.isnan(loss) or torch.isinf(loss):
+                    raise RuntimeError(
+                        f"LDM training diverged at epoch {epoch+1}, "
+                        f"batch {i//batch_size}: loss={loss.item()}"
+                    )
+
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
@@ -591,8 +600,11 @@ class LatentDiffusion(nn.Module):
             avg = epoch_loss / max(n_batches, 1)
             history["loss"].append(avg)
 
+            scheduler.step(avg)
+
             if verbose and (epoch + 1) % 50 == 0:
-                print(f"    Epoch {epoch+1}/{n_epochs}: loss={avg:.6f}")
+                current_lr = optimizer.param_groups[0]["lr"]
+                print(f"    Epoch {epoch+1}/{n_epochs}: loss={avg:.6f} (lr={current_lr:.1e})")
 
         return history
 

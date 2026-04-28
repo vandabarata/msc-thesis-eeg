@@ -263,6 +263,13 @@ def save_synthetic_windows(
     labels = np.array([l for _, l, _ in synthetic], dtype=np.int64)
     pids = np.array([p for _, _, p in synthetic], dtype=np.int64)
 
+    nan_count = np.isnan(windows).sum()
+    if nan_count > 0:
+        raise RuntimeError(
+            f"Synthetic windows contain {nan_count} NaN values — "
+            f"generator training likely diverged. Refusing to save."
+        )
+
     path = save_dir / f"synthetic_ratio_{ratio:.2f}.npz"
     np.savez_compressed(path, windows=windows, labels=labels, patient_ids=pids)
     print(f"  Saved {len(synthetic)} synthetic windows to {path}")

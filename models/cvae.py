@@ -273,6 +273,15 @@ class CVAE(nn.Module):
     ) -> List[Tuple[np.ndarray, int, int]]:
         """Generate synthetic EEG windows by sampling from the prior."""
         self.eval()
+
+        # Verify model weights are valid before generating
+        for name, param in self.named_parameters():
+            if torch.isnan(param).any():
+                raise RuntimeError(
+                    f"CVAE has NaN weights in '{name}' — model training diverged. "
+                    f"Cannot generate synthetic data."
+                )
+
         synthetic = []
         batch_size = min(64, n_samples)
 
@@ -330,6 +339,9 @@ class CVAE(nn.Module):
             p_cpu = torch.from_numpy(patient_ids).long()
 
         optimizer = torch.optim.Adam(self.parameters(), lr=lr)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer, mode="min", factor=0.5, patience=10, min_lr=1e-5,
+        )
         history = {"total_loss": [], "recon_loss": [], "kl_loss": [], "beta": []}
 
         for epoch in range(n_epochs):
@@ -349,6 +361,12 @@ class CVAE(nn.Module):
                 x_recon, mu, log_var = self.forward(x, y, p)
                 total, recon, kl = self.loss_function(x, x_recon, mu, log_var, beta)
 
+                if torch.isnan(total) or torch.isinf(total):
+                    raise RuntimeError(
+                        f"CVAE training diverged at epoch {epoch+1}, "
+                        f"batch {i//batch_size}: loss={total.item()}"
+                    )
+
                 optimizer.zero_grad()
                 total.backward()
                 torch.nn.utils.clip_grad_norm_(self.parameters(), max_norm=1.0)
@@ -367,9 +385,12 @@ class CVAE(nn.Module):
             history["kl_loss"].append(avg_k)
             history["beta"].append(beta)
 
+            scheduler.step(avg_t)
+
             if verbose and (epoch + 1) % 50 == 0:
+                current_lr = optimizer.param_groups[0]["lr"]
                 print(f"    Epoch {epoch+1}/{n_epochs}: loss={avg_t:.4f} "
-                      f"(recon={avg_r:.4f}, kl={avg_k:.4f}, beta={beta:.2f})")
+                      f"(recon={avg_r:.4f}, kl={avg_k:.4f}, beta={beta:.2f}, lr={current_lr:.1e})")
 
         return history
 
