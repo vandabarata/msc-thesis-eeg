@@ -226,7 +226,7 @@ def process_metadata(summary_path: str, edf_filename: str, fs: int) -> Metadata:
 
 
 # -----------------------------
-# EDF selection / normalization
+# EDF selection/ normalization
 # -----------------------------
 def choose_indices_for_file(edf_path: str, valid_channels: List[str]) -> Optional[Tuple[List[int], int]]:
     """
@@ -331,12 +331,12 @@ def _is_unwanted_channel(label: str) -> bool:
 
     Dropped categories (beyond the original ECG/EKG/DUMMY/"-"/"."):
       - VNS: vagal nerve stimulator pulse channel (chb09 set 1).
-      - Polygraphy pairs (LOC-ROC, LUE-RAE): eye-movement / auricular
+      - Polygraphy pairs (LOC-ROC, LUE-RAE): eye-movement/ auricular
         channels, not EEG (chb12 set 3, chb13 set 1).
       - Common-reference suffixes (*-CS2, *-Ref): channels recorded in a
         referential montage rather than the standard bipolar montage
         (chb12 sets 0/1, chb15 sets 0/1).
-      - Unipolar / absolute labels (no hyphen): single-electrode names
+      - Unipolar/ absolute labels (no hyphen): single-electrode names
         such as "C2", "CZ", "T7" that appear in chb12 set 0 alongside
         the bipolar channels.
     """
@@ -351,13 +351,13 @@ def _is_unwanted_channel(label: str) -> bool:
     # vagal nerve stimulator
     if u == "VNS":
         return True
-    # polygraphy (ocular / auricular)
+    # polygraphy (ocular/ auricular)
     if u in _POLYGRAPHY_CHANNELS:
         return True
     # common-reference montage suffixes — not bipolar EEG
     if u.endswith("-CS2") or u.endswith("-REF"):
         return True
-    # unipolar / absolute channel: no hyphen means it is not a bipolar pair
+    # unipolar/ absolute channel: no hyphen means it is not a bipolar pair
     if "-" not in stripped:
         return True
     return False

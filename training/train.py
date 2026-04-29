@@ -89,7 +89,7 @@ class TrainConfig:
     save_checkpoints: bool = True
 
 
-# ── SMOTE / ADASYN Augmentation ───────────────────────────────────────────
+# ── SMOTE/ ADASYN Augmentation ────────────────────────────────────────────
 _INTERICTAL_RATIO = 10  # interictal subsample = 10× ictal count
 
 def apply_oversampling(
