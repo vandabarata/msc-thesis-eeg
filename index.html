@@ -186,7 +186,7 @@ tailwind.config = {
             <span class="w-2 h-2 bg-iscte-400 rounded-full animate-pulse shrink-0"></span>
             MSc Thesis &middot; Running ~60%
           </a>
-          <span class="text-xs text-gray-600">Last updated: 28 April 2026</span>
+          <span class="text-xs text-gray-600">Last updated: 29 April 2026</span>
         </div>
         <h1 class="text-3xl sm:text-4xl lg:text-6xl font-extrabold text-white leading-tight mb-3 sm:mb-3">
           Synthetic Data in Healthcare:<br>
@@ -1505,10 +1505,16 @@ tailwind.config = {
                 <td class="py-3">No early stopping for the generator - epoch count is the primary convergence control. 500 with 50-epoch KL annealing gives 450 epochs at full regularisation. Loss continues declining gradually through the full run (recon loss drops ~20% between epoch 200 and 500).</td>
               </tr>
               <tr class="border-b border-gray-800/50">
-                <td class="py-3 pr-4 text-gray-300 font-medium">Numerical stability</td>
-                <td class="py-3 pr-4"><code class="text-cyan-500">log_var</code> clamp [&minus;20, 20] + grad clip (1.0) + <code class="text-cyan-500">ReduceLROnPlateau</code></td>
+                <td class="py-3 pr-4 text-gray-300 font-medium">Learning rate</td>
+                <td class="py-3 pr-4">5e-4 (Adam, eps=1e-7) + 5-epoch linear warmup from 5e-5</td>
 
-                <td class="py-3">Without clamping, <code class="text-cyan-500">exp(0.5 &times; log_var)</code> in the reparameterization trick can overflow to <code class="text-cyan-500">inf</code> for certain initializations, cascading to NaN across all weights. Gradient clipping prevents a single bad batch from making outsized weight updates. The LR scheduler (patience=10, factor=0.5, min_lr=1e-5) automatically reduces the learning rate when loss stalls or climbs, preventing divergence caused by large MSE values on raw &micro;V-scale data (&plusmn;800). All are standard <a href="#gl-vae" class="text-cyan-600 hover:text-cyan-400 hover:underline">VAE</a> practice.</td>
+                <td class="py-3">Reduced from 1e-3 after epoch-1 NaN divergence. The warmup ramps LR from lr/10 to lr over 5 epochs, protecting the critical first steps when random weights + random batch ordering can overflow the decoder. <code class="text-cyan-500">ReduceLROnPlateau</code> (patience=10, factor=0.5, min_lr=1e-5) activates after warmup completes.</td>
+              </tr>
+              <tr class="border-b border-gray-800/50">
+                <td class="py-3 pr-4 text-gray-300 font-medium">Numerical stability</td>
+                <td class="py-3 pr-4"><code class="text-cyan-500">log_var</code> clamp [&minus;20, 20] + grad clip (1.0) + NaN guards</td>
+
+                <td class="py-3">Without clamping, <code class="text-cyan-500">exp(0.5 &times; log_var)</code> in the reparameterization trick can overflow to <code class="text-cyan-500">inf</code> for certain initializations, cascading to NaN across all weights. Gradient clipping prevents a single bad batch from making outsized weight updates. Training raises immediately on NaN/Inf loss; generation refuses to run if model weights contain NaN. All are standard <a href="#gl-vae" class="text-cyan-600 hover:text-cyan-400 hover:underline">VAE</a> practice.</td>
               </tr>
             </tbody>
           </table>
@@ -2296,7 +2302,7 @@ tailwind.config = {
 <div id="page-status" class="page">
   <section class="max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12">
     <h1 class="text-3xl font-bold text-white mb-2">Current Status</h1>
-    <p class="text-gray-500 mb-3">Implementation progress and experimental results. Last updated: 28 April 2026. See <a href="#design" class="text-cyan-600 hover:text-cyan-400 hover:underline">Design Decisions</a> for parameter justifications and <a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">Roadmap</a> for the full experiment plan.</p>
+    <p class="text-gray-500 mb-3">Implementation progress and experimental results. Last updated: 29 April 2026. See <a href="#design" class="text-cyan-600 hover:text-cyan-400 hover:underline">Design Decisions</a> for parameter justifications and <a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">Roadmap</a> for the full experiment plan.</p>
 
     <!-- Progress overview -->
     <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-3">
@@ -2344,7 +2350,7 @@ tailwind.config = {
         <h3 class="font-semibold text-white mb-3 text-sm">What's Left</h3>
         <div class="space-y-2 text-xs">
           <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-1 mb-1">Generator experiments</div>
-          <div class="flex items-start gap-2"><span class="text-cyan-400 shrink-0 animate-pulse">&#9679;</span><span class="text-gray-400"><strong class="text-cyan-400">E4 CVAE running</strong> (<a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E4</a>) - re-running all 3 seeds after numerical stability fix (log_var clamping + gradient clipping + LR scheduler)</span></div>
+          <div class="flex items-start gap-2"><span class="text-cyan-400 shrink-0 animate-pulse">&#9679;</span><span class="text-gray-400"><strong class="text-cyan-400">E4 CVAE running</strong> (<a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E4</a>) - re-running all 3 seeds with LR warmup fix (5e-5 to 5e-4 over 5 epochs)</span></div>
           <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">LDM training (<a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E5</a>) - after CVAE, reuses its encoder</span></div>
           <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-3 mb-1">Analysis &amp; writing</div>
           <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">Full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> evaluation (23 folds &times; 3 seeds per experiment)</span></div>
@@ -2632,8 +2638,9 @@ tailwind.config = {
         <span class="ml-auto text-xs font-semibold text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 px-2 py-0.5 rounded animate-pulse">RUNNING</span>
       </div>
       <div class="text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-3 space-y-2">
-        <p><strong class="text-gray-400">Issue encountered:</strong> The initial E4 run completed seed 42 successfully but seeds 123 and 456 diverged to NaN. The root cause is that generators train on raw &micro;V-scale data (&plusmn;800) to avoid double-normalization, producing MSE reconstruction losses in the thousands. These large losses generate consistently large gradients, and with certain random seeds (weight initialization + batch ordering), the Adam optimizer enters an unstable trajectory where a weight update overshoots into a region where <code class="text-cyan-500">exp(0.5 &times; log_var)</code> overflows, cascading NaN through all parameters. The corrupted model then generates all-NaN synthetic windows, crashing detector training downstream.</p>
-        <p><strong class="text-gray-400">Fix applied:</strong> Three standard <a href="#gl-vae" class="text-cyan-600 hover:text-cyan-400 hover:underline">VAE</a> stability measures: (1) clamp <code class="text-cyan-500">log_var</code> to [&minus;20, 20] before exponentiation, preventing float32 overflow in the reparameterization trick, (2) clip gradient norm to 1.0 after each backward pass, bounding the maximum update per step, (3) <code class="text-cyan-500">ReduceLROnPlateau</code> scheduler (patience=10, factor=0.5, min_lr=1e-5) &mdash; when loss stops improving (the precursor to divergence), the scheduler automatically shrinks the learning rate, pulling the optimizer back from the unstable region. None of these change the architecture, loss function, or hyperparameters &mdash; they only prevent numerical instability during training. All 3 seeds re-running from scratch for fair comparison.</p>
+        <p><strong class="text-gray-400">Issue encountered:</strong> CVAE training diverged to NaN for certain seeds. The root cause: generators train on raw &micro;V-scale data (&plusmn;800) to avoid double-normalization, producing large MSE gradients. With certain random seeds (weight initialization + batch ordering), the Adam optimizer enters an unstable trajectory where <code class="text-cyan-500">exp(0.5 &times; log_var)</code> overflows, cascading NaN through all parameters.</p>
+        <p><strong class="text-gray-400">Fixes that helped but weren't sufficient alone:</strong> (1) clamp <code class="text-cyan-500">log_var</code> to [&minus;20, 20] before exponentiation, (2) clip gradient norm to 1.0, (3) <code class="text-cyan-500">ReduceLROnPlateau</code> scheduler (patience=10, factor=0.5, min_lr=1e-5). These prevented late-epoch divergence but not epoch-1 NaN, because the scheduler needs history to trigger and <code class="text-cyan-500">lr=1e-3</code> is too aggressive on randomly-initialized weights.</p>
+        <p><strong class="text-gray-400">Final fix:</strong> (4) Reduced base LR from <code class="text-cyan-500">1e-3</code> to <code class="text-cyan-500">5e-4</code>, (5) linear LR warmup over 5 epochs from <code class="text-cyan-500">5e-5</code> to <code class="text-cyan-500">5e-4</code> - protects the critical first steps when random weights can overflow the decoder, (6) lower Adam epsilon (<code class="text-cyan-500">1e-7</code>). None of these change the architecture or loss function. All 3 seeds re-running from scratch for fair comparison.</p>
       </div>
     </div>
 
@@ -2679,6 +2686,7 @@ tailwind.config = {
       <div class="text-xs text-gray-500 font-semibold uppercase tracking-wide mb-3">Quick Index</div>
       <div class="flex flex-wrap gap-x-3 gap-y-1 text-xs">
         <a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400">ADASYN</a>
+        <a href="#gl-adam" class="text-cyan-600 hover:text-cyan-400">Adam/ AdamW</a>
         <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400">AUPRC</a>
         <a href="#gl-auroc" class="text-cyan-600 hover:text-cyan-400">AUROC</a>
         <a href="#gl-butterworth" class="text-cyan-600 hover:text-cyan-400">Butterworth Filter</a>
@@ -2956,6 +2964,12 @@ tailwind.config = {
           <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">A student studying for an exam improves at first, then hits a point where more studying starts hurting (they memorize answers instead of understanding concepts). Early stopping is like a parent saying: &ldquo;If your practice test scores don&rsquo;t improve for 10 days in a row, stop studying and go with your best score so far.&rdquo; It keeps the model from memorizing the training data instead of learning general patterns.</p></details>
           <p class="text-gray-600 text-sm mt-2"><a href="#cite-prechelt1998" class="text-cyan-600 hover:text-cyan-400 hover:underline">Prechelt, 1998</a>. Patience=10 is a common default in PyTorch practice.</p>
         </div>
+        <div id="gl-adam" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
+          <div class="font-semibold text-cyan-500 mb-1">Adam/ AdamW Optimizer</div>
+          <p class="text-gray-400"><strong class="text-white">Adam</strong> (Adaptive Moment Estimation) is an optimizer that maintains per-parameter running averages of both the gradient (first moment) and the squared gradient (second moment). This gives each weight its own adaptive learning rate: parameters with consistently large gradients get smaller steps, and vice versa. <strong class="text-white">AdamW</strong> is a variant that decouples weight decay from the adaptive step, improving generalization. In this thesis, the detector and CVAE use Adam; the LDM uses AdamW.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Basic gradient descent is like descending a mountain in thick fog with fixed-size steps. Adam is like having a GPS that remembers which direction you&rsquo;ve been going (momentum) and how steep the terrain has been (adaptive step size). On flat plateaus it takes bigger steps; near steep cliffs it takes smaller ones. This makes it much faster and more stable than fixed-step approaches, which is why it&rsquo;s the default optimizer for most deep learning.</p></details>
+          <p class="text-gray-600 text-sm mt-2"><a href="#cite-kingma2015" class="text-cyan-600 hover:text-cyan-400 hover:underline">Kingma &amp; Ba, 2015</a>. AdamW variant: <a href="#cite-loshchilov2019" class="text-cyan-600 hover:text-cyan-400 hover:underline">Loshchilov &amp; Hutter, 2019</a>.</p>
+        </div>
         <div id="gl-modecollapse" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">Mode Collapse</div>
           <p class="text-gray-400">A failure mode specific to GANs where the generator learns to produce only a narrow subset of the possible outputs, ignoring the full diversity of the training data. For seizure EEG, this would mean the generator always produces the same seizure pattern instead of capturing the variety of ictal morphologies across different patients and seizure types.</p>
@@ -3114,6 +3128,9 @@ tailwind.config = {
       <div id="cite-kingma2014" class="flex gap-3 p-2.5 rounded hover:bg-gray-800/40 transition-colors scroll-mt-20">
         <div>D. P. <strong class="text-white">Kingma</strong> and M. Welling, &ldquo;Auto-encoding variational Bayes,&rdquo; in <em>Proc. ICLR</em>, 2014. <a href="https://doi.org/10.48550/arXiv.1312.6114" target="_blank" class="text-cyan-600 hover:text-cyan-400 hover:underline">doi: 10.48550/arXiv.1312.6114</a><span class="ml-2 px-1.5 py-0.5 bg-gray-700/40 rounded text-gray-500 text-xs font-medium shrink-0">Foundational</span></div>
       </div>
+      <div id="cite-kingma2015" class="flex gap-3 p-2.5 rounded hover:bg-gray-800/40 transition-colors scroll-mt-20">
+        <div>D. P. <strong class="text-white">Kingma</strong> and J. Ba, &ldquo;Adam: A method for stochastic optimization,&rdquo; in <em>Proc. ICLR</em>, 2015. <a href="https://doi.org/10.48550/arXiv.1412.6980" target="_blank" class="text-cyan-600 hover:text-cyan-400 hover:underline">doi: 10.48550/arXiv.1412.6980</a><span class="ml-2 px-1.5 py-0.5 bg-gray-700/40 rounded text-gray-500 text-xs font-medium shrink-0">Foundational</span></div>
+      </div>
       <div id="cite-kohavi1995" class="flex gap-3 p-2.5 rounded hover:bg-gray-800/40 transition-colors scroll-mt-20">
         <div>R. <strong class="text-white">Kohavi</strong>, &ldquo;A study of cross-validation and bootstrap for accuracy estimation and model selection,&rdquo; in <em>Proc. IJCAI</em>, vol. 14, no. 2, 1995, pp. 1137&ndash;1145. [Online]. Available: <a href="https://dl.acm.org/doi/10.5555/1643031.1643047" target="_blank" class="text-cyan-600 hover:text-cyan-400 hover:underline">ACM DL</a><span class="ml-2 px-1.5 py-0.5 bg-gray-700/40 rounded text-gray-500 text-xs font-medium shrink-0">Foundational</span></div>
       </div>
@@ -3125,6 +3142,9 @@ tailwind.config = {
       </div>
       <div id="cite-lemieux2024" class="flex gap-3 p-2.5 rounded hover:bg-gray-800/40 transition-colors scroll-mt-20">
         <div>V. L. <strong class="text-white">Lemieux</strong> and J. Werner, &ldquo;Protecting privacy in digital records: the potential of privacy-enhancing technologies,&rdquo; <em>J. Comput. Cult. Herit.</em>, vol. 16, no. 4, 2024. <a href="https://doi.org/10.1145/3633477" target="_blank" class="text-cyan-600 hover:text-cyan-400 hover:underline">doi: 10.1145/3633477</a><span class="ml-2 px-1.5 py-0.5 bg-iscte-500/20 rounded text-cyan-500 text-xs font-medium shrink-0">SLR</span></div>
+      </div>
+      <div id="cite-loshchilov2019" class="flex gap-3 p-2.5 rounded hover:bg-gray-800/40 transition-colors scroll-mt-20">
+        <div>I. <strong class="text-white">Loshchilov</strong> and F. Hutter, &ldquo;Decoupled weight decay regularization,&rdquo; in <em>Proc. ICLR</em>, 2019. <a href="https://doi.org/10.48550/arXiv.1711.05101" target="_blank" class="text-cyan-600 hover:text-cyan-400 hover:underline">doi: 10.48550/arXiv.1711.05101</a><span class="ml-2 px-1.5 py-0.5 bg-gray-700/40 rounded text-gray-500 text-xs font-medium shrink-0">Foundational</span></div>
       </div>
       <div id="cite-nichol2021" class="flex gap-3 p-2.5 rounded hover:bg-gray-800/40 transition-colors scroll-mt-20">
         <div>A. <strong class="text-white">Nichol</strong> and P. Dhariwal, &ldquo;Improved denoising diffusion probabilistic models,&rdquo; in <em>Proc. ICML</em>, 2021. <a href="https://doi.org/10.48550/arXiv.2102.09672" target="_blank" class="text-cyan-600 hover:text-cyan-400 hover:underline">doi: 10.48550/arXiv.2102.09672</a><span class="ml-2 px-1.5 py-0.5 bg-rsch-500/20 rounded text-rsch-400 text-xs font-medium shrink-0">Thesis</span></div>

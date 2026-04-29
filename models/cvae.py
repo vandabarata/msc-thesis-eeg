@@ -309,7 +309,7 @@ class CVAE(nn.Module):
         patient_ids: Optional[np.ndarray] = None,
         n_epochs: int = 500,
         batch_size: int = 64,
-        lr: float = 1e-3,
+        lr: float = 5e-4,
         beta_warmup: int = 50,
         device: str = "cpu",
         verbose: bool = True,
@@ -338,10 +338,11 @@ class CVAE(nn.Module):
         if patient_ids is not None and self.n_patients:
             p_cpu = torch.from_numpy(patient_ids).long()
 
-        optimizer = torch.optim.Adam(self.parameters(), lr=lr)
+        optimizer = torch.optim.Adam(self.parameters(), lr=lr, eps=1e-7)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             optimizer, mode="min", factor=0.5, patience=10, min_lr=1e-5,
         )
+        lr_warmup_epochs = 5
         history = {"total_loss": [], "recon_loss": [], "kl_loss": [], "beta": []}
 
         for epoch in range(n_epochs):
@@ -349,6 +350,12 @@ class CVAE(nn.Module):
             perm = torch.randperm(N)
             epoch_total = epoch_recon = epoch_kl = 0.0
             n_batches = 0
+
+            # LR warmup: ramp from lr/10 to lr over first few epochs
+            if epoch < lr_warmup_epochs:
+                warmup_factor = 0.1 + 0.9 * (epoch / lr_warmup_epochs)
+                for pg in optimizer.param_groups:
+                    pg["lr"] = lr * warmup_factor
 
             beta = min(1.0, epoch / max(beta_warmup, 1))
 
@@ -385,7 +392,8 @@ class CVAE(nn.Module):
             history["kl_loss"].append(avg_k)
             history["beta"].append(beta)
 
-            scheduler.step(avg_t)
+            if epoch >= lr_warmup_epochs:
+                scheduler.step(avg_t)
 
             if verbose and (epoch + 1) % 50 == 0:
                 current_lr = optimizer.param_groups[0]["lr"]
