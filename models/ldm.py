@@ -579,6 +579,8 @@ class LatentDiffusion(nn.Module):
 
             for i in range(0, N, batch_size):
                 idx = perm[i:i + batch_size]
+                if len(idx) < 2:
+                    continue
                 z_0 = z_cpu[idx].to(device)
                 y = y_cpu[idx].to(device)
 
@@ -592,6 +594,7 @@ class LatentDiffusion(nn.Module):
 
                 optimizer.zero_grad()
                 loss.backward()
+                torch.nn.utils.clip_grad_norm_(self.unet.parameters(), 1.0)
                 optimizer.step()
 
                 epoch_loss += loss.item()
