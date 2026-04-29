@@ -1695,12 +1695,13 @@ tailwind.config = {
           <div class="text-xs font-semibold text-gray-400 mt-4 mb-2 uppercase tracking-wide">Key Dates</div>
           <div class="space-y-1 text-xs text-gray-500">
             <div>30 Mar 2026 - Plan start (Phase 0)</div>
-            <div>21 Apr 2026 - E1+E2 baselines complete (Phase 1)</div>
-            <div>26 Apr 2026 - TimeGAN training complete (E3)</div>
+            <div>21 Apr 2026 - E1+E2 baselines complete (single-split)</div>
+            <div>26 Apr 2026 - TimeGAN complete (E3, single-split)</div>
             <div>28 Apr 2026 - CVAE training begins (E4)</div>
             <div class="text-gray-400 italic">&mdash; projected &mdash;</div>
-            <div>May 2026 - LDM training (E5, uses CVAE encoder)</div>
-            <div>Jun 2026 - Comparison + subject-ID (E6, E7)</div>
+            <div>May 2026 - LDM training (E5, single-split)</div>
+            <div>May&ndash;Jun 2026 - Full LOPO runs (E1&ndash;E5, 23 folds)</div>
+            <div>Jun&ndash;Jul 2026 - Comparison + subject-ID (E6, E7)</div>
             <div>Jul 2026 - All experiments complete</div>
             <div>26 Jul 2026 - Thesis writing deadline</div>
           </div>
@@ -1782,7 +1783,7 @@ tailwind.config = {
             <div class="flex-1">
               <div class="flex items-center gap-3 flex-wrap mb-2">
                 <div class="font-semibold text-white">Baseline Detector (Real Data Only)</div>
-                <span class="px-2 py-0.5 bg-emerald-500/20 rounded text-emerald-400 text-xs">Done</span>
+                <span class="px-2 py-0.5 bg-emerald-500/20 rounded text-emerald-400 text-xs">Single-split done</span>
                 <span class="px-2 py-0.5 bg-gray-700/30 rounded text-gray-300 text-xs">Anchor</span>
                 <span data-tooltip-ref="RQ2" class="px-1.5 py-0.5 bg-gray-800 rounded text-gray-500 text-xs hover:text-cyan-400">RQ2</span>
               </div>
@@ -1801,7 +1802,7 @@ tailwind.config = {
             <div class="flex-1">
               <div class="flex items-center gap-3 flex-wrap mb-2">
                 <div class="font-semibold text-white">Non-Synthetic Controls (<a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a>, <a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400 hover:underline">ADASYN</a>)</div>
-                <span class="px-2 py-0.5 bg-emerald-500/20 rounded text-emerald-400 text-xs">Done</span>
+                <span class="px-2 py-0.5 bg-emerald-500/20 rounded text-emerald-400 text-xs">Single-split done</span>
                 <span class="px-2 py-0.5 bg-sky-500/20 rounded text-sky-400 text-xs">Control</span>
                 <span data-tooltip-ref="RQ2" class="px-1.5 py-0.5 bg-gray-800 rounded text-gray-500 text-xs hover:text-cyan-400">RQ2</span>
               </div>
@@ -1820,7 +1821,7 @@ tailwind.config = {
             <div class="flex-1">
               <div class="flex items-center gap-3 flex-wrap mb-2">
                 <div class="font-semibold text-white">TimeGAN Augmentation</div>
-                <span class="px-2 py-0.5 bg-emerald-500/20 rounded text-emerald-400 text-xs">Done</span>
+                <span class="px-2 py-0.5 bg-emerald-500/20 rounded text-emerald-400 text-xs">Single-split done</span>
                 <span class="px-2 py-0.5 bg-rsch-500/20 rounded text-rsch-400 text-xs">Generative</span>
                 <span data-tooltip-ref="RQ2,RQ3" class="px-1.5 py-0.5 bg-gray-800 rounded text-gray-500 text-xs hover:text-cyan-400">RQ2, RQ3</span>
               </div>
@@ -1937,7 +1938,7 @@ tailwind.config = {
       <!-- Gantt chart -->
       <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-3">
         <h3 class="font-semibold text-white mb-1">Phase Overview (30 Mar &ndash; 26 Jul 2026)</h3>
-        <p class="text-xs text-gray-500 mb-3">Sequential execution on a single machine. Each generator runs <a href="#gl-singlesplit" class="text-cyan-600 hover:text-cyan-400 hover:underline">single-split</a> first (fast validation), then full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> once all generators succeed. TimeGAN (independent) ran first, then CVAE (in progress), then LDM (reuses CVAE encoder). Writing runs alongside from 21 Apr.</p>
+        <p class="text-xs text-gray-500 mb-3">Sequential execution on a single machine. Each generator runs <a href="#gl-singlesplit" class="text-cyan-600 hover:text-cyan-400 hover:underline">single-split</a> first (fast validation), then full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> once all generators succeed. TimeGAN (independent) ran first, then CVAE (in progress), then LDM (reuses CVAE encoder). Thesis writing has been ongoing since Jan 2026 (midterm submitted 31 Jan).</p>
         <div class="chart-wrap" style="height:clamp(260px,40vw,340px)"><canvas id="chart-gantt"></canvas></div>
       </div>
 
@@ -2166,14 +2167,14 @@ tailwind.config = {
         <!-- Phase 7: Writing -->
         <div class="bg-gray-900 border border-gray-700/50 rounded-xl overflow-hidden">
           <div class="flex items-center gap-3 px-5 py-3 bg-gray-800/50 border-b border-gray-700/50">
-            <span class="text-xs font-bold text-white bg-gray-700/50 px-2 py-0.5 rounded">21 Apr &ndash; 26 Jul</span>
-            <span class="font-semibold text-white text-sm">Thesis Writing (ongoing from 21 Apr)</span>
-            <span class="ml-auto text-xs text-gray-400">14 weeks, ongoing</span>
+            <span class="text-xs font-bold text-white bg-gray-700/50 px-2 py-0.5 rounded">Jan 2026 &ndash; 26 Jul</span>
+            <span class="font-semibold text-white text-sm">Thesis Writing (ongoing since Jan 2026)</span>
+            <span class="ml-auto text-xs text-gray-400">~7 months, ongoing</span>
           </div>
           <div class="p-5 grid md:grid-cols-3 gap-4 text-xs">
             <div>
-              <div class="font-semibold text-gray-400 mb-2">Chapters 1&ndash;5: Written</div>
-              <div class="text-gray-500">Introduction, SLR, theoretical background, proposed approach, and experimental design are complete (29 pages). Written alongside implementation.</div>
+              <div class="font-semibold text-gray-400 mb-2">Chapters 1&ndash;5: Written (since Jan 2026)</div>
+              <div class="text-gray-500">Introduction, SLR, theoretical background, proposed approach, and experimental design are complete (29 pages). Midterm submission delivered 31 Jan 2026.</div>
             </div>
             <div>
               <div class="font-semibold text-gray-400 mb-2">28 Apr &ndash; 11 Jul: Results as they come</div>
@@ -2343,7 +2344,7 @@ tailwind.config = {
         <div class="space-y-2 text-xs">
           <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><strong class="text-emerald-400">Data pipeline complete</strong> - <a href="#gl-edf" class="text-cyan-600 hover:text-cyan-400 hover:underline">EDF</a> <a href="#gl-homogenization" class="text-cyan-600 hover:text-cyan-400 hover:underline">homogenization</a>, PyTorch Dataset with <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a>, preprocessing, QC, leakage-safe normalization, flat-signal mmap cache</span></div>
           <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><strong class="text-emerald-400">All models written</strong> - <a href="#gl-frozen" class="text-cyan-600 hover:text-cyan-400 hover:underline">Frozen 1D-CNN</a> detector (49K params), <a href="#gl-timegan" class="text-cyan-600 hover:text-cyan-400 hover:underline">TimeGAN</a> (1.6M), <a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a> (1.9M), <a href="#gl-ldm" class="text-cyan-600 hover:text-cyan-400 hover:underline">LDM</a> (2.3M)</span></div>
-          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><strong class="text-emerald-400">E1 + E2 + E3 complete</strong> - baseline, <a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a>/<a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400 hover:underline">ADASYN</a> controls, and <a href="#gl-timegan" class="text-cyan-600 hover:text-cyan-400 hover:underline">TimeGAN</a> augmentation, 3 seeds each (results below)</span></div>
+          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><strong class="text-emerald-400">E1 + E2 + E3 complete (<a href="#gl-singlesplit" class="text-cyan-600 hover:text-cyan-400 hover:underline">single-split</a>)</strong> - baseline, <a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a>/<a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400 hover:underline">ADASYN</a> controls, and <a href="#gl-timegan" class="text-cyan-600 hover:text-cyan-400 hover:underline">TimeGAN</a> augmentation, 3 seeds each (results below). Full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> pending.</span></div>
           <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><strong class="text-emerald-400">Training infrastructure ready</strong> - <a href="#gl-earlystopping" class="text-cyan-600 hover:text-cyan-400 hover:underline">early stopping</a>, LOPO + <a href="#gl-singlesplit" class="text-cyan-600 hover:text-cyan-400 hover:underline">single-split</a>, per-fold resume, full metric suite, visualization tools</span></div>
         </div>
       </div>
@@ -3675,15 +3676,17 @@ function initRoadmapCharts() {
   }
 
   // Gantt data: [start_week, duration_weeks] per phase
+  // Week 1 = 30 Mar. Week 4 = 21 Apr. Week 5 = 28 Apr. etc.
   const phases = [
     { label: 'P0: Pipeline (done)',         start: 1,  dur: 3,  color: 'rgba(148,163,184,0.25)', border: 'rgba(148,163,184,0.5)' },
-    { label: 'P1: Baseline (E1+E2)',      start: 4,  dur: 1,  color: 'rgba(156,163,175,0.40)', border: 'rgba(156,163,175,0.8)' },
-    { label: 'P2: TimeGAN (E3)',           start: 5,  dur: 3,  color: 'rgba(133,23,172,0.55)',  border: 'rgba(133,23,172,0.9)' },
-    { label: 'P3: CVAE (E4)',              start: 8,  dur: 3,  color: 'rgba(20,191,184,0.55)',  border: 'rgba(20,191,184,0.9)' },
-    { label: 'P4: LDM (E5)',              start: 11, dur: 3,  color: 'rgba(52,211,153,0.55)',  border: 'rgba(52,211,153,0.9)' },
-    { label: 'P5: Compare (E6)',           start: 14, dur: 2,  color: 'rgba(245,158,11,0.55)',  border: 'rgba(245,158,11,0.9)' },
-    { label: 'P6: Subject-ID (E7)',        start: 14, dur: 2,  color: 'rgba(244,63,94,0.55)',   border: 'rgba(244,63,94,0.9)' },
-    { label: 'Writing (ongoing)',          start: 4,  dur: 14, color: 'rgba(75,85,99,0.20)',    border: 'rgba(75,85,99,0.50)' },
+    { label: 'P1: Baseline E1+E2 (done)',   start: 4,  dur: 1,  color: 'rgba(156,163,175,0.40)', border: 'rgba(156,163,175,0.8)' },
+    { label: 'P2: TimeGAN E3 (done)',       start: 4,  dur: 1,  color: 'rgba(133,23,172,0.55)',  border: 'rgba(133,23,172,0.9)' },
+    { label: 'P3: CVAE E4 (active)',        start: 5,  dur: 2,  color: 'rgba(20,191,184,0.55)',  border: 'rgba(20,191,184,0.9)' },
+    { label: 'P4: LDM E5',                 start: 7,  dur: 2,  color: 'rgba(52,211,153,0.55)',  border: 'rgba(52,211,153,0.9)' },
+    { label: 'Full LOPO (E1–E5)',      start: 9,  dur: 3,  color: 'rgba(99,102,241,0.55)',  border: 'rgba(99,102,241,0.9)' },
+    { label: 'P5: Compare (E6)',            start: 12, dur: 2,  color: 'rgba(245,158,11,0.55)',  border: 'rgba(245,158,11,0.9)' },
+    { label: 'P6: Subject-ID (E7)',         start: 12, dur: 2,  color: 'rgba(244,63,94,0.55)',   border: 'rgba(244,63,94,0.9)' },
+    { label: 'Writing (ongoing since Jan)',  start: 1,  dur: 17, color: 'rgba(75,85,99,0.20)',    border: 'rgba(75,85,99,0.50)' },
   ];
 
   // Build floating bar data: each bar = [start_week, end_week]
