@@ -25,6 +25,8 @@ CLAUDE.md
 # Secrets
 .env
 
-# Logs
+# Logs and run state
 *.log
 nohup.out
+.discord_webhook
+results/lopo_status/

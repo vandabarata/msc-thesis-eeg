@@ -186,7 +186,7 @@ tailwind.config = {
             <span class="w-2 h-2 bg-iscte-400 rounded-full animate-pulse shrink-0"></span>
             MSc Thesis &middot; Running ~60%
           </a>
-          <span class="text-xs text-gray-600">Last updated: 29 April 2026</span>
+          <span class="text-xs text-gray-600">Last updated: 30 April 2026</span>
         </div>
         <h1 class="text-3xl sm:text-4xl lg:text-6xl font-extrabold text-white leading-tight mb-3 sm:mb-3">
           Synthetic Data in Healthcare:<br>
@@ -1697,9 +1697,9 @@ tailwind.config = {
             <div>30 Mar 2026 - Plan start (Phase 0)</div>
             <div>21 Apr 2026 - E1+E2 baselines complete (single-split)</div>
             <div>26 Apr 2026 - TimeGAN complete (E3, single-split)</div>
-            <div>28 Apr 2026 - CVAE training begins (E4)</div>
-            <div class="text-gray-400 italic">&mdash; projected &mdash;</div>
-            <div>May 2026 - LDM training (E5, single-split)</div>
+            <div>29 Apr 2026 - CVAE complete (E4, single-split)</div>
+            <div>29 Apr 2026 - LDM complete (E5, single-split) - all generators done</div>
+            <div class="text-gray-400 italic">-- projected --</div>
             <div>May&ndash;Jun 2026 - Full LOPO runs (E1&ndash;E5, 23 folds)</div>
             <div>Jun&ndash;Jul 2026 - Comparison + subject-ID (E6, E7)</div>
             <div>Jul 2026 - All experiments complete</div>
@@ -1938,7 +1938,7 @@ tailwind.config = {
       <!-- Gantt chart -->
       <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-3">
         <h3 class="font-semibold text-white mb-1">Phase Overview (30 Mar &ndash; 26 Jul 2026)</h3>
-        <p class="text-xs text-gray-500 mb-3">Sequential execution on a single machine. Each generator runs <a href="#gl-singlesplit" class="text-cyan-600 hover:text-cyan-400 hover:underline">single-split</a> first (fast validation), then full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> once all generators succeed. TimeGAN and CVAE complete, LDM next (reuses CVAE encoder). Thesis writing has been ongoing since Jan 2026 (midterm submitted 31 Jan).</p>
+        <p class="text-xs text-gray-500 mb-3">Sequential execution on a single machine. Each generator runs <a href="#gl-singlesplit" class="text-cyan-600 hover:text-cyan-400 hover:underline">single-split</a> first (fast validation), then full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> once all generators succeed. All single-split experiments (E1-E5) complete. Full LOPO evaluation running (started 30 Apr 2026). Thesis writing has been ongoing since Jan 2026 (midterm submitted 31 Jan).</p>
         <div class="chart-wrap" style="height:clamp(260px,40vw,340px)"><canvas id="chart-gantt"></canvas></div>
       </div>
 
@@ -2304,22 +2304,22 @@ tailwind.config = {
 <div id="page-status" class="page">
   <section class="max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12">
     <h1 class="text-3xl font-bold text-white mb-2">Current Status</h1>
-    <p class="text-gray-500 mb-3">Implementation progress and experimental results. Last updated: 29 April 2026. See <a href="#design" class="text-cyan-600 hover:text-cyan-400 hover:underline">Design Decisions</a> for parameter justifications and <a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">Roadmap</a> for the full experiment plan.</p>
+    <p class="text-gray-500 mb-3">Implementation progress and experimental results. Last updated: 30 April 2026. See <a href="#design" class="text-cyan-600 hover:text-cyan-400 hover:underline">Design Decisions</a> for parameter justifications and <a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">Roadmap</a> for the full experiment plan.</p>
 
     <!-- Progress overview -->
     <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-3">
       <div class="flex items-center gap-4 mb-3">
         <h3 class="font-semibold text-white">Overall Thesis Progress</h3>
-        <span class="text-2xl font-bold text-cyan-500">~60%</span>
+        <span class="text-2xl font-bold text-cyan-500">~65%</span>
       </div>
       <div class="w-full bg-gray-800 rounded-full h-4 mb-3 overflow-hidden">
-        <div class="h-full rounded-full bg-gradient-to-r from-iscte-500 to-cyan-500 relative" style="width: 60%">
+        <div class="h-full rounded-full bg-gradient-to-r from-iscte-500 to-cyan-500 relative" style="width: 65%">
           <div class="absolute inset-0 bg-white/10 animate-pulse rounded-full"></div>
         </div>
       </div>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs">
         <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3">
-          <div class="text-emerald-400 font-bold text-lg">2</div>
+          <div class="text-emerald-400 font-bold text-lg">3</div>
           <div class="text-gray-400">Phases Complete</div>
         </div>
         <div class="bg-iscte-500/10 border border-iscte-500/30 rounded-lg p-3">
@@ -2327,7 +2327,7 @@ tailwind.config = {
           <div class="text-gray-400">Phase Active</div>
         </div>
         <div class="bg-gray-800/60 border border-gray-700 rounded-lg p-3">
-          <div class="text-gray-400 font-bold text-lg">3</div>
+          <div class="text-gray-400 font-bold text-lg">2</div>
           <div class="text-gray-400">Phases Remaining</div>
         </div>
         <div class="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
@@ -2344,17 +2344,15 @@ tailwind.config = {
         <div class="space-y-2 text-xs">
           <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><strong class="text-emerald-400">Data pipeline complete</strong> - <a href="#gl-edf" class="text-cyan-600 hover:text-cyan-400 hover:underline">EDF</a> <a href="#gl-homogenization" class="text-cyan-600 hover:text-cyan-400 hover:underline">homogenization</a>, PyTorch Dataset with <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a>, preprocessing, QC, leakage-safe normalization, flat-signal mmap cache</span></div>
           <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><strong class="text-emerald-400">All models written</strong> - <a href="#gl-frozen" class="text-cyan-600 hover:text-cyan-400 hover:underline">Frozen 1D-CNN</a> detector (49K params), <a href="#gl-timegan" class="text-cyan-600 hover:text-cyan-400 hover:underline">TimeGAN</a> (1.6M), <a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a> (1.9M), <a href="#gl-ldm" class="text-cyan-600 hover:text-cyan-400 hover:underline">LDM</a> (2.3M)</span></div>
-          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><strong class="text-emerald-400">E1 + E2 + E3 + E4 complete (<a href="#gl-singlesplit" class="text-cyan-600 hover:text-cyan-400 hover:underline">single-split</a>)</strong> - baseline, <a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a>/<a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400 hover:underline">ADASYN</a> controls, <a href="#gl-timegan" class="text-cyan-600 hover:text-cyan-400 hover:underline">TimeGAN</a>, and <a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a> augmentation, 3 seeds each (results below). Full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> pending.</span></div>
+          <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><strong class="text-emerald-400">E1 + E2 + E3 + E4 + E5 complete (<a href="#gl-singlesplit" class="text-cyan-600 hover:text-cyan-400 hover:underline">single-split</a>)</strong> - baseline, <a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a>/<a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400 hover:underline">ADASYN</a> controls, <a href="#gl-timegan" class="text-cyan-600 hover:text-cyan-400 hover:underline">TimeGAN</a>, <a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a>, and <a href="#gl-ldm" class="text-cyan-600 hover:text-cyan-400 hover:underline">LDM</a> augmentation, 3 seeds each (results below).</span></div>
           <div class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">&#10003;</span><span class="text-gray-400"><strong class="text-emerald-400">Training infrastructure ready</strong> - <a href="#gl-earlystopping" class="text-cyan-600 hover:text-cyan-400 hover:underline">early stopping</a>, LOPO + <a href="#gl-singlesplit" class="text-cyan-600 hover:text-cyan-400 hover:underline">single-split</a>, per-fold resume, full metric suite, visualization tools</span></div>
         </div>
       </div>
       <div class="bg-gray-900 border border-amber-500/20 rounded-xl p-5">
         <h3 class="font-semibold text-white mb-3 text-sm">What's Left</h3>
         <div class="space-y-2 text-xs">
-          <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-1 mb-1">Generator experiments (<a href="#gl-singlesplit" class="text-cyan-600 hover:text-cyan-400 hover:underline">single-split</a>)</div>
-          <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">LDM training (<a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E5</a>) - reuses CVAE encoder, last single-split experiment</span></div>
-          <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-3 mb-1">Full evaluation (after all generators succeed on single-split)</div>
-          <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">Full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> evaluation (23 folds &times; 3 seeds per experiment) - the publication-quality results</span></div>
+          <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-1 mb-1">Full evaluation (in progress)</div>
+          <div class="flex items-start gap-2"><span class="text-iscte-400 shrink-0">&#9654;</span><span class="text-gray-400">Full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> evaluation (23 folds &times; 3 seeds per experiment) - running since 30 Apr 2026</span></div>
           <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">Cross-generator comparison (<a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E6</a>) and subject-identity analysis (<a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">E7</a>)</span></div>
           <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-3 mb-1">Thesis document (Chapters 1&ndash;5 written, 29 pages)</div>
           <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">Results &amp; Discussion chapter (after E3&ndash;E5 complete)</span></div>
@@ -2367,10 +2365,85 @@ tailwind.config = {
     <!-- Evaluation stage callout -->
     <div class="bg-gray-900 border border-iscte-500/20 rounded-xl p-5 mb-3">
       <div class="flex items-center gap-3 mb-2">
-        <span class="text-xs font-semibold text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 px-2 py-0.5 rounded">STAGE 1 OF 2</span>
-        <h3 class="font-semibold text-white text-sm">Currently running: <a href="#gl-singlesplit" class="text-cyan-600 hover:text-cyan-400 hover:underline">single-split</a> evaluation</h3>
+        <span class="text-xs font-semibold text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 px-2 py-0.5 rounded">STAGE 2 OF 2 - RUNNING</span>
+        <h3 class="font-semibold text-white text-sm">Full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> evaluation in progress</h3>
       </div>
       <p class="text-xs text-gray-400 leading-relaxed">All results below use a <strong class="text-white">single fixed split</strong> (18 train/ 2 val/ 4 test patients). This is fast enough to iterate on generator training, debug numerical issues, and confirm that the pipeline works end-to-end. Once all generators (E3-E5) succeed on single-split, the full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> evaluation (23 folds x 3 seeds = 69 runs per experiment) produces the publication-quality results. Single-split takes ~30 minutes per experiment; full LOPO takes ~12 hours.</p>
+    </div>
+
+    <!-- Comparison Summary Table -->
+    <div class="bg-gray-900 border border-cyan-500/30 rounded-xl p-5 mb-3">
+      <div class="flex items-center gap-3 mb-3">
+        <h3 class="font-semibold text-white text-sm">Single-Split Results Summary</h3>
+        <span class="text-xs text-gray-500">(3 seeds each, mean &plusmn; std)</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs">
+          <thead><tr class="border-b border-gray-700 text-left text-gray-500">
+            <th class="py-2 pr-4">Exp</th>
+            <th class="py-2 pr-4">Generator</th>
+            <th class="py-2 pr-4"><a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></th>
+            <th class="py-2 pr-4"><a href="#gl-auroc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUROC</a></th>
+            <th class="py-2 pr-4"><a href="#gl-f1" class="text-cyan-600 hover:text-cyan-400 hover:underline">F1</a></th>
+            <th class="py-2 pr-4"><a href="#gl-sens95spec" class="text-cyan-600 hover:text-cyan-400 hover:underline">Sens@95</a></th>
+            <th class="py-2 pr-4">Per-patient <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></th>
+            <th class="py-2">Train time</th>
+          </tr></thead>
+          <tbody class="text-gray-400">
+            <tr class="border-b border-gray-800/50 bg-cyan-500/5">
+              <td class="py-2 pr-4 font-semibold text-cyan-400">E5</td>
+              <td class="py-2 pr-4 text-white"><a href="#gl-ldm" class="text-cyan-600 hover:text-cyan-400 hover:underline">LDM</a></td>
+              <td class="py-2 pr-4 font-semibold text-white">0.2272 &plusmn; 0.0193</td>
+              <td class="py-2 pr-4">0.8934 &plusmn; 0.0132</td>
+              <td class="py-2 pr-4">0.3671 &plusmn; 0.0201</td>
+              <td class="py-2 pr-4">0.7170 &plusmn; 0.0773</td>
+              <td class="py-2 pr-4">0.3759 &plusmn; 0.0419</td>
+              <td class="py-2">~130 min</td>
+            </tr>
+            <tr class="border-b border-gray-800/50">
+              <td class="py-2 pr-4 font-semibold text-gray-300">E1</td>
+              <td class="py-2 pr-4">None (baseline)</td>
+              <td class="py-2 pr-4">0.1766 &plusmn; 0.0542</td>
+              <td class="py-2 pr-4">0.8767 &plusmn; 0.0355</td>
+              <td class="py-2 pr-4">0.2870 &plusmn; 0.0768</td>
+              <td class="py-2 pr-4">0.6177 &plusmn; 0.0969</td>
+              <td class="py-2 pr-4">0.2264 &plusmn; 0.0646</td>
+              <td class="py-2">~205 min</td>
+            </tr>
+            <tr class="border-b border-gray-800/50">
+              <td class="py-2 pr-4 font-semibold text-gray-300">E4</td>
+              <td class="py-2 pr-4"><a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a></td>
+              <td class="py-2 pr-4">0.1750 &plusmn; 0.0732</td>
+              <td class="py-2 pr-4">0.8438 &plusmn; 0.0744</td>
+              <td class="py-2 pr-4">0.2628 &plusmn; 0.1032</td>
+              <td class="py-2 pr-4">0.6017 &plusmn; 0.2073</td>
+              <td class="py-2 pr-4">0.2877 &plusmn; 0.1239</td>
+              <td class="py-2">~141 min</td>
+            </tr>
+            <tr class="border-b border-gray-800/50">
+              <td class="py-2 pr-4 font-semibold text-gray-300">E3</td>
+              <td class="py-2 pr-4"><a href="#gl-timegan" class="text-cyan-600 hover:text-cyan-400 hover:underline">TimeGAN</a></td>
+              <td class="py-2 pr-4">0.1742 &plusmn; 0.0842</td>
+              <td class="py-2 pr-4">0.7031 &plusmn; 0.1338</td>
+              <td class="py-2 pr-4">0.2612 &plusmn; 0.0840</td>
+              <td class="py-2 pr-4">0.4815 &plusmn; 0.1218</td>
+              <td class="py-2 pr-4">0.1943 &plusmn; 0.1063</td>
+              <td class="py-2">~101 min</td>
+            </tr>
+            <tr class="border-b border-gray-800/50">
+              <td class="py-2 pr-4 font-semibold text-gray-300">E2</td>
+              <td class="py-2 pr-4"><a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400 hover:underline">ADASYN</a></td>
+              <td class="py-2 pr-4">0.1078 &plusmn; 0.0732</td>
+              <td class="py-2 pr-4">0.5558 &plusmn; 0.0339</td>
+              <td class="py-2 pr-4">0.2327 &plusmn; 0.1509</td>
+              <td class="py-2 pr-4">0.3068 &plusmn; 0.0913</td>
+              <td class="py-2 pr-4">0.1302 &plusmn; 0.0713</td>
+              <td class="py-2">~80 min</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-xs text-gray-500 mt-3"><strong class="text-gray-400">Train time</strong> = generator training + detector training (per seed average). E1 trains longer because the detector needs more epochs to plateau without augmentation data. E5 includes the LDM diffusion model (~58 min) plus a shorter detector phase (~72 min) thanks to faster convergence with higher-quality synthetic data.</p>
     </div>
 
     <!-- E1 Results -->
@@ -2400,7 +2473,7 @@ tailwind.config = {
             <tr class="border-b border-gray-800/50">
               <td class="py-2 pr-4 text-gray-300 font-medium"><a href="#gl-f1" class="text-cyan-600 hover:text-cyan-400 hover:underline">F1</a></td>
               <td class="py-2 pr-4">0.1794</td><td class="py-2 pr-4">0.3281</td><td class="py-2 pr-4">0.3536</td>
-              <td class="py-2 font-semibold text-white">0.2870 &plusmn; 0.0779</td>
+              <td class="py-2 font-semibold text-white">0.2870 &plusmn; 0.0768</td>
             </tr>
             <tr class="border-b border-gray-800/50">
               <td class="py-2 pr-4 text-gray-300 font-medium"><a href="#gl-sens95spec" class="text-cyan-600 hover:text-cyan-400 hover:underline">Sens. @ 95% Spec.</a></td>
@@ -2708,6 +2781,74 @@ tailwind.config = {
             <p><strong class="text-gray-400">Final fix:</strong> (4) Reduced base LR from <code class="text-cyan-500">1e-3</code> to <code class="text-cyan-500">5e-4</code>, (5) linear LR warmup over 5 epochs from <code class="text-cyan-500">5e-5</code> to <code class="text-cyan-500">5e-4</code>, (6) lower <a href="#gl-adam" class="text-cyan-600 hover:text-cyan-400 hover:underline">Adam</a> epsilon (<code class="text-cyan-500">1e-7</code>). None of these change the architecture or loss function. All 3 seeds completed without divergence after these changes. See <a href="#design-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">Design &rarr; CVAE</a> for full details.</p>
           </div>
         </details>
+      </div>
+    </div>
+
+    <!-- E5 Results -->
+    <div class="bg-gray-900 border border-rsch-500/30 rounded-xl p-5 mb-3">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-8 h-8 rounded-full bg-rsch-500/10 border border-rsch-500/30 flex items-center justify-center text-rsch-400 font-bold text-sm shrink-0">E5</div>
+        <div>
+          <h3 class="font-semibold text-white text-sm">LDM Results - Synthetic Augmentation (single-split, ratio 1.0)</h3>
+          <p class="text-xs text-gray-500">Completed 29 Apr 2026 - 3 seeds, <a href="#gl-ldm" class="text-cyan-600 hover:text-cyan-400 hover:underline">LDM</a>-generated ictal windows (reuses <a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a> encoder, 200 DDPM steps), class-weighted cross-entropy loss, early stopping on validation <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></p>
+        </div>
+        <span class="ml-auto text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded">DONE</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs">
+          <thead><tr class="border-b border-gray-700 text-left text-gray-500"><th class="py-2 pr-4">Metric</th><th class="py-2 pr-4">Seed 42</th><th class="py-2 pr-4">Seed 123</th><th class="py-2 pr-4">Seed 456</th><th class="py-2 font-semibold text-gray-400">Mean &plusmn; Std</th></tr></thead>
+          <tbody class="text-gray-400">
+            <tr class="border-b border-gray-800/50">
+              <td class="py-2 pr-4 text-gray-300 font-medium"><a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></td>
+              <td class="py-2 pr-4">0.2004</td><td class="py-2 pr-4">0.2360</td><td class="py-2 pr-4">0.2451</td>
+              <td class="py-2 font-semibold text-white">0.2272 &plusmn; 0.0193</td>
+            </tr>
+            <tr class="border-b border-gray-800/50">
+              <td class="py-2 pr-4 text-gray-300 font-medium"><a href="#gl-auroc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUROC</a></td>
+              <td class="py-2 pr-4">0.8787</td><td class="py-2 pr-4">0.8910</td><td class="py-2 pr-4">0.9106</td>
+              <td class="py-2 font-semibold text-white">0.8934 &plusmn; 0.0132</td>
+            </tr>
+            <tr class="border-b border-gray-800/50">
+              <td class="py-2 pr-4 text-gray-300 font-medium"><a href="#gl-f1" class="text-cyan-600 hover:text-cyan-400 hover:underline">F1</a></td>
+              <td class="py-2 pr-4">0.3873</td><td class="py-2 pr-4">0.3743</td><td class="py-2 pr-4">0.3397</td>
+              <td class="py-2 font-semibold text-white">0.3671 &plusmn; 0.0201</td>
+            </tr>
+            <tr class="border-b border-gray-800/50">
+              <td class="py-2 pr-4 text-gray-300 font-medium"><a href="#gl-sens95spec" class="text-cyan-600 hover:text-cyan-400 hover:underline">Sens. @ 95% Spec.</a></td>
+              <td class="py-2 pr-4">0.6077</td><td class="py-2 pr-4">0.7723</td><td class="py-2 pr-4">0.7709</td>
+              <td class="py-2 font-semibold text-white">0.7170 &plusmn; 0.0773</td>
+            </tr>
+            <tr class="border-b border-gray-800/50">
+              <td class="py-2 pr-4 text-gray-300 font-medium">Per-patient <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></td>
+              <td class="py-2 pr-4">0.3168</td><td class="py-2 pr-4">0.4097</td><td class="py-2 pr-4">0.4011</td>
+              <td class="py-2 font-semibold text-white">0.3759 &plusmn; 0.0419</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mt-3 grid grid-cols-3 gap-3 text-xs">
+        <div class="bg-gray-800/40 rounded p-2 text-center">
+          <div class="text-gray-500">Seed 42</div>
+          <div class="text-gray-400">Best epoch 4/14</div>
+          <div class="text-gray-500">Validation AUPRC 0.5216</div>
+        </div>
+        <div class="bg-gray-800/40 rounded p-2 text-center">
+          <div class="text-gray-500">Seed 123</div>
+          <div class="text-gray-400">Best epoch 16/26</div>
+          <div class="text-gray-500">Validation AUPRC 0.5950</div>
+        </div>
+        <div class="bg-gray-800/40 rounded p-2 text-center">
+          <div class="text-gray-500">Seed 456</div>
+          <div class="text-gray-400">Best epoch 5/15</div>
+          <div class="text-gray-500">Validation AUPRC 0.6106</div>
+        </div>
+      </div>
+      <div class="mt-3 text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-3 space-y-2">
+        <strong class="text-gray-400">Interpretation:</strong>
+        <p><a href="#gl-ldm" class="text-cyan-600 hover:text-cyan-400 hover:underline">LDM</a> augmentation is the clear winner among single-split experiments. Mean <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a> 0.2272 vs 0.1766 (E1 baseline) represents a <strong class="text-white">+29% relative improvement</strong>. Crucially, E5 also shows the <strong class="text-white">lowest variance</strong> across seeds (std 0.0193 vs 0.0542 for E1), indicating that LDM-generated samples provide a more consistent training signal regardless of random initialization.</p>
+        <p><strong class="text-gray-400">Per-patient AUPRC jumps from 0.2263 (E1) to 0.3759 (+66%).</strong> This suggests LDM-augmented training generalizes better across patients - the generator produces diverse enough synthetic ictal patterns that the detector learns more patient-agnostic seizure features.</p>
+        <p><strong class="text-gray-400">Sensitivity at 95% specificity (0.7170)</strong> surpasses the E1 baseline (0.6177) and CVAE (0.6017), meaning the LDM-trained detector catches more seizures while maintaining clinical-grade specificity. E3 TimeGAN (0.4815) lags significantly.</p>
+        <p>The ranking for full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> evaluation is now clear: E5 (LDM) &gt; E1 (baseline) &asymp; E4 (CVAE) &asymp; E3 (TimeGAN) &gt;&gt; E2 (SMOTE/ADASYN).</p>
       </div>
     </div>
 

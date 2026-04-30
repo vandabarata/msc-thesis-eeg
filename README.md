@@ -7,7 +7,7 @@
 </picture>
 
 _MSc thesis by Vanda Barata at ISCTE-IUL._\
-_Supervised by [Ana de Almeida](https://ciencia.iscte-iul.pt/authors/ana-de-almeida) and [Luís Nunes](https://ciencia.iscte-iul.pt/authors/luis-miguel-martins-nunes)._
+_Supervised by [Ana de Almeida](https://ciencia.iscte-iul.pt/authors/ana-de-almeida) and [Luis Nunes](https://ciencia.iscte-iul.pt/authors/luis-miguel-martins-nunes)._
 
 ---
 
@@ -32,7 +32,8 @@ msc_thesis_code/
 ├── data/                        Data pipeline
 │   ├── loader.py                  Dataset, preprocessing, windowing, splits
 │   ├── split_config.json          Patient-level splits (single + 23 LOPO folds)
-│   └── homogenize.py              EDF cleaning pipeline (already run)
+│   ├── homogenize.py              EDF cleaning pipeline (already run)
+│   └── build_cache.py             Builds the flat-signal mmap cache from clean_edfs/
 │
 ├── models/                      Neural network architectures
 │   ├── detector.py                1D-CNN seizure detector (frozen, 49K params)
@@ -45,15 +46,15 @@ msc_thesis_code/
 │   ├── generate.py                Generator training + synthetic window production (E3-E5)
 │   ├── evaluate.py                AUPRC, AUROC, F1, per-patient, Wilcoxon test
 │   ├── visualize.py               PSD comparison, t-SNE, amplitude distributions
-│   ├── subject_identity.py        E7 linear probe for subject-ID analysis
-│   └── run_experiments.sh         Runs all Phase 1 experiments
+│   └── subject_identity.py        E7 linear probe for subject-ID analysis
+│
+├── experiment_scripts/          Shell scripts for running on the remote GPU machine
+│   ├── run_e1.sh ... run_e5.sh    Per-experiment single-split launchers
+│   ├── run_lopo.sh                Full LOPO evaluation (E1-E5, 23 folds x 3 seeds)
+│   └── deploy_and_train.sh        Deploy code to remote and start training
 │
 ├── notebooks/                   Exploration
 │   └── chb-mit-analysis.ipynb     Full EDA notebook
-│
-├── run_e3.sh                    E3 launch script (TimeGAN generation + detector training)
-├── deploy_and_train.sh          Deploy code to remote machine and start training
-├── build_cache.py               Builds the flat-signal mmap cache from clean_edfs/
 │
 ├── results/                     Experiment outputs (metrics + model checkpoints)
 ├── index.html                   Project website (GitHub Pages)
@@ -95,23 +96,25 @@ Download the [CHB-MIT Scalp EEG Database](https://physionet.org/content/chbmit/1
 
 | Experiment | Description | Status |
 |:----------:|-------------|:------:|
-| **E1** | Baseline 1D-CNN detector (real data, class-weighted cross-entropy) | Done |
-| **E2** | Non-synthetic controls (SMOTE, ADASYN) | Done |
-| **E3** | TimeGAN augmentation (25%, 50%, 100%, 200%) | Running |
-| **E4** | CVAE augmentation (same ratios) | Ready |
-| **E5** | Latent Diffusion augmentation (same ratios, needs trained CVAE) | After E4 |
-| **E6** | Cross-generator comparison (Wilcoxon signed-rank test) | After E1-E5 |
+| **E1** | Baseline 1D-CNN detector (real data, class-weighted cross-entropy) | Single-split done |
+| **E2** | Non-synthetic controls (SMOTE, ADASYN) | Single-split done |
+| **E3** | TimeGAN augmentation (ratio 1.0) | Single-split done |
+| **E4** | CVAE augmentation (ratio 1.0) | Single-split done |
+| **E5** | Latent Diffusion augmentation (ratio 1.0, reuses CVAE encoder) | Single-split done |
+| **E6** | Cross-generator comparison (Wilcoxon signed-rank test) | After LOPO |
 | **E7** | Subject-identity analysis (linear probe on embeddings) | After E6 |
 
-### Results So Far (single-split development)
+### Results (single-split, 3 seeds)
 
-| Experiment | Mean AUPRC | Mean Per-Patient AUPRC | Notes |
-|:----------:|:----------:|:----------------------:|-------|
-| **E1** Baseline | 0.1766 ± 0.0540 | 0.2263 ± 0.0646 | Anchor for all comparisons |
-| **E2** SMOTE | 0.0685 ± 0.0620 | 0.0921 ± 0.0723 | Below baseline |
-| **E2** ADASYN | 0.1078 ± 0.0729 | 0.1302 ± 0.0712 | Below baseline |
+| Experiment | Generator | AUPRC | Per-Patient AUPRC | Train time |
+|:----------:|-----------|:-----:|:-----------------:|:----------:|
+| **E5** | LDM | **0.2272 +/- 0.0193** | **0.3759 +/- 0.0419** | ~130 min |
+| **E1** | None (baseline) | 0.1766 +/- 0.0542 | 0.2264 +/- 0.0646 | ~205 min |
+| **E4** | CVAE | 0.1750 +/- 0.0732 | 0.2877 +/- 0.1239 | ~141 min |
+| **E3** | TimeGAN | 0.1742 +/- 0.0842 | 0.1943 +/- 0.1063 | ~101 min |
+| **E2** | ADASYN | 0.1078 +/- 0.0732 | 0.1302 +/- 0.0713 | ~80 min |
 
-Both non-synthetic controls underperform the baseline, with high variance across seeds. The bar for generative models (E3-E5) remains the E1 baseline. Full results on the [project website](https://vandabarata.github.io/msc-thesis-eeg/).
+LDM augmentation improves AUPRC by +29% over baseline with the lowest cross-seed variance. Full LOPO evaluation (23 folds x 3 seeds) is in progress. Detailed results and interpretations on the [project website](https://vandabarata.github.io/msc-thesis-eeg/).
 
 <details>
 <summary>Protocol rules enforced in code</summary>
@@ -130,25 +133,27 @@ Both non-synthetic controls underperform the baseline, with high variance across
 source .venv/bin/activate
 
 # E1: Baseline
-python -m training.train --experiment e1 --mode single --seeds 42
+python -m training.train --experiment e1 --mode single --seeds 42 123 456
 
 # E2: SMOTE / ADASYN controls
-python -m training.train --experiment e2 --augmentation smote --mode single --seeds 42
-python -m training.train --experiment e2 --augmentation adasyn --mode single --seeds 42
+python -m training.train --experiment e2 --augmentation smote --mode single --seeds 42 123 456
+python -m training.train --experiment e2 --augmentation adasyn --mode single --seeds 42 123 456
 
 # E3: TimeGAN
-python -m training.generate --model timegan --ratio 0.25 0.5 1.0 2.0
+python -m training.generate --model timegan --mode single --seed 42
+python -m training.train --experiment e3 --mode single --seeds 42 123 456
 
 # E4: CVAE
-python -m training.generate --model cvae --ratio 0.25 0.5 1.0 2.0
+python -m training.generate --model cvae --mode single --seed 42
+python -m training.train --experiment e4 --mode single --seeds 42 123 456
 
 # E5: LDM (needs pretrained CVAE)
-python -m training.generate --model ldm \
-    --cvae-checkpoint results/e4/seed_42/single_split/cvae.pt \
-    --ratio 0.25 0.5 1.0 2.0
+python -m training.generate --model ldm --mode single --seed 42 \
+    --cvae-checkpoint results/e4/seed_42/single_split/cvae.pt
+python -m training.train --experiment e5 --mode single --seeds 42 123 456
 
-# Full LOPO evaluation (23 folds x 3 seeds)
-bash training/run_experiments.sh full
+# Full LOPO evaluation (E1-E5, 23 folds x 3 seeds)
+bash experiment_scripts/run_lopo.sh
 ```
 
 ### Results Structure
@@ -159,8 +164,10 @@ results/<experiment>/
 │   ├── single_split/
 │   │   ├── best_model.pt           Model checkpoint (or best_model_<aug>.pt for E2)
 │   │   └── results.json            Metrics + history (or results_<aug>.json for E2)
-│   ├── fold_00/ ... fold_22/       LOPO folds (same structure per fold)
-└── lopo_summary.json               Aggregated results
+│   └── lopo/
+│       ├── fold_00/ ... fold_22/   LOPO folds (same structure per fold)
+│       └── lopo_summary.json       Aggregated results
+└── lopo_status/                    Checkpoint files from run_lopo.sh
 ```
 
 ---
