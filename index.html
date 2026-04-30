@@ -372,12 +372,12 @@ tailwind.config = {
       <!-- Evaluation Strategy -->
       <div id="eval-strategy" class="bg-gray-900 border border-gray-800 rounded-xl p-5">
         <h3 class="font-semibold text-white mb-3">Evaluation Strategy</h3>
-        <p class="text-sm text-gray-400 mb-3">All experiments use <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> <a href="#gl-cv" class="text-cyan-600 hover:text-cyan-400 hover:underline">cross-validation</a> with a <a href="#gl-frozen" class="text-cyan-600 hover:text-cyan-400 hover:underline">frozen</a> 1D-CNN detector. Synthetic data enters training only - never validation or test.</p>
+        <p class="text-sm text-gray-400 mb-3">All experiments use <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> <a href="#gl-cv" class="text-cyan-600 hover:text-cyan-400 hover:underline">cross-validation</a> (23 folds, one patient held out completely per fold) with a <a href="#gl-frozen" class="text-cyan-600 hover:text-cyan-400 hover:underline">frozen</a> 1D-CNN detector. Synthetic data enters training only - never validation or test. The model never sees any test patient data during training, normalisation, or generation.</p>
         <div class="space-y-2 text-sm">
-          <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Primary metric:</strong> <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a> - sensitive to minority class performance</span></div>
+          <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Primary metric:</strong> <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a> - doesn't fall for the "always say no seizure" trick that inflates accuracy and AUROC</span></div>
           <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Secondary:</strong> <a href="#gl-auroc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUROC</a>, <a href="#gl-f1" class="text-cyan-600 hover:text-cyan-400 hover:underline">F1</a> at optimal threshold, <a href="#gl-sens95spec" class="text-cyan-600 hover:text-cyan-400 hover:underline">sensitivity at 95% specificity</a></span></div>
           <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Fidelity:</strong> <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a> comparison per frequency band, <a href="#gl-kl" class="text-cyan-600 hover:text-cyan-400 hover:underline">KL divergence</a> per band, <a href="#gl-discriminative" class="text-cyan-600 hover:text-cyan-400 hover:underline">discriminative score</a> (real-vs-synthetic classifier &rarr; 0.5 = indistinguishable)</span></div>
-          <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Utility:</strong> <a href="#gl-tstr" class="text-cyan-600 hover:text-cyan-400 hover:underline">TSTR</a> evaluation - synthetic-only training as a standalone quality check</span></div>
+          <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Utility:</strong> <a href="#gl-tstr" class="text-cyan-600 hover:text-cyan-400 hover:underline">TSTR</a> - train on only synthetic data, test on real: if the generator is good, a model that never saw a real seizure should still detect them</span></div>
           <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Statistical:</strong> <a href="#gl-wilcoxon" class="text-cyan-600 hover:text-cyan-400 hover:underline">Wilcoxon signed-rank test</a> across LOPO folds</span></div>
           <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Stability:</strong> Per-patient <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a> dispersion, 3 seeds per experiment</span></div>
         </div>
@@ -664,8 +664,8 @@ tailwind.config = {
     <!-- Why preprocessing -->
     <div class="bg-gray-900 border border-iscte-500/20 rounded-xl p-5 mb-3">
       <h3 class="font-semibold text-white mb-3">Why Preprocess?</h3>
-      <p class="text-gray-400 text-sm leading-relaxed mb-3">Raw scalp EEG is contaminated by powerline interference, movement artefacts, electrode drift, and high-frequency noise that carry no neural information. The thesis <a href="#gl-slr" class="text-cyan-600 hover:text-cyan-400 hover:underline">SLR</a> emphasizes that <strong class="text-white">preprocessing choices directly affect what generators learn and how synthetic samples behave downstream</strong> <a href="#cite-dakshit2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">(Dakshit et al., 2023)</a>, <a href="#cite-you2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">(You et al., 2025)</a>, <a href="#cite-carrle2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">(Carrle et al., 2023)</a>. A consistent, fit-on-train-only pipeline is required so that real and synthetic data share the same representation.</p>
-      <p class="text-gray-400 text-sm leading-relaxed">The experimental protocol requires consistent preprocessing and fixed windowing so that baseline and augmented experiments remain comparable, preventing accidental confounds.</p>
+      <p class="text-gray-400 text-sm leading-relaxed mb-3">Raw scalp EEG is full of things that aren't brain signals: powerline hum at 60 Hz, slow drifts from electrode chemistry, muscle noise from jaw clenching or eye movements, and the occasional electrode pop when something shifts. If generators train on this raw signal, they learn to reproduce artefacts alongside real neural patterns - and the synthetic data inherits those artefacts <a href="#cite-dakshit2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">(Dakshit et al., 2023)</a>, <a href="#cite-you2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">(You et al., 2025)</a>, <a href="#cite-carrle2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">(Carrle et al., 2023)</a>. The pipeline below cleans the signal while keeping all the clinically relevant information, and it's applied consistently across all experiments so comparisons are fair.</p>
+      <p class="text-gray-400 text-sm leading-relaxed">Importantly, normalisation parameters come from training data only. This prevents information about test patients from leaking into the pipeline.</p>
     </div>
 
     <!-- Pipeline steps -->
@@ -1015,19 +1015,19 @@ tailwind.config = {
     <!-- Why generative -->
     <div class="bg-gray-900 border border-iscte-500/20 rounded-xl p-5 mb-3">
       <h3 class="font-semibold text-white mb-3">Motivation: Why Generative Models?</h3>
-      <p class="text-gray-400 text-sm leading-relaxed mb-3">In the CHB-MIT dataset, seizure windows make up roughly <strong class="text-white">0.4% of total signal time</strong>. Classical resampling (e.g. <a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a>) interpolates in feature space and fails to reproduce the complex multi-channel, temporally structured dynamics of ictal EEG. Deep generative models learn the full data distribution and can synthesize entirely new, biologically plausible ictal segments, providing richer augmentation that can improve classifier recall without inflating specificity loss.</p>
+      <p class="text-gray-400 text-sm leading-relaxed mb-3">In the CHB-MIT dataset, seizure windows make up roughly <strong class="text-white">0.4% of total signal time</strong>. Classical resampling (e.g. <a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a>) just interpolates between existing samples in feature space - it can't reproduce the temporal structure or spectral patterns that make real seizures look like real seizures. Deep generative models actually learn the underlying data distribution and can produce entirely new ictal segments that preserve the multi-channel dynamics, giving the detector more realistic examples to learn from.</p>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-4">
         <div class="bg-gray-800/60 rounded-lg p-4">
           <div class="text-amber-400 font-semibold text-sm mb-1">Problem</div>
-          <div class="text-xs text-gray-400">Minority class (seizure) severely under-represented &rarr; biased classifiers with poor sensitivity</div>
+          <div class="text-xs text-gray-400">Seizures are &lt;0.4% of the data &rarr; detectors learn to just say "no seizure" and get 99%+ accuracy while missing most actual seizures</div>
         </div>
         <div class="bg-gray-800/60 rounded-lg p-4">
           <div class="text-cyan-500 font-semibold text-sm mb-1">Solution</div>
-          <div class="text-xs text-gray-400">Generative models trained on ictal segments &rarr; realistic synthetic seizures generated &rarr; training set augmented</div>
+          <div class="text-xs text-gray-400">Train generative models on real seizure windows &rarr; generate new synthetic seizures that look realistic &rarr; add them to training data</div>
         </div>
         <div class="bg-gray-800/60 rounded-lg p-4">
           <div class="text-emerald-400 font-semibold text-sm mb-1">Expected outcome</div>
-          <div class="text-xs text-gray-400">Balanced training distribution &rarr; higher sensitivity in downstream seizure detector</div>
+          <div class="text-xs text-gray-400">More seizure examples in training &rarr; detector learns what seizures actually look like &rarr; catches more real seizures</div>
         </div>
       </div>
     </div>
@@ -1050,7 +1050,7 @@ tailwind.config = {
            <span class="text-white font-semibold text-xs">TimeGAN</span>
            <span class="text-gray-500 text-xs">(<a href="#cite-yoon2019" class="text-cyan-600 hover:text-cyan-400 hover:underline">Yoon et al., 2019</a>)</span>
          </div>
-         <p class="text-xs text-gray-400 mb-3 leading-relaxed"><a href="#gl-timegan" class="text-cyan-600 hover:text-cyan-400 hover:underline">TimeGAN</a> adds a <em>supervised <a href="#gl-loss" class="text-cyan-600 hover:text-cyan-400 hover:underline">loss</a></em> that forces the generator to respect step-wise temporal dynamics, solving the main weakness of vanilla <a href="#gl-gan" class="text-cyan-600 hover:text-cyan-400 hover:underline">GANs</a> on time-series. It jointly trains an embedder, recovery, generator, and discriminator in a shared <a href="#gl-latentspace" class="text-cyan-600 hover:text-cyan-400 hover:underline">latent space</a> — making it the strongest GAN-family baseline for multi-channel <a href="#gl-eeg" class="text-cyan-600 hover:text-cyan-400 hover:underline">EEG</a> synthesis.</p>
+         <p class="text-xs text-gray-400 mb-3 leading-relaxed"><a href="#gl-timegan" class="text-cyan-600 hover:text-cyan-400 hover:underline">TimeGAN</a> adds a <em>supervised <a href="#gl-loss" class="text-cyan-600 hover:text-cyan-400 hover:underline">loss</a></em> that forces the generator to respect step-wise temporal dynamics - meaning each generated time point has to follow plausibly from the previous one, not just look reasonable in isolation. This solves the main weakness of vanilla <a href="#gl-gan" class="text-cyan-600 hover:text-cyan-400 hover:underline">GANs</a> on time-series. It jointly trains five sub-networks (embedder, recovery, generator, discriminator, supervisor) in a shared <a href="#gl-latentspace" class="text-cyan-600 hover:text-cyan-400 hover:underline">latent space</a>, making it the strongest GAN-family baseline for multi-channel <a href="#gl-eeg" class="text-cyan-600 hover:text-cyan-400 hover:underline">EEG</a> synthesis.</p>
          <p class="text-xs text-gray-500 mb-3 leading-relaxed"><strong class="text-gray-400">Why not cGAN or WGAN-GP?</strong> TimeGAN's supervised <a href="#gl-loss" class="text-cyan-600 hover:text-cyan-400 hover:underline">loss</a> directly targets temporal coherence, which is critical for EEG. WGAN-GP improves training stability but does not specifically address time-series structure.</p>
         <div class="space-y-2 text-xs mb-3">
           <div class="font-semibold text-gray-300">Relevant literature</div>
@@ -1083,7 +1083,7 @@ tailwind.config = {
            <span class="text-cyan-500 font-bold text-xs">&#10003; Chosen:</span>
            <span class="text-white font-semibold text-xs">CVAE with 1-D Conv encoder/decoder</span>
          </div>
-         <p class="text-xs text-gray-400 mb-3 leading-relaxed">A <em>Conditional</em> VAE (CVAE) extends the standard VAE by conditioning the <a href="#gl-latentspace" class="text-cyan-600 hover:text-cyan-400 hover:underline">latent space</a> on a label (e.g. patient ID or ictal/interictal). The encoder and decoder use 1-D convolutional layers to capture local spectral structure across channels efficiently. <a href="#gl-elbo" class="text-cyan-600 hover:text-cyan-400 hover:underline">KL annealing</a> prevents posterior collapse.</p>
+         <p class="text-xs text-gray-400 mb-3 leading-relaxed">A <em>Conditional</em> VAE (CVAE) extends the standard VAE by conditioning on a label (patient ID + class) so it can generate seizures for a specific patient on demand. The encoder compresses each 23x1024 window down to a small 128-dimensional <a href="#gl-latentspace" class="text-cyan-600 hover:text-cyan-400 hover:underline">latent vector</a>, and the decoder rebuilds the full signal from that compressed representation. Both use 1-D convolutional layers. <a href="#gl-elbo" class="text-cyan-600 hover:text-cyan-400 hover:underline">KL annealing</a> prevents posterior collapse (where the model ignores the latent code and produces near-identical outputs).</p>
          <p class="text-xs text-gray-500 mb-3 leading-relaxed"><strong class="text-gray-400">Why 1-D Conv over a recurrent architecture (LSTM/GRU)?</strong> Recurrent neural networks (RNNs) - including their LSTM and GRU variants - process sequences step-by-step, which suits variable-length or very long temporal dependencies. However, for fixed-length 4-second EEG windows, convolutional encoders are faster to train, fully parallelisable, and more stable. The conditioning label enables targeted ictal synthesis for each patient, directly supporting the augmentation goal. <a href="#cite-carrle2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Carrle et al., 2023</a> note that CNNs are &ldquo;well suited for processing biological data&rdquo; due to their hierarchical structure, combining local data points in a way that resembles neural organisation principles.</p>
         <div class="space-y-2 text-xs mb-3">
           <div class="font-semibold text-gray-300">Relevant literature</div>
@@ -1115,7 +1115,7 @@ tailwind.config = {
            <span class="text-emerald-400 font-bold text-xs">&#10003; Chosen:</span>
            <span class="text-white font-semibold text-xs">Latent Diffusion Model (LDM) + 1-D UNet</span>
          </div>
-         <p class="text-xs text-gray-400 mb-3 leading-relaxed">A <em>Latent</em> Diffusion Model encodes EEG segments into a compact <a href="#gl-latentspace" class="text-cyan-600 hover:text-cyan-400 hover:underline">latent space</a> (via the CVAE encoder above), runs the <a href="#gl-ddpm" class="text-cyan-600 hover:text-cyan-400 hover:underline">DDPM</a> forward/reverse process entirely in that latent space, then decodes back to signal. This cuts compute dramatically compared to pixel/sample-space diffusion while retaining high fidelity. The denoiser is a 1-D UNet with additive embedding for time-step, class, and patient conditioning (simpler than cross-attention, which is designed for complex conditioning like text).</p>
+         <p class="text-xs text-gray-400 mb-3 leading-relaxed">A <em>Latent</em> Diffusion Model takes the CVAE's compressed representation (the <a href="#gl-latentspace" class="text-cyan-600 hover:text-cyan-400 hover:underline">latent space</a>) and runs the <a href="#gl-ddpm" class="text-cyan-600 hover:text-cyan-400 hover:underline">DDPM</a> diffusion process there instead of on the full 23,552-dimensional signal. This is massively faster - denoising a 128-value latent vector is much cheaper than denoising the raw signal. It reuses the same encoder/decoder as the CVAE, so if the two models produce different quality outputs, that difference can only come from how they generate in latent space (direct sampling vs iterative denoising), not from a better encoder. The denoiser is a 1-D UNet with additive embeddings for time-step, class, and patient conditioning.</p>
          <p class="text-xs text-gray-500 mb-3 leading-relaxed"><strong class="text-gray-400">Why LDM over plain DDPM?</strong> Full-resolution DDPM on 256 Hz × 23-channel windows is prohibitively slow at inference. The shared VAE <a href="#gl-latentspace" class="text-cyan-600 hover:text-cyan-400 hover:underline">latent space</a> also enables reuse of the encoder/decoder across the CVAE and LDM, keeping the comparison controlled.</p>
         <div class="space-y-2 text-xs mb-3">
           <div class="font-semibold text-gray-300">Relevant literature</div>
@@ -1204,14 +1204,14 @@ tailwind.config = {
           <div><strong class="text-gray-300">MNE-Python/ pyedflib</strong> - The standard library for reading EEG data in EDF/EDF+ format, used across the neuroscience community.</div>
           <div><strong class="text-gray-300">scikit-learn + imbalanced-learn</strong> - Standard implementations of SMOTE/ADASYN (<a href="#cite-zhao2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Zhao et al., 2022</a>) and evaluation metrics (AUPRC, AUROC). Using canonical implementations ensures comparability with the literature.</div>
           <div><strong class="text-gray-300">SciPy signal processing</strong> - <a href="#gl-butterworth" class="text-cyan-600 hover:text-cyan-400 hover:underline">Butterworth</a> filters, <code class="text-cyan-500">filtfilt</code> for zero-phase filtering, Welch <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a> estimation. Standard DSP tools with no reason to reimplement.</div>
-          <div><strong class="text-gray-300">1D raw signals</strong> (not 2D spectrograms) - Working directly on raw 1D signals keeps the pipeline simpler and avoids the confound of &ldquo;did the improvement come from the augmentation or from the representation change?&rdquo;</div>
+          <div><strong class="text-gray-300">1D raw signals</strong> (not 2D spectrograms) - Working directly on the time-domain signal keeps things simple and avoids a confound: if results change, is it because of the augmentation or because of the representation? By keeping the input format the same across all experiments, the only variable is the training data.</div>
         </div>
       </div>
 
       <!-- Data Caching & Memory Management -->
       <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-3" id="design-caching">
         <h3 class="font-semibold text-white mb-3">Data Caching &amp; Memory Management</h3>
-        <p class="text-gray-500 text-xs mb-3">The CHB-MIT dataset after preprocessing is ~43 GB of raw signal. A naive pre-windowed cache with 50% overlap nearly doubles this, exceeding both the 32 GB RAM and available disk on the target machine. The flat-signal approach below was <em class="text-gray-400">necessary</em> to run experiments on available hardware, not just an optimization.</p>
+        <p class="text-gray-500 text-xs mb-3">The dataset after preprocessing is ~43 GB. Pre-computing all overlapping windows would nearly double that (each sample appears in two windows with 50% overlap), exceeding both the 32 GB RAM and available disk. The approach below isn't just an optimisation - it's the only way to run experiments on this hardware at all.</p>
         <div class="overflow-x-auto">
           <table class="w-full text-xs">
             <thead><tr class="border-b border-gray-700 text-left text-gray-500"><th class="py-2 pr-4">Decision</th><th class="py-2 pr-4">Choice</th><th class="py-2">Justification</th></tr></thead>
@@ -1271,7 +1271,7 @@ tailwind.config = {
         </div>
         <div class="mt-3 text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-3 space-y-2">
           <p><strong class="text-gray-400">Hardware context:</strong> Target machine has 32 GB RAM, ~98 GB disk (shared with OS and Python env), and an RTX 3080 Ti (12 GB VRAM). A naive pre-windowed loader consumed ~125 GB RAM and was OOM-killed on first training attempt. The flat-signal approach reduces disk to ~35&ndash;40 GB and RAM to ~10 MB.</p>
-          <p><strong class="text-gray-400">Generator &amp; oversampling memory:</strong> CVAE and LDM training keep data tensors on CPU and move per-batch to GPU (12 GB VRAM cannot hold the full ictal set + model + optimizer). <a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a>/<a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400 hover:underline">ADASYN</a> subsample interictal windows to 10&times; ictal count before oversampling - without this, the flattened feature matrix would require ~123 GB RAM.</p>
+          <p><strong class="text-gray-400">Generator &amp; oversampling memory:</strong> CVAE and LDM training keep data tensors on CPU and move per-batch to GPU (12 GB VRAM cannot hold the full ictal set + model + optimizer). <a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a>/<a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400 hover:underline">ADASYN</a> subsample interictal windows to 10&times; ictal count before oversampling - without this, the flattened feature matrix would require ~113 GB RAM.</p>
         </div>
       </div>
 
@@ -1639,6 +1639,11 @@ tailwind.config = {
                 <td class="py-3">Binary classifier trained to distinguish real from synthetic windows; accuracy near 50% = indistinguishable. Tests the joint distribution, not just marginal frequency content. Introduced with TimeGAN (<a href="#cite-yoon2019" class="text-cyan-600 hover:text-cyan-400 hover:underline">Yoon et al., 2019</a>); applied to wearable health sensors by <a href="#cite-lange2024" class="text-cyan-600 hover:text-cyan-400 hover:underline">Lange et al., 2024</a>.</td>
               </tr>
               <tr class="border-b border-gray-800/50">
+                <td class="py-3 pr-4 text-gray-300 font-medium">Excluded: <a href="#gl-fid" class="text-cyan-600 hover:text-cyan-400 hover:underline">FID</a></td>
+                <td class="py-3 pr-4">Not used</td>
+                <td class="py-3"><a href="#gl-fid" class="text-cyan-600 hover:text-cyan-400 hover:underline">FID</a> relies on ImageNet-pretrained Inception-Net features designed for natural images. <a href="#cite-ibrahim2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">Ibrahim et al., 2025</a> note it "may not accurately reflect the subtle variations and noise patterns inherent in medical data." <a href="#cite-you2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">You et al., 2025</a> concur that adapted FID is not a true assessment of EEG quality. PSD-based metrics and the discriminative score above are domain-appropriate alternatives.</td>
+              </tr>
+              <tr class="border-b border-gray-800/50">
                 <td class="py-3 pr-4 text-gray-300 font-medium">Utility metric</td>
                 <td class="py-3 pr-4"><a href="#gl-tstr" class="text-cyan-600 hover:text-cyan-400 hover:underline">TSTR</a></td>
 
@@ -1684,7 +1689,7 @@ tailwind.config = {
           <div id="protocol-rules" class="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">Protocol Rules</div>
           <p class="text-xs text-gray-400 mb-2">All experiments follow the <a href="#eval-strategy" class="text-cyan-600 hover:text-cyan-400 hover:underline">evaluation strategy</a>. Additionally:</p>
           <div class="space-y-2 text-xs text-gray-400">
-            <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#10003;</span><span><strong class="text-white">Two-stage evaluation:</strong> <a href="#gl-singlesplit" class="text-cyan-600 hover:text-cyan-400 hover:underline">single-split</a> first (fast iteration, ~30 min/experiment), then full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> (23 folds, ~12 h/experiment) for final results</span></div>
+            <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#10003;</span><span><strong class="text-white">Two-stage evaluation:</strong> <a href="#gl-singlesplit" class="text-cyan-600 hover:text-cyan-400 hover:underline">single-split</a> first (4-10 h per experiment, 3 seeds), then full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> (23 folds x 3 seeds = 69 runs, ~20x the compute) for final results</span></div>
             <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#10003;</span><span><a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> cross-validation (23 folds, chb01/chb21 always grouped)</span></div>
             <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#10003;</span><span>Normalization fitted on training data only (per-fold, hash-keyed)</span></div>
             <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#10003;</span><span>Synthetic data in training only - never validation or test</span></div>
@@ -1746,7 +1751,7 @@ tailwind.config = {
             <span class="w-7 h-7 flex items-center justify-center text-cyan-500 text-sm">&#9776;</span>
             <span class="font-semibold text-white text-sm">Multi-Channel Consistency</span>
           </div>
-          <p class="text-xs text-gray-400 leading-relaxed">Ictal activity propagates across cortical regions, creating spatial patterns across the 23-channel montage. A generative model must preserve inter-channel coherence — not just per-channel fidelity.</p>
+          <p class="text-xs text-gray-400 leading-relaxed">Seizure activity spreads across the brain, showing up as coordinated patterns across the 23 channels. A generative model can't just make each channel look right individually - it has to preserve the relationships between channels too.</p>
           <div class="mt-auto pt-3 text-xs text-cyan-500">Evaluated via <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a> per channel and inter-channel coherence</div>
         </div>
 
@@ -1764,7 +1769,7 @@ tailwind.config = {
             <span class="w-7 h-7 flex items-center justify-center text-sm">&#x1F50D;</span>
             <span class="font-semibold text-white text-sm">Evaluation of Realism</span>
           </div>
-          <p class="text-xs text-gray-400 leading-relaxed">There is no universal metric for synthetic EEG quality. <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a> similarity is necessary but not sufficient; temporal structure and spatial coherence must also be validated. Downstream task performance (<a href="#gl-tstr" class="text-cyan-600 hover:text-cyan-400 hover:underline">TSTR</a>) is the most clinically meaningful proxy.</p>
+          <p class="text-xs text-gray-400 leading-relaxed">There's no single number that tells you if synthetic EEG is "good enough." Matching the power spectrum is necessary but not enough - the temporal dynamics and spatial patterns also need to be realistic. The most meaningful test: can a detector trained on only synthetic data still detect real seizures (<a href="#gl-tstr" class="text-cyan-600 hover:text-cyan-400 hover:underline">TSTR</a>)?</p>
           <div class="mt-auto pt-3 text-xs text-sky-400">Multi-metric approach: <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a>, <a href="#gl-discriminative" class="text-cyan-600 hover:text-cyan-400 hover:underline">discriminative score</a>, <a href="#gl-tsne" class="text-cyan-600 hover:text-cyan-400 hover:underline">t-SNE</a>, <a href="#gl-tstr" class="text-cyan-600 hover:text-cyan-400 hover:underline">TSTR</a>, <a href="#gl-kl" class="text-cyan-600 hover:text-cyan-400 hover:underline">KL divergence</a></div>
         </div>
 
@@ -1806,7 +1811,7 @@ tailwind.config = {
                 <span class="px-2 py-0.5 bg-sky-500/20 rounded text-sky-400 text-xs">Control</span>
                 <span data-tooltip-ref="RQ2" class="px-1.5 py-0.5 bg-gray-800 rounded text-gray-500 text-xs hover:text-cyan-400">RQ2</span>
               </div>
-              <p class="text-xs text-gray-400 mb-3">Establishes the bar that generators must clear. Any claim that synthetic EEG &ldquo;helps&rdquo; must beat standard oversampling, not just the raw baseline. <a href="#cite-carrle2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Carrle et al., 2023</a> showed noise augmentation matched GANs; <a href="#cite-zhao2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Zhao et al., 2022</a> showed CB focal loss was competitive.</p>
+              <p class="text-xs text-gray-400 mb-3">The bar that generators must clear. If cheap interpolation already solves the imbalance problem, there's no reason to train expensive generative models. Both methods flatten each 23x1024 window into a 23,552-value vector and interpolate sample-by-sample - destroying temporal coherence and spectral structure in the process. This is exactly why E3-E5 exist.</p>
               <div class="flex flex-wrap gap-2 text-xs">
                 <span class="px-2 py-1 bg-gray-800 rounded text-gray-400">SMOTE (k=5)</span>
                 <span class="px-2 py-1 bg-gray-800 rounded text-gray-400">ADASYN</span>
@@ -1844,11 +1849,11 @@ tailwind.config = {
             <div class="flex-1">
               <div class="flex items-center gap-3 flex-wrap mb-2">
                 <div class="font-semibold text-white">CVAE Augmentation</div>
-                <span class="px-2 py-0.5 bg-cyan-500/20 rounded text-cyan-400 text-xs animate-pulse">Running</span>
+                <span class="px-2 py-0.5 bg-emerald-500/20 rounded text-emerald-400 text-xs">Single-split done</span>
                 <span class="px-2 py-0.5 bg-rsch-500/20 rounded text-rsch-400 text-xs">Generative</span>
                 <span data-tooltip-ref="RQ2,RQ3" class="px-1.5 py-0.5 bg-gray-800 rounded text-gray-500 text-xs hover:text-cyan-400">RQ2, RQ3</span>
               </div>
-              <p class="text-xs text-gray-400 mb-3">Second generative model. Conditional VAE with 1D-Conv encoder/decoder. Different inductive bias (explicit <a href="#gl-latentspace" class="text-cyan-600 hover:text-cyan-400 hover:underline">latent space</a> + reconstruction objective vs adversarial). Same evaluation protocol as E3: <a href="#gl-singlesplit" class="text-cyan-600 hover:text-cyan-400 hover:underline">single-split</a> at 100% ratio first, full ratio sweep during <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a>.</p>
+              <p class="text-xs text-gray-400 mb-3">Second generative model. Conditional VAE with 1D-Conv encoder/decoder. Compresses each window to a 128-dimensional latent vector and reconstructs from there. Different approach from TimeGAN: explicit <a href="#gl-latentspace" class="text-cyan-600 hover:text-cyan-400 hover:underline">latent space</a> + reconstruction objective instead of adversarial training. The encoder/decoder is shared with E5 (LDM) so any quality difference between them can only come from the generation method.</p>
               <div class="flex flex-wrap gap-2 text-xs">
                 <span class="px-2 py-1 bg-gray-800 rounded text-gray-400">CVAE (128-dim latent)</span>
                 <span class="px-2 py-1 bg-gray-800 rounded text-gray-400">Ratio sweep: 25/ 50/ 100/ 200%</span>
@@ -1869,10 +1874,11 @@ tailwind.config = {
             <div class="flex-1">
               <div class="flex items-center gap-3 flex-wrap mb-2">
                 <div class="font-semibold text-white">LDM Augmentation</div>
+                <span class="px-2 py-0.5 bg-emerald-500/20 rounded text-emerald-400 text-xs">Single-split done</span>
                 <span class="px-2 py-0.5 bg-rsch-500/20 rounded text-rsch-400 text-xs">Generative</span>
                 <span data-tooltip-ref="RQ2,RQ3" class="px-1.5 py-0.5 bg-gray-800 rounded text-gray-500 text-xs hover:text-cyan-400">RQ2, RQ3</span>
               </div>
-              <p class="text-xs text-gray-400 mb-3">Third generative model. Latent Diffusion Model using the CVAE encoder for latent space + 1D-UNet denoiser. Expected highest fidelity at highest compute cost. Same ratio sweep and evaluation.</p>
+              <p class="text-xs text-gray-400 mb-3">Third generative model. Runs the diffusion process in the CVAE's compressed latent space instead of on the raw signal - massively faster. Reuses the CVAE encoder/decoder from E4, so any quality difference comes from iterative denoising vs direct sampling. Best single-split results (+29% AUPRC over baseline).</p>
               <div class="flex flex-wrap gap-2 text-xs">
                 <span class="px-2 py-1 bg-gray-800 rounded text-gray-400">LDM + 1D-UNet</span>
                 <span class="px-2 py-1 bg-gray-800 rounded text-gray-400">Ratio sweep: 25/ 50/ 100/ 200%</span>
@@ -1917,7 +1923,7 @@ tailwind.config = {
                 <span class="px-2 py-0.5 bg-rose-500/20 rounded text-rose-400 text-xs">Privacy/ Memorisation</span>
                 <span data-tooltip-ref="RQ4" class="px-1.5 py-0.5 bg-gray-800 rounded text-gray-500 text-xs hover:text-cyan-400">RQ4</span>
               </div>
-              <p class="text-xs text-gray-400 mb-3">Does augmentation reduce or amplify subject signatures? A subject-ID <a href="#gl-linearprobe" class="text-cyan-600 hover:text-cyan-400 hover:underline">linear probe</a> on the frozen detector&rsquo;s embeddings answers three questions. (a) Real baseline: how identifiable are subjects? (b) Synthetic transfer: do synthetic windows inherit subject identity? (c) Augmented: does the detector rely less on subject signatures after augmentation?</p>
+              <p class="text-xs text-gray-400 mb-3">A detector might get good scores not because it learned what seizures look like, but because it learned to recognise which patient is which. A <a href="#gl-linearprobe" class="text-cyan-600 hover:text-cyan-400 hover:underline">linear probe</a> on the detector's post-pooling embeddings tests how easily patient identity can be read. Run on the E1 detector (real only) and E3-E5 detectors (augmented) - does augmentation make patient identity easier or harder to infer?</p>
               <div class="flex flex-wrap gap-2 text-xs">
                 <span class="px-2 py-1 bg-gray-800 rounded text-gray-400">Subject-ID classifier</span>
                 <span class="px-2 py-1 bg-gray-800 rounded text-gray-400">Linear probe on embeddings</span>
@@ -2225,7 +2231,7 @@ tailwind.config = {
           <div class="min-w-0">
             <div class="flex items-start gap-2 flex-wrap">
               <span class="text-white font-medium text-sm">E1 Baseline</span>
-              <span class="text-xs text-gray-500">~15&ndash;30 min</span>
+              <span class="text-xs text-gray-500">~205 min/seed (detector only)</span>
             </div>
             <p class="text-gray-400 text-xs mt-1">The baseline everything else is compared against. Trains the 49K-param detector on real data only. Expected low sensitivity (~30&ndash;50%) and high specificity (~95%+) - confirming the imbalance problem is real.</p>
             <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">python -m training.train --experiment e1 --mode single --seeds 42 123 456</code>
@@ -2237,7 +2243,7 @@ tailwind.config = {
           <div class="min-w-0">
             <div class="flex items-start gap-2 flex-wrap">
               <span class="text-white font-medium text-sm">E2 Controls (SMOTE + ADASYN)</span>
-              <span class="text-xs text-gray-500">~15&ndash;40 min each</span>
+              <span class="text-xs text-gray-500">~80 min/seed each method</span>
             </div>
             <p class="text-gray-400 text-xs mt-1">Non-synthetic baselines. Any generator must beat these to be useful. <a href="#cite-carrle2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Carrle et al., 2023</a> showed noise augmentation matched GANs in some cases.</p>
             <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">python -m training.train --experiment e2 --augmentation smote --mode single --seeds 42 123 456</code>
@@ -2250,7 +2256,7 @@ tailwind.config = {
           <div class="min-w-0">
             <div class="flex items-start gap-2 flex-wrap">
               <span class="text-white font-medium text-sm">E3 TimeGAN</span>
-              <span class="text-xs text-gray-500">~3&ndash;8 hours</span>
+              <span class="text-xs text-gray-500">~101 min/seed (generator + detector)</span>
             </div>
             <p class="text-gray-400 text-xs mt-1">First generator (independent, no dependencies). <a href="#gl-gru" class="text-cyan-600 hover:text-cyan-400 hover:underline"><code class="text-cyan-500">GRU</code></a>-based with 3 sequential training phases (autoencoder, supervisor, joint adversarial). Early results inform whether the generative approach is promising.</p>
             <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">python -m training.generate --model timegan --ratio 1.0 --seed 42</code>
@@ -2264,7 +2270,7 @@ tailwind.config = {
             <div class="flex items-start gap-2 flex-wrap">
               <span class="text-white font-medium text-sm">E4 CVAE</span>
               <span class="text-xs text-cyan-400 font-medium">Fastest generator</span>
-              <span class="text-xs text-gray-500">~1&ndash;3 hours</span>
+              <span class="text-xs text-gray-500">~141 min/seed (generator + detector)</span>
             </div>
             <p class="text-gray-400 text-xs mt-1">All convolutions (no recurrence, no multi-phase training). Most stable training (no adversarial dynamics). Also produces the encoder checkpoint needed for the LDM next.</p>
             <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">python -m training.generate --model cvae --ratio 1.0 --seed 42</code>
@@ -2277,7 +2283,7 @@ tailwind.config = {
           <div class="min-w-0">
             <div class="flex items-start gap-2 flex-wrap">
               <span class="text-white font-medium text-sm">E5 LDM</span>
-              <span class="text-xs text-gray-500">~2&ndash;4 hours (after CVAE)</span>
+              <span class="text-xs text-gray-500">~130 min/seed (denoiser + detector; reuses CVAE encoder)</span>
             </div>
             <p class="text-gray-400 text-xs mt-1">Requires the CVAE checkpoint from Step 4. The UNet denoiser trains in <a href="#gl-latentspace" class="text-cyan-600 hover:text-cyan-400 hover:underline">latent space</a> (small and fast), but DDPM sampling is slow. DDIM (50 steps) is used by default for generation.</p>
             <code class="block text-xs text-cyan-500 bg-gray-800 rounded px-3 py-2 mt-2 overflow-x-auto">python -m training.generate --model ldm --cvae-checkpoint results/e4/seed_42/single_split/cvae.pt --ratio 1.0 --seed 42</code>
@@ -2368,7 +2374,7 @@ tailwind.config = {
         <span class="text-xs font-semibold text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 px-2 py-0.5 rounded">STAGE 2 OF 2 - RUNNING</span>
         <h3 class="font-semibold text-white text-sm">Full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> evaluation in progress</h3>
       </div>
-      <p class="text-xs text-gray-400 leading-relaxed">All results below use a <strong class="text-white">single fixed split</strong> (18 train/ 2 val/ 4 test patients). This is fast enough to iterate on generator training, debug numerical issues, and confirm that the pipeline works end-to-end. Once all generators (E3-E5) succeed on single-split, the full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> evaluation (23 folds x 3 seeds = 69 runs per experiment) produces the publication-quality results. Single-split takes ~30 minutes per experiment; full LOPO takes ~12 hours.</p>
+      <p class="text-xs text-gray-400 leading-relaxed">All results below use a <strong class="text-white">single fixed split</strong> (18 train/ 2 val/ 4 test patients). This catches problems early - a full LOPO run that crashes halfway because of a NaN in the CVAE is a lot of wasted compute. A single-split run takes 4-10 hours total per experiment (3 seeds, each running 1.5-3.5 h depending on the generator). The full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> evaluation (23 folds x 3 seeds = 69 runs per experiment) is roughly 20x the compute. Single-split confirms the pipeline works end-to-end; only LOPO results are used to draw conclusions.</p>
     </div>
 
     <!-- Comparison Summary Table -->
@@ -2387,7 +2393,7 @@ tailwind.config = {
             <th class="py-2 pr-4"><a href="#gl-f1" class="text-cyan-600 hover:text-cyan-400 hover:underline">F1</a></th>
             <th class="py-2 pr-4"><a href="#gl-sens95spec" class="text-cyan-600 hover:text-cyan-400 hover:underline">Sens@95</a></th>
             <th class="py-2 pr-4">Per-patient <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></th>
-            <th class="py-2">Train time</th>
+            <th class="py-2">Time/seed</th>
           </tr></thead>
           <tbody class="text-gray-400">
             <tr class="border-b border-gray-800/50 bg-cyan-500/5">
@@ -2443,13 +2449,13 @@ tailwind.config = {
           </tbody>
         </table>
       </div>
-      <p class="text-xs text-gray-500 mt-3"><strong class="text-gray-400">Train time</strong> = generator training + detector training (per seed average). E1 trains longer because the detector needs more epochs to plateau without augmentation data. E5 includes the LDM diffusion model (~58 min) plus a shorter detector phase (~72 min) thanks to faster convergence with higher-quality synthetic data.</p>
+      <p class="text-xs text-gray-500 mt-3"><strong class="text-gray-400">Time/seed</strong> = total wall-clock time for one seed on single-split: generator training + synthetic generation + detector training. E1 has no generator but the detector needs more epochs to plateau without augmentation data. E5 includes the LDM denoiser training (~58 min) plus a shorter detector phase (~72 min) - the detector converges faster with higher-quality synthetic data.</p>
     </div>
 
     <!-- E1 Results -->
-    <div class="bg-gray-900 border border-emerald-500/30 rounded-xl p-5 mb-3">
+    <div class="bg-gray-900 border border-gray-500/30 rounded-xl p-5 mb-3">
       <div class="flex items-center gap-3 mb-3">
-        <div class="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-sm shrink-0">E1</div>
+        <div class="w-8 h-8 rounded-full bg-gray-700/30 border border-gray-500/40 flex items-center justify-center text-gray-300 font-bold text-sm shrink-0">E1</div>
         <div>
           <h3 class="font-semibold text-white text-sm">Baseline Results - 1D-CNN Detector (single-split, no augmentation)</h3>
           <p class="text-xs text-gray-500">Completed 26 Apr 2026 - 3 seeds, class-weighted cross-entropy loss, early stopping on validation <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></p>
@@ -2506,7 +2512,7 @@ tailwind.config = {
         </div>
       </div>
       <div class="mt-3 text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-2">
-        <strong class="text-gray-400">Interpretation:</strong> Results are within the expected range for a no-augmentation baseline on CHB-MIT with patient-independent splitting. The high variance between seeds (e.g. AUPRC 0.10&ndash;0.24) reflects the stochastic nature of training on heavily imbalanced data. Sensitivity at 95% specificity averaging ~62% confirms the model detects roughly half to two-thirds of seizure windows while maintaining a low false-alarm rate - the floor that augmentation experiments (E2&ndash;E5) must beat.
+        <strong class="text-gray-400">Interpretation:</strong> Expected range for a no-augmentation baseline with cross-subject splitting. The high variance between seeds (AUPRC 0.10-0.24) is typical when training on heavily imbalanced data - some random initializations handle the imbalance better than others. Sensitivity at 95% specificity averaging ~62% means the detector catches roughly half to two-thirds of seizures while keeping false alarms low. This is the floor that augmentation (E2-E5) must beat.
       </div>
     </div>
 
@@ -2704,16 +2710,16 @@ tailwind.config = {
       </div>
       <div class="mt-3 text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-3 space-y-2">
         <strong class="text-gray-400">Interpretation:</strong>
-        <p><a href="#gl-timegan" class="text-cyan-600 hover:text-cyan-400 hover:underline">TimeGAN</a> augmentation at 100% ratio produces results comparable to the E1 baseline (mean <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a> 0.1742 vs 0.1766). Unlike <a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a>/<a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400 hover:underline">ADASYN</a> (E2), the generative approach does not degrade performance - the synthetic windows are realistic enough that adding them to the training set neither helps nor hurts.</p>
-        <p><strong class="text-gray-400">High seed variance is notable.</strong> Seed 456 achieves AUPRC 0.2907 (higher than any E1 seed), while seed 123 drops to 0.0948. This suggests TimeGAN&rsquo;s 3-phase adversarial training is sensitive to initialization - some seeds produce higher-quality synthetic data than others. Per-patient AUPRC shows the same pattern: seed 456 reaches 0.3434 while seed 123 drops to 0.1035.</p>
-        <p>The key finding: generative augmentation preserves baseline performance (unlike tabular oversampling which degrades it), but TimeGAN does not yet improve it. E4 (<a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a>) and E5 (<a href="#gl-ldm" class="text-cyan-600 hover:text-cyan-400 hover:underline">LDM</a>) test whether convolutional or diffusion-based generators can do better.</p>
+        <p><a href="#gl-timegan" class="text-cyan-600 hover:text-cyan-400 hover:underline">TimeGAN</a> augmentation at 100% ratio produces results comparable to E1 baseline (mean <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a> 0.1742 vs 0.1766). Unlike <a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a>/<a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400 hover:underline">ADASYN</a> (E2), the synthetic windows are realistic enough that adding them to training doesn't degrade things - but it doesn't clearly help either.</p>
+        <p><strong class="text-gray-400">High seed variance is notable.</strong> Seed 456 hits AUPRC 0.2907 (higher than any E1 seed), while seed 123 drops to 0.0948. TimeGAN's 3-phase adversarial training is sensitive to initialisation - some seeds produce much better synthetic data than others. This is a known instability issue with GANs.</p>
+        <p>Key takeaway: generative augmentation preserves baseline performance (unlike tabular oversampling which actively hurts), but TimeGAN alone doesn't improve it. <a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a> (E4) and <a href="#gl-ldm" class="text-cyan-600 hover:text-cyan-400 hover:underline">LDM</a> (E5) test whether different generation strategies can do better.</p>
       </div>
     </div>
 
     <!-- E4 Results -->
-    <div class="bg-gray-900 border border-rsch-500/30 rounded-xl p-5 mb-3">
+    <div class="bg-gray-900 border border-cyan-500/30 rounded-xl p-5 mb-3">
       <div class="flex items-center gap-3 mb-3">
-        <div class="w-8 h-8 rounded-full bg-rsch-500/10 border border-rsch-500/30 flex items-center justify-center text-rsch-400 font-bold text-sm shrink-0">E4</div>
+        <div class="w-8 h-8 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-500 font-bold text-sm shrink-0">E4</div>
         <div>
           <h3 class="font-semibold text-white text-sm">CVAE Results - Synthetic Augmentation (single-split, ratio 1.0)</h3>
           <p class="text-xs text-gray-500">Completed 29 Apr 2026 - 3 seeds, <a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a>-generated ictal windows (LR warmup 5e-5 to 5e-4, log_var clamping, grad clip 1.0), class-weighted cross-entropy loss, early stopping on validation <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></p>
@@ -2771,8 +2777,8 @@ tailwind.config = {
       </div>
       <div class="mt-3 text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-3 space-y-2">
         <strong class="text-gray-400">Interpretation:</strong>
-        <p><a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a> augmentation at 100% ratio produces results comparable to the E1 baseline and E3 TimeGAN (mean <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a> 0.1750 vs 0.1766 baseline vs 0.1742 TimeGAN). All three generative approaches converge to similar single-split performance, suggesting the single-split evaluation is not sensitive enough to differentiate generator quality.</p>
-        <p><strong class="text-gray-400">Seed 456 is an outlier</strong> (AUPRC 0.07, while seeds 42 and 123 reach 0.21-0.24). Seeds 42 and 123 show strong sensitivity at 95% specificity (0.75), indicating the CVAE-augmented detector generalizes well when the generator produces high-quality synthetic data. The variance pattern differs from E3: in TimeGAN, seed 456 was the best; here it is the worst.</p>
+        <p><a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a> augmentation at 100% ratio lands at similar performance to E1 baseline and E3 TimeGAN (mean <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a> 0.1750 vs 0.1766 baseline vs 0.1742 TimeGAN). All three end up in the same neighbourhood on single-split, suggesting this evaluation isn't sensitive enough to differentiate generator quality - which is exactly why the full LOPO exists.</p>
+        <p><strong class="text-gray-400">Seed 456 is an outlier</strong> (AUPRC 0.07, while seeds 42 and 123 reach 0.21-0.24). When the CVAE works well (seeds 42/123), sensitivity at 95% specificity hits 0.75 - better than baseline. The variance pattern is interesting: in TimeGAN, seed 456 was the best performer; here it's the worst. Different models are sensitive to different initialisations.</p>
         <details class="mt-1">
           <summary class="text-gray-400 cursor-pointer hover:text-cyan-400">NaN stability issue and fix (click to expand)</summary>
           <div class="mt-2 space-y-2 text-gray-500">
@@ -2785,12 +2791,12 @@ tailwind.config = {
     </div>
 
     <!-- E5 Results -->
-    <div class="bg-gray-900 border border-rsch-500/30 rounded-xl p-5 mb-3">
+    <div class="bg-gray-900 border border-emerald-500/30 rounded-xl p-5 mb-3">
       <div class="flex items-center gap-3 mb-3">
-        <div class="w-8 h-8 rounded-full bg-rsch-500/10 border border-rsch-500/30 flex items-center justify-center text-rsch-400 font-bold text-sm shrink-0">E5</div>
+        <div class="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-sm shrink-0">E5</div>
         <div>
           <h3 class="font-semibold text-white text-sm">LDM Results - Synthetic Augmentation (single-split, ratio 1.0)</h3>
-          <p class="text-xs text-gray-500">Completed 29 Apr 2026 - 3 seeds, <a href="#gl-ldm" class="text-cyan-600 hover:text-cyan-400 hover:underline">LDM</a>-generated ictal windows (reuses <a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a> encoder, 200 DDPM steps), class-weighted cross-entropy loss, early stopping on validation <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></p>
+          <p class="text-xs text-gray-500">Completed 29 Apr 2026 - 3 seeds, <a href="#gl-ldm" class="text-cyan-600 hover:text-cyan-400 hover:underline">LDM</a>-generated ictal windows (reuses <a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a> encoder/decoder, DDIM 50 steps), class-weighted cross-entropy loss, early stopping on validation <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></p>
         </div>
         <span class="ml-auto text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded">DONE</span>
       </div>
@@ -2845,10 +2851,10 @@ tailwind.config = {
       </div>
       <div class="mt-3 text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-3 space-y-2">
         <strong class="text-gray-400">Interpretation:</strong>
-        <p><a href="#gl-ldm" class="text-cyan-600 hover:text-cyan-400 hover:underline">LDM</a> augmentation is the clear winner among single-split experiments. Mean <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a> 0.2272 vs 0.1766 (E1 baseline) represents a <strong class="text-white">+29% relative improvement</strong>. Crucially, E5 also shows the <strong class="text-white">lowest variance</strong> across seeds (std 0.0193 vs 0.0542 for E1), indicating that LDM-generated samples provide a more consistent training signal regardless of random initialization.</p>
-        <p><strong class="text-gray-400">Per-patient AUPRC jumps from 0.2263 (E1) to 0.3759 (+66%).</strong> This suggests LDM-augmented training generalizes better across patients - the generator produces diverse enough synthetic ictal patterns that the detector learns more patient-agnostic seizure features.</p>
-        <p><strong class="text-gray-400">Sensitivity at 95% specificity (0.7170)</strong> surpasses the E1 baseline (0.6177) and CVAE (0.6017), meaning the LDM-trained detector catches more seizures while maintaining clinical-grade specificity. E3 TimeGAN (0.4815) lags significantly.</p>
-        <p>The ranking for full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> evaluation is now clear: E5 (LDM) &gt; E1 (baseline) &asymp; E4 (CVAE) &asymp; E3 (TimeGAN) &gt;&gt; E2 (SMOTE/ADASYN).</p>
+        <p><a href="#gl-ldm" class="text-cyan-600 hover:text-cyan-400 hover:underline">LDM</a> is the clear winner on single-split. Mean <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a> 0.2272 vs 0.1766 baseline is a <strong class="text-white">+29% relative improvement</strong>. Just as importantly, E5 has the <strong class="text-white">lowest variance</strong> across seeds (std 0.0193 vs 0.0542 for E1) - the iterative denoising process produces consistently good synthetic data regardless of which random seed you use.</p>
+        <p><strong class="text-gray-400">Per-patient AUPRC jumps from 0.2263 (E1) to 0.3759 (+66%).</strong> The detector generalises better across patients when trained with LDM data - suggesting the generator produces diverse enough seizure patterns that the detector learns patient-agnostic features rather than memorising specific patients.</p>
+        <p><strong class="text-gray-400">Sensitivity at 95% specificity (0.7170)</strong> beats the baseline (0.6177) and CVAE (0.6017), meaning the LDM-trained detector catches more real seizures while maintaining the same low false-alarm rate. TimeGAN (0.4815) lags behind.</p>
+        <p>Single-split ranking: E5 (LDM) &gt; E1 (baseline) &asymp; E4 (CVAE) &asymp; E3 (TimeGAN) &gt;&gt; E2 (SMOTE/ADASYN). Full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> will determine if this holds across all 23 patients.</p>
       </div>
     </div>
 
