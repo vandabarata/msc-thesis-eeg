@@ -284,6 +284,43 @@ def load_synthetic_windows(path: str) -> List[Tuple[np.ndarray, int, int]]:
     return [(windows[i], int(labels[i]), int(pids[i])) for i in range(len(windows))]
 
 
+def _run_fidelity_plots(
+    train_ds: CHBMITDataset,
+    synthetic_path: Path,
+    output_dir: Path,
+    generator_name: str,
+):
+    """Run data-level fidelity evaluation on generated synthetic windows."""
+    from training.visualize import generate_all_plots
+
+    synth_data = np.load(str(synthetic_path))
+    synthetic_windows = synth_data["windows"]
+
+    ictal_idx = np.where(train_ds._all_labels[:train_ds._n_real] == 1)[0]
+    interictal_idx = np.where(train_ds._all_labels[:train_ds._n_real] == 0)[0]
+
+    # Load all ictal + small interictal sample (memory-safe)
+    rng = np.random.RandomState(42)
+    n_inter_sample = min(len(interictal_idx), 2000)
+    inter_chosen = rng.choice(interictal_idx, n_inter_sample, replace=False)
+
+    selected = np.concatenate([ictal_idx, inter_chosen])
+    windows = np.empty((len(selected), N_CHANNELS, WINDOW_SAMPLES), dtype=np.float32)
+    labels = np.empty(len(selected), dtype=np.int64)
+    for i, idx in enumerate(selected):
+        w, l, _ = train_ds._get_real_window(int(idx))
+        windows[i] = w
+        labels[i] = l
+
+    generate_all_plots(
+        real_windows=windows,
+        real_labels=labels,
+        synthetic_windows=synthetic_windows,
+        output_dir=str(output_dir),
+        generator_name=generator_name,
+    )
+
+
 def _run_single_split(args, device: str, experiment: str):
     """Run generator training + synthesis on single-split."""
     # normalize=False: generators produce µV-scale windows so the loader
@@ -300,6 +337,16 @@ def _run_single_split(args, device: str, experiment: str):
     for ratio in args.ratio:
         synthetic = generate_synthetic(model, n_ictal, ratio, device)
         save_synthetic_windows(synthetic, save_dir, ratio)
+
+    # Fidelity plots on the primary ratio (1.0 if available, else first ratio)
+    fidelity_ratio = 1.0 if 1.0 in args.ratio else args.ratio[0]
+    synth_path = save_dir / f"synthetic_ratio_{fidelity_ratio:.2f}.npz"
+    if synth_path.exists():
+        _run_fidelity_plots(
+            train_ds, synth_path,
+            output_dir=save_dir / "plots",
+            generator_name=args.model.upper(),
+        )
 
     print(f"\nDone. Outputs in {save_dir}/")
 
@@ -344,6 +391,16 @@ def _run_lopo(args, device: str, experiment: str):
         for ratio in args.ratio:
             synthetic = generate_synthetic(model, n_ictal, ratio, device)
             save_synthetic_windows(synthetic, save_dir, ratio)
+
+        # Fidelity plots per fold
+        fidelity_ratio = 1.0 if 1.0 in args.ratio else args.ratio[0]
+        synth_path = save_dir / f"synthetic_ratio_{fidelity_ratio:.2f}.npz"
+        if synth_path.exists():
+            _run_fidelity_plots(
+                train_ds, synth_path,
+                output_dir=save_dir / "plots",
+                generator_name=f"{args.model.upper()} fold {fold}",
+            )
 
     print(f"\nDone. Outputs in {RESULTS_DIR / experiment}/")
 

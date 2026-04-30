@@ -398,6 +398,46 @@ tailwind.config = {
       </div>
     </div>
 
+    <!-- What's being evaluated -->
+    <div class="bg-gray-900 border border-cyan-500/20 rounded-xl p-5 mb-3">
+      <h3 class="font-semibold text-white mb-3">What's Being Evaluated: The Generators, Not the Classifier</h3>
+      <p class="text-sm text-gray-400 mb-3">The detector is a <em>measuring instrument</em> - it's frozen specifically so it can't be the source of any performance difference. The actual object of study is the synthetic data itself. Evaluation happens in layers, and the data is evaluated directly <strong class="text-white">before</strong> it ever touches a classifier:</p>
+      <div class="space-y-3 text-sm">
+        <div class="bg-gray-800/40 rounded-lg p-4 border-l-2 border-cyan-500">
+          <div class="text-cyan-400 font-semibold text-xs uppercase tracking-wide mb-1">Layer 1: Direct Data Evaluation (no classifier involved)</div>
+          <div class="space-y-1 text-xs text-gray-400">
+            <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span><strong class="text-gray-300">Spectral fidelity:</strong> PSD per frequency band per channel - does the synthetic data have the same spectral shape as real ictal EEG?</span></div>
+            <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span><strong class="text-gray-300">Distribution matching:</strong> amplitude distributions (histograms + Q-Q plots), KL divergence per band - how different are the statistical properties?</span></div>
+            <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span><strong class="text-gray-300">Temporal structure:</strong> autocorrelation functions - does the synthetic data preserve the time-dependencies within a window?</span></div>
+            <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span><strong class="text-gray-300">Spatial structure:</strong> cross-channel correlation matrices - are the relationships between EEG channels preserved?</span></div>
+            <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span><strong class="text-gray-300">Visual inspection:</strong> side-by-side waveform plots of real vs synthetic windows</span></div>
+          </div>
+        </div>
+        <div class="bg-gray-800/40 rounded-lg p-4 border-l-2 border-rsch-500">
+          <div class="text-rsch-400 font-semibold text-xs uppercase tracking-wide mb-1">Layer 2: Discriminability (lightweight classifier, not the detector)</div>
+          <div class="space-y-1 text-xs text-gray-400">
+            <div class="flex gap-2"><span class="text-rsch-400 shrink-0">&#9679;</span><span><strong class="text-gray-300">C2ST (discriminative score):</strong> a separate classifier tries to tell real from synthetic. Score near 0.5 = indistinguishable. This tests the <em>data</em>, not the seizure detector.</span></div>
+            <div class="flex gap-2"><span class="text-rsch-400 shrink-0">&#9679;</span><span><strong class="text-gray-300">t-SNE embedding:</strong> do synthetic samples overlap with real ictal data in feature space, or do they cluster separately?</span></div>
+          </div>
+        </div>
+        <div class="bg-gray-800/40 rounded-lg p-4 border-l-2 border-amber-500">
+          <div class="text-amber-400 font-semibold text-xs uppercase tracking-wide mb-1">Layer 3: Downstream Utility (uses the frozen detector)</div>
+          <div class="space-y-1 text-xs text-gray-400">
+            <div class="flex gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span><strong class="text-gray-300">TSTR:</strong> train detector on ONLY synthetic data, test on real. Answers "does the synthetic data alone capture what matters?" - still evaluating the data, using the detector as the measurement tool.</span></div>
+            <div class="flex gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span><strong class="text-gray-300">Augmented performance (AUPRC):</strong> does adding synthetic data to real data improve detection? The detector is frozen - any change must come from the data.</span></div>
+          </div>
+        </div>
+        <div class="bg-gray-800/40 rounded-lg p-4 border-l-2 border-rose-500">
+          <div class="text-rose-400 font-semibold text-xs uppercase tracking-wide mb-1">Layer 4: Failure Mode Detection</div>
+          <div class="space-y-1 text-xs text-gray-400">
+            <div class="flex gap-2"><span class="text-rose-400 shrink-0">&#9679;</span><span><strong class="text-gray-300">Subject-identity probe (E7):</strong> is the generator memorising patients rather than learning general seizure patterns? Tests the data for a specific failure mode.</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-gray-500 mt-3">Layers 1 and 2 evaluate the synthetic data with no dependence on the downstream task. Layer 3 uses the frozen detector as an indirect measurement of data quality. Layer 4 checks for a specific failure mode. Together they answer "is this synthetic data any good?" from multiple angles - the classifier result alone would be insufficient.</p>
+      <p class="text-xs text-emerald-500/80 mt-2"><strong>Status:</strong> Layers 1 and 2 implemented and generated for all three generators (E3/E4/E5), all 3 seeds. Full fidelity suite: <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a> + <a href="#gl-kl" class="text-cyan-600 hover:text-cyan-400 hover:underline">KL</a>, <a href="#gl-autocorrelation" class="text-cyan-600 hover:text-cyan-400 hover:underline">autocorrelation</a>, <a href="#gl-crosschannel" class="text-cyan-600 hover:text-cyan-400 hover:underline">cross-channel correlation</a>, per-channel distributions, waveforms, <a href="#gl-discriminative" class="text-cyan-600 hover:text-cyan-400 hover:underline">C2ST</a>, and <a href="#gl-tsne" class="text-cyan-600 hover:text-cyan-400 hover:underline">t-SNE</a>. See <a href="#page-status" class="text-cyan-600 hover:text-cyan-400 hover:underline">Status &rarr; Data Fidelity Comparison</a> for cross-generator results.</p>
+    </div>
+
     <!-- Key SLR Gaps -->
     <div class="bg-gray-900 border border-amber-500/30 rounded-xl p-5">
       <h3 class="font-semibold text-white mb-3">Research Gaps Identified in the SLR</h3>
@@ -1674,13 +1714,13 @@ tailwind.config = {
       <h3 class="font-semibold text-white mb-3">Experiment Plan Overview</h3>
       <div class="grid md:grid-cols-2 gap-4">
         <div>
-          <p class="text-sm text-gray-400 leading-relaxed mb-3">The plan tests whether synthetic EEG augmentation improves seizure detection on <strong class="text-white">unseen patients</strong> under a leakage-aware protocol. Three generator families (TimeGAN, CVAE, LDM) are compared against non-synthetic controls (<a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a>, <a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400 hover:underline">ADASYN</a>), using the same <a href="#gl-frozen" class="text-cyan-600 hover:text-cyan-400 hover:underline">frozen 1D-CNN detector</a> throughout to isolate the augmentation effect.</p>
+          <p class="text-sm text-gray-400 leading-relaxed mb-3">The plan evaluates synthetic EEG data from three generator families (TimeGAN, CVAE, LDM). Each generator's output is first <strong class="text-white">evaluated directly as data</strong> (spectral, temporal, spatial fidelity) and then tested for <strong class="text-white">downstream utility</strong> via a <a href="#gl-frozen" class="text-cyan-600 hover:text-cyan-400 hover:underline">frozen detector</a> on <strong class="text-white">unseen patients</strong>. The object of study is the generated data, not the classifier.</p>
           <div class="space-y-2 text-xs text-gray-400">
             <div class="flex gap-2 items-baseline"><span class="text-gray-300 font-mono shrink-0">E1</span> <span>Baseline detector (real data only) - the anchor</span></div>
             <div class="flex gap-2 items-baseline"><span class="text-sky-400 font-mono shrink-0">E2</span> <span>Non-synthetic controls (SMOTE, ADASYN) - the bar generators must clear</span></div>
-            <div class="flex gap-2 items-baseline"><span class="text-rsch-400 font-mono shrink-0">E3</span> <span>TimeGAN augmentation + ratio sweep</span></div>
-            <div class="flex gap-2 items-baseline"><span class="text-cyan-500 font-mono shrink-0">E4</span> <span>CVAE augmentation + ratio sweep</span></div>
-            <div class="flex gap-2 items-baseline"><span class="text-emerald-400 font-mono shrink-0">E5</span> <span>LDM augmentation + ratio sweep</span></div>
+            <div class="flex gap-2 items-baseline"><span class="text-rsch-400 font-mono shrink-0">E3</span> <span>TimeGAN: generate, evaluate data fidelity, measure utility</span></div>
+            <div class="flex gap-2 items-baseline"><span class="text-cyan-500 font-mono shrink-0">E4</span> <span>CVAE: generate, evaluate data fidelity, measure utility</span></div>
+            <div class="flex gap-2 items-baseline"><span class="text-emerald-400 font-mono shrink-0">E5</span> <span>LDM: generate, evaluate data fidelity, measure utility</span></div>
             <div class="flex gap-2 items-baseline"><span class="text-amber-400 font-mono shrink-0">E6</span> <span>Cross-generator comparison &amp; ablation analysis</span></div>
             <div class="flex gap-2 items-baseline"><span class="text-rose-400 font-mono shrink-0">E7</span> <span>Subject-identity analysis (memorization check)</span></div>
           </div>
@@ -1830,7 +1870,7 @@ tailwind.config = {
                 <span class="px-2 py-0.5 bg-rsch-500/20 rounded text-rsch-400 text-xs">Generative</span>
                 <span data-tooltip-ref="RQ2,RQ3" class="px-1.5 py-0.5 bg-gray-800 rounded text-gray-500 text-xs hover:text-cyan-400">RQ2, RQ3</span>
               </div>
-              <p class="text-xs text-gray-400 mb-3">First generative model. TimeGAN (<a href="#cite-yoon2019" class="text-cyan-600 hover:text-cyan-400 hover:underline">Yoon et al., 2019</a>) models temporal dynamics via supervised embedding-recovery. Trained on ictal windows from training patients only. <a href="#gl-singlesplit" class="text-cyan-600 hover:text-cyan-400 hover:underline">Single-split</a> at 100% ratio first; full <a href="#gl-syntheticratio" class="text-cyan-600 hover:text-cyan-400 hover:underline">ratio sweep</a> (25/ 50/ 100/ 200%) during <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a>. <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a> comparison mandatory.</p>
+              <p class="text-xs text-gray-400 mb-3">First generative model. TimeGAN (<a href="#cite-yoon2019" class="text-cyan-600 hover:text-cyan-400 hover:underline">Yoon et al., 2019</a>) models temporal dynamics via supervised embedding-recovery. Three-stage evaluation per fold: <strong class="text-gray-300">(1)</strong> generate synthetic ictal windows, <strong class="text-gray-300">(2)</strong> assess data fidelity directly (spectral, temporal, spatial), <strong class="text-gray-300">(3)</strong> measure downstream utility via the frozen detector.</p>
               <div class="flex flex-wrap gap-2 text-xs">
                 <span class="px-2 py-1 bg-gray-800 rounded text-gray-400"><a href="#gl-timegan" class="text-gray-400 hover:text-cyan-400 hover:underline">TimeGAN</a> (<a href="#gl-gru" class="text-gray-400 hover:text-cyan-400 hover:underline">GRU</a>-based)</span>
                 <span class="px-2 py-1 bg-gray-800 rounded text-gray-400">Ratio sweep: 25/ 50/ 100/ 200%</span>
@@ -1853,7 +1893,7 @@ tailwind.config = {
                 <span class="px-2 py-0.5 bg-rsch-500/20 rounded text-rsch-400 text-xs">Generative</span>
                 <span data-tooltip-ref="RQ2,RQ3" class="px-1.5 py-0.5 bg-gray-800 rounded text-gray-500 text-xs hover:text-cyan-400">RQ2, RQ3</span>
               </div>
-              <p class="text-xs text-gray-400 mb-3">Second generative model. Conditional VAE with 1D-Conv encoder/decoder. Compresses each window to a 128-dimensional latent vector and reconstructs from there. Different approach from TimeGAN: explicit <a href="#gl-latentspace" class="text-cyan-600 hover:text-cyan-400 hover:underline">latent space</a> + reconstruction objective instead of adversarial training. The encoder/decoder is shared with E5 (LDM) so any quality difference between them can only come from the generation method.</p>
+              <p class="text-xs text-gray-400 mb-3">Second generative model. Conditional VAE with 1D-Conv encoder/decoder, 128-dim latent space. Same three-stage evaluation: generate, assess fidelity, measure utility. The encoder/decoder is shared with E5 (LDM) so any quality difference between them can only come from the generation method (direct sampling vs iterative denoising).</p>
               <div class="flex flex-wrap gap-2 text-xs">
                 <span class="px-2 py-1 bg-gray-800 rounded text-gray-400">CVAE (128-dim latent)</span>
                 <span class="px-2 py-1 bg-gray-800 rounded text-gray-400">Ratio sweep: 25/ 50/ 100/ 200%</span>
@@ -1878,7 +1918,7 @@ tailwind.config = {
                 <span class="px-2 py-0.5 bg-rsch-500/20 rounded text-rsch-400 text-xs">Generative</span>
                 <span data-tooltip-ref="RQ2,RQ3" class="px-1.5 py-0.5 bg-gray-800 rounded text-gray-500 text-xs hover:text-cyan-400">RQ2, RQ3</span>
               </div>
-              <p class="text-xs text-gray-400 mb-3">Third generative model. Runs the diffusion process in the CVAE's compressed latent space instead of on the raw signal - massively faster. Reuses the CVAE encoder/decoder from E4, so any quality difference comes from iterative denoising vs direct sampling. Best single-split results (+29% AUPRC over baseline).</p>
+              <p class="text-xs text-gray-400 mb-3">Third generative model. Runs the diffusion process in the CVAE's compressed latent space - massively faster than raw-signal diffusion. Same three-stage evaluation. Reuses the CVAE encoder/decoder from E4, isolating the generation method. Best single-split results (+29% AUPRC over baseline, lowest cross-seed variance).</p>
               <div class="flex flex-wrap gap-2 text-xs">
                 <span class="px-2 py-1 bg-gray-800 rounded text-gray-400">LDM + 1D-UNet</span>
                 <span class="px-2 py-1 bg-gray-800 rounded text-gray-400">Ratio sweep: 25/ 50/ 100/ 200%</span>
@@ -2856,6 +2896,190 @@ tailwind.config = {
         <p><strong class="text-gray-400">Sensitivity at 95% specificity (0.7170)</strong> beats the baseline (0.6177) and CVAE (0.6017), meaning the LDM-trained detector catches more real seizures while maintaining the same low false-alarm rate. TimeGAN (0.4815) lags behind.</p>
         <p>Single-split ranking: E5 (LDM) &gt; E1 (baseline) &asymp; E4 (CVAE) &asymp; E3 (TimeGAN) &gt;&gt; E2 (SMOTE/ADASYN). Full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> will determine if this holds across all 23 patients.</p>
       </div>
+      <details class="mt-3">
+        <summary class="text-xs text-gray-400 cursor-pointer hover:text-cyan-400 font-semibold">Data-level fidelity assessment (click to expand)</summary>
+        <div class="mt-2 text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-3 space-y-3">
+          <p class="text-gray-400">These metrics evaluate the synthetic data directly - no classifier involved. They answer "does it look like real ictal EEG?" before asking "does it help detection?"</p>
+          <div>
+            <strong class="text-gray-400">KL Divergence per frequency band</strong> (lower = closer to real, averaged across 3 seeds):
+            <table class="w-full mt-2">
+              <thead><tr class="border-b border-gray-700 text-left text-gray-500"><th class="py-1 pr-3">Band</th><th class="py-1 pr-3">Seed 42</th><th class="py-1 pr-3">Seed 123</th><th class="py-1 pr-3">Seed 456</th><th class="py-1 font-semibold text-gray-400">Mean</th></tr></thead>
+              <tbody class="text-gray-400">
+                <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">Delta (0.5-4 Hz)</td><td class="py-1 pr-3">0.0024</td><td class="py-1 pr-3">0.0032</td><td class="py-1 pr-3">0.0010</td><td class="py-1 font-semibold text-emerald-400">0.0022</td></tr>
+                <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">Theta (4-8 Hz)</td><td class="py-1 pr-3">0.0200</td><td class="py-1 pr-3">0.0102</td><td class="py-1 pr-3">0.0070</td><td class="py-1 font-semibold text-emerald-400">0.0124</td></tr>
+                <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">Alpha (8-13 Hz)</td><td class="py-1 pr-3">0.0814</td><td class="py-1 pr-3">0.0891</td><td class="py-1 pr-3">0.0862</td><td class="py-1 font-semibold text-amber-400">0.0856</td></tr>
+                <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">Beta (13-30 Hz)</td><td class="py-1 pr-3">0.0490</td><td class="py-1 pr-3">0.0263</td><td class="py-1 pr-3">0.0427</td><td class="py-1 font-semibold text-amber-400">0.0393</td></tr>
+                <tr><td class="py-1 pr-3">Gamma (30-40 Hz)</td><td class="py-1 pr-3">0.0419</td><td class="py-1 pr-3">0.0287</td><td class="py-1 pr-3">0.0332</td><td class="py-1 font-semibold text-amber-400">0.0346</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="text-gray-500">The LDM faithfully reproduces low-frequency content (delta/theta KL &lt; 0.02) where most seizure energy lies. Higher divergence in alpha/beta/gamma suggests the denoising process slightly smooths fast activity. C2ST accuracy: 0.725 (a classifier can tell real from synthetic ~73% of the time - partially distinguishable but not trivially so). See the <a href="#fidelity-comparison" class="text-cyan-600 hover:text-cyan-400 hover:underline">cross-generator comparison below</a> for context.</p>
+          <div>
+            <strong class="text-gray-400">Additional data-level plots generated</strong> (per seed):
+            <div class="mt-1 grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div class="bg-gray-800/50 rounded p-2 text-center"><span class="text-cyan-500">PSD</span><br>Spectral shape</div>
+              <div class="bg-gray-800/50 rounded p-2 text-center"><span class="text-cyan-500">Autocorrelation</span><br>Temporal structure</div>
+              <div class="bg-gray-800/50 rounded p-2 text-center"><span class="text-cyan-500">Cross-channel</span><br>Spatial structure</div>
+              <div class="bg-gray-800/50 rounded p-2 text-center"><span class="text-cyan-500">Waveforms</span><br>Visual inspection</div>
+            </div>
+          </div>
+          <p class="text-gray-500">Full plot suite: <code class="text-cyan-500">results/e5/seed_*/single_split/plots/</code> (7 plots + KL + C2ST JSON per seed).</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Data Fidelity Comparison (all generators) -->
+    <div id="fidelity-comparison" class="bg-gray-900 border border-rsch-500/30 rounded-xl p-5 mb-3">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-8 h-8 rounded-full bg-rsch-500/10 border border-rsch-500/30 flex items-center justify-center text-rsch-400 font-bold text-xs shrink-0">L1</div>
+        <div>
+          <h3 class="font-semibold text-white text-sm">Data Fidelity Comparison - All Generators (single-split)</h3>
+          <p class="text-xs text-gray-500">Direct data evaluation - no classifier involved. Answers: "does the synthetic data look like real ictal EEG?"</p>
+        </div>
+      </div>
+
+      <div class="text-xs text-gray-500 mb-3 bg-gray-800/30 border border-gray-700/30 rounded p-3">
+        <p class="text-gray-400 mb-2"><strong>What this table shows:</strong> Each generator produces synthetic seizure windows. Before asking "does it help detection?", we ask "does it look right?" Two metrics answer that:</p>
+        <p class="text-gray-400 mb-1"><strong><a href="#gl-kl" class="text-cyan-600 hover:text-cyan-400 hover:underline">KL divergence</a></strong> measures how different the synthetic signal's frequency content is from real seizures, band by band. Lower = closer to real. A value of 0 means identical frequency profiles; values above ~0.1 are noticeable; above 1.0 means the generator is producing something spectrally wrong.</p>
+        <p class="text-gray-400"><strong><a href="#gl-discriminative" class="text-cyan-600 hover:text-cyan-400 hover:underline">C2ST</a></strong> asks: "if you mix real and synthetic windows and train a simple classifier to tell them apart, how well does it do?" Accuracy near 50% = can't tell the difference (perfect generator). Near 100% = trivially distinguishable (bad generator). Anything in between means partially distinguishable.</p>
+      </div>
+
+      <div class="overflow-x-auto mb-3">
+        <p class="text-xs text-gray-600 mb-1">Mean &plusmn; std across 3 seeds (42, 123, 456):</p>
+        <table class="w-full text-xs">
+          <thead><tr class="border-b border-gray-700 text-left text-gray-500"><th class="py-2 pr-3">KL Divergence</th><th class="py-2 pr-3">Delta</th><th class="py-2 pr-3">Theta</th><th class="py-2 pr-3">Alpha</th><th class="py-2 pr-3">Beta</th><th class="py-2">Gamma</th></tr></thead>
+          <tbody class="text-gray-400">
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-rsch-400 font-medium">TimeGAN (E3)</td><td class="py-2 pr-3">0.104 &plusmn; 0.051</td><td class="py-2 pr-3">0.244 &plusmn; 0.190</td><td class="py-2 pr-3">0.134 &plusmn; 0.045</td><td class="py-2 pr-3 text-rose-400 font-semibold">3.34 &plusmn; 0.80</td><td class="py-2 text-rose-400 font-semibold">2.36 &plusmn; 0.60</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-cyan-400 font-medium">CVAE (E4)</td><td class="py-2 pr-3 text-emerald-400">0.004 &plusmn; 0.001</td><td class="py-2 pr-3 text-emerald-400">0.035 &plusmn; 0.006</td><td class="py-2 pr-3 text-emerald-400">0.032 &plusmn; 0.005</td><td class="py-2 pr-3 text-emerald-400">0.041 &plusmn; 0.002</td><td class="py-2 text-emerald-400">0.012 &plusmn; 0.001</td></tr>
+            <tr><td class="py-2 pr-3 text-emerald-400 font-medium">LDM (E5)</td><td class="py-2 pr-3 text-emerald-400">0.002 &plusmn; 0.001</td><td class="py-2 pr-3 text-emerald-400">0.012 &plusmn; 0.007</td><td class="py-2 pr-3">0.086 &plusmn; 0.004</td><td class="py-2 pr-3 text-emerald-400">0.039 &plusmn; 0.012</td><td class="py-2">0.035 &plusmn; 0.007</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="overflow-x-auto mb-3">
+        <table class="w-full text-xs">
+          <thead><tr class="border-b border-gray-700 text-left text-gray-500"><th class="py-2 pr-3">C2ST</th><th class="py-2 pr-3">Accuracy (closer to 0.5 = better)</th><th class="py-2">AUROC</th></tr></thead>
+          <tbody class="text-gray-400">
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-rsch-400 font-medium">TimeGAN (E3)</td><td class="py-2 pr-3">0.772 &plusmn; 0.005</td><td class="py-2">0.783 &plusmn; 0.047</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-cyan-400 font-medium">CVAE (E4)</td><td class="py-2 pr-3 font-semibold text-white">0.709 &plusmn; 0.011</td><td class="py-2">0.774 &plusmn; 0.015</td></tr>
+            <tr><td class="py-2 pr-3 text-emerald-400 font-medium">LDM (E5)</td><td class="py-2 pr-3">0.725 &plusmn; 0.007</td><td class="py-2 font-semibold text-white">0.680 &plusmn; 0.015</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Fidelity Plots -->
+      <div class="mb-3">
+        <details class="bg-gray-800/30 border border-gray-700/30 rounded">
+          <summary class="text-xs text-gray-400 font-semibold cursor-pointer hover:text-cyan-400 p-3">Fidelity plots - TimeGAN (E3, seed 42)</summary>
+          <div class="p-3 pt-0 space-y-3">
+            <div><p class="text-xs text-gray-500 mb-1">Power Spectral Density - real (blue) vs synthetic (red):</p><img src="results/e3/seed_42/single_split/plots/psd.png" alt="PSD: Real vs TimeGAN" class="rounded border border-gray-700 w-full"></div>
+            <div><p class="text-xs text-gray-500 mb-1">Autocorrelation - temporal dependence structure:</p><img src="results/e3/seed_42/single_split/plots/autocorrelation.png" alt="Autocorrelation: Real vs TimeGAN" class="rounded border border-gray-700 w-full"></div>
+            <div><p class="text-xs text-gray-500 mb-1">Per-channel amplitude distribution (mean and std):</p><img src="results/e3/seed_42/single_split/plots/per_channel_dist.png" alt="Per-Channel Distribution: Real vs TimeGAN" class="rounded border border-gray-700 w-full"></div>
+            <div><p class="text-xs text-gray-500 mb-1">Waveform examples - real vs synthetic side by side:</p><img src="results/e3/seed_42/single_split/plots/waveforms.png" alt="Waveforms: Real vs TimeGAN" class="rounded border border-gray-700 w-full"></div>
+            <div><p class="text-xs text-gray-500 mb-1">t-SNE embedding - do synthetic samples overlap with real?</p><img src="results/e3/seed_42/single_split/plots/tsne.png" alt="t-SNE: Real vs TimeGAN" class="rounded border border-gray-700 w-full"></div>
+          </div>
+        </details>
+        <details class="bg-gray-800/30 border border-gray-700/30 rounded mt-2">
+          <summary class="text-xs text-gray-400 font-semibold cursor-pointer hover:text-cyan-400 p-3">Fidelity plots - CVAE (E4, seed 42)</summary>
+          <div class="p-3 pt-0 space-y-3">
+            <div><p class="text-xs text-gray-500 mb-1">Power Spectral Density - real (blue) vs synthetic (red):</p><img src="results/e4/seed_42/single_split/plots/psd.png" alt="PSD: Real vs CVAE" class="rounded border border-gray-700 w-full"></div>
+            <div><p class="text-xs text-gray-500 mb-1">Autocorrelation - temporal dependence structure:</p><img src="results/e4/seed_42/single_split/plots/autocorrelation.png" alt="Autocorrelation: Real vs CVAE" class="rounded border border-gray-700 w-full"></div>
+            <div><p class="text-xs text-gray-500 mb-1">Per-channel amplitude distribution (mean and std):</p><img src="results/e4/seed_42/single_split/plots/per_channel_dist.png" alt="Per-Channel Distribution: Real vs CVAE" class="rounded border border-gray-700 w-full"></div>
+            <div><p class="text-xs text-gray-500 mb-1">Waveform examples - real vs synthetic side by side:</p><img src="results/e4/seed_42/single_split/plots/waveforms.png" alt="Waveforms: Real vs CVAE" class="rounded border border-gray-700 w-full"></div>
+            <div><p class="text-xs text-gray-500 mb-1">t-SNE embedding - do synthetic samples overlap with real?</p><img src="results/e4/seed_42/single_split/plots/tsne.png" alt="t-SNE: Real vs CVAE" class="rounded border border-gray-700 w-full"></div>
+          </div>
+        </details>
+        <details class="bg-gray-800/30 border border-gray-700/30 rounded mt-2">
+          <summary class="text-xs text-gray-400 font-semibold cursor-pointer hover:text-cyan-400 p-3">Fidelity plots - LDM (E5, seed 42)</summary>
+          <div class="p-3 pt-0 space-y-3">
+            <div><p class="text-xs text-gray-500 mb-1">Power Spectral Density - real (blue) vs synthetic (red):</p><img src="results/e5/seed_42/single_split/plots/psd.png" alt="PSD: Real vs LDM" class="rounded border border-gray-700 w-full"></div>
+            <div><p class="text-xs text-gray-500 mb-1">Autocorrelation - temporal dependence structure:</p><img src="results/e5/seed_42/single_split/plots/autocorrelation.png" alt="Autocorrelation: Real vs LDM" class="rounded border border-gray-700 w-full"></div>
+            <div><p class="text-xs text-gray-500 mb-1">Per-channel amplitude distribution (mean and std):</p><img src="results/e5/seed_42/single_split/plots/per_channel_dist.png" alt="Per-Channel Distribution: Real vs LDM" class="rounded border border-gray-700 w-full"></div>
+            <div><p class="text-xs text-gray-500 mb-1">Waveform examples - real vs synthetic side by side:</p><img src="results/e5/seed_42/single_split/plots/waveforms.png" alt="Waveforms: Real vs LDM" class="rounded border border-gray-700 w-full"></div>
+            <div><p class="text-xs text-gray-500 mb-1">t-SNE embedding - do synthetic samples overlap with real?</p><img src="results/e5/seed_42/single_split/plots/tsne.png" alt="t-SNE: Real vs LDM" class="rounded border border-gray-700 w-full"></div>
+          </div>
+        </details>
+      </div>
+
+      <div class="text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-3 space-y-2">
+        <strong class="text-gray-400">Spectral fidelity (KL + C2ST):</strong>
+        <p><strong class="text-rose-400">TimeGAN</strong> has a serious problem with high-frequency content. KL divergence above 2.0 in beta (13-30 Hz) and gamma (30-40 Hz) means it's producing signals with completely wrong spectral shape in those bands. The GRU architecture captures slow dynamics (delta/theta are okay) but can't reproduce fast oscillations. This is visible in the waveforms too - they look smooth where real seizures have sharp transients.</p>
+        <p><strong class="text-cyan-400">CVAE</strong> has the best overall spectral match across all five bands (all KL &lt; 0.05). It's also the hardest to distinguish from real data by accuracy (0.709 - closest to the ideal 0.5). The 1D-Conv architecture preserves frequency content at all scales because convolutions operate directly on the waveform.</p>
+        <p><strong class="text-emerald-400">LDM</strong> is best at low frequencies (delta/theta) where most seizure energy lies, but slightly worse than CVAE in alpha. The iterative denoising process (50 DDIM steps) smooths some high-frequency detail. However, it has the lowest C2ST AUROC (0.680) meaning the classifier's confidence in its real-vs-synthetic predictions is lower - the mistakes it does make are less extreme.</p>
+      </div>
+
+      <div class="text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-3 space-y-2 mt-3">
+        <strong class="text-gray-400"><a href="#gl-autocorrelation" class="text-cyan-600 hover:text-cyan-400 hover:underline">Temporal structure</a> (autocorrelation):</strong>
+        <p>Real ictal EEG has a smooth, monotonically decaying autocorrelation function - high at short lags (0-50 ms), crossing zero around 100 ms, and flattening near zero at longer lags. This reflects the continuous, oscillatory nature of brain signals.</p>
+        <p><strong class="text-rose-400">TimeGAN</strong> produces signals with highly irregular autocorrelation: instead of smooth decay, the function oscillates wildly between positive and negative values at medium-to-long lags (100-500 ms), with very wide variance bands. This means the temporal structure is inconsistent across samples - some follow the real pattern, others are erratic. The GRU captures short-range dependencies (initial decay matches) but introduces spurious periodicities at longer timescales.</p>
+        <p><strong class="text-cyan-400">CVAE</strong> closely matches the real autocorrelation shape: smooth monotonic decay with the correct zero-crossing around 100 ms. The synthetic curve sits slightly above the real one at medium lags (100-300 ms), indicating marginally higher temporal smoothness (consistent with the VAE's tendency to produce slightly smoother outputs). Variance bands overlap substantially with the real data.</p>
+        <p><strong class="text-emerald-400">LDM</strong> shows nearly identical behaviour to the CVAE - expected since both use the same encoder/decoder. The autocorrelation decay is smooth and correctly shaped, with the synthetic curve again sitting slightly above real at medium lags. Both share the CVAE's latent space, so temporal structure is primarily determined by the decoder's ability to reconstruct smooth signals from compressed representations.</p>
+      </div>
+
+      <div class="text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-3 space-y-2 mt-3">
+        <strong class="text-gray-400"><a href="#gl-crosschannel" class="text-cyan-600 hover:text-cyan-400 hover:underline">Spatial structure</a> (cross-channel correlation):</strong>
+        <p>The 23&times;23 correlation matrix shows which EEG channels move together. For real ictal data, nearby electrodes are strongly correlated (seizures propagate spatially), creating a characteristic block-diagonal structure with off-diagonal correlations reflecting the propagation pattern.</p>
+        <p><strong class="text-rose-400">TimeGAN</strong> partially preserves the spatial pattern (the overall structure of which channels correlate is visible) but the difference matrix shows systematic errors: correlation magnitudes are attenuated, meaning the generator produces channels that are less correlated than reality. This is consistent with mode collapse - if the generator produces more uniform outputs, inter-channel variation is reduced.</p>
+        <p><strong class="text-cyan-400">CVAE</strong> preserves spatial structure well. The correlation matrix visually resembles the real one, and the difference matrix shows small, relatively uniform residuals. The 1D convolutional architecture processes all 23 channels jointly, naturally learning inter-channel relationships during reconstruction.</p>
+        <p><strong class="text-emerald-400">LDM</strong> shows similar spatial preservation to the CVAE (same encoder/decoder). The difference matrix is comparable in magnitude and pattern, confirming that spatial structure is primarily encoded by the shared autoencoder rather than the generation method.</p>
+      </div>
+
+      <div class="text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-3 space-y-2 mt-3">
+        <strong class="text-gray-400">Per-channel amplitude distributions:</strong>
+        <p>Each EEG channel has characteristic amplitude statistics (mean near zero after bandpass filtering, standard deviation ~85-130 uV for real ictal windows depending on the channel).</p>
+        <p><strong class="text-rose-400">TimeGAN</strong> fails significantly on amplitude: per-channel means deviate from zero (offsets of 20-80 uV on several channels), and per-channel standard deviations are dramatically reduced (~25-45 uV vs real ~85-130 uV). The generator produces signals that are both offset and compressed in amplitude - about 3x lower variability than real seizures. This amplitude mismatch alone would make the synthetic data easy to detect by a downstream classifier.</p>
+        <p><strong class="text-cyan-400">CVAE</strong> preserves per-channel means well (all near zero) but shows reduced standard deviation compared to real data (~50-95 uV vs ~85-130 uV). This is the classic VAE smoothing effect: the KL regularisation encourages the decoder to produce outputs closer to the mean, reducing extreme amplitudes. Still much better than TimeGAN - the amplitude profile is recognisably correct even if somewhat compressed.</p>
+        <p><strong class="text-emerald-400">LDM</strong> has correct per-channel means (near zero) but shows the most severe amplitude reduction (~20-50 uV vs ~85-130 uV). The iterative denoising in latent space, combined with the CVAE decoder's smoothing tendency, produces signals with correct frequency content but lower dynamic range. This is the main weakness that the C2ST likely exploits to distinguish LDM outputs from real data.</p>
+      </div>
+
+      <div class="text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-3 space-y-2 mt-3">
+        <strong class="text-gray-400">Summary - what the data evaluation tells us:</strong>
+        <p>These metrics answer different questions about synthetic quality. KL divergence asks "is the frequency content right?" Autocorrelation asks "is the temporal structure right?" Cross-channel correlation asks "are the spatial relationships right?" Per-channel distributions ask "are the amplitudes right?" C2ST asks "taking everything together, can anything tell them apart?"</p>
+        <p>No generator passes all tests perfectly, but the failure modes differ. <strong class="text-rose-400">TimeGAN</strong> fails at spectral, temporal, and amplitude levels - fundamental signal properties are wrong. <strong class="text-cyan-400">CVAE</strong> passes spectral and temporal tests well but slightly compresses amplitudes (characteristic VAE smoothing). <strong class="text-emerald-400">LDM</strong> has excellent spectral fidelity (especially low-frequency) and correct temporal structure, but compresses amplitudes more than CVAE.</p>
+        <p class="text-gray-500">These results explain the downstream utility pattern: TimeGAN's synthetic data is fundamentally wrong in multiple dimensions, so it can't help detection. CVAE and LDM both produce spectrally and temporally correct signals - the amplitude compression affects realism but still provides useful training signal for the detector, because the frequency content and timing are correct.</p>
+      </div>
+    </div>
+
+    <!-- Downstream Utility Comparison (single-split) -->
+    <div id="utility-comparison" class="bg-gray-900 border border-amber-500/30 rounded-xl p-5 mb-3">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-8 h-8 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold text-xs shrink-0">L3</div>
+        <div>
+          <h3 class="font-semibold text-white text-sm">Downstream Utility - All Experiments (single-split)</h3>
+          <p class="text-xs text-gray-500">Does the synthetic data actually help seizure detection? Frozen detector trained with augmented data, tested on held-out patients.</p>
+        </div>
+      </div>
+
+      <div class="text-xs text-gray-500 mb-3 bg-gray-800/30 border border-gray-700/30 rounded p-3">
+        <p class="text-gray-400 mb-2"><strong>What this table shows:</strong> The same frozen 49K-param detector is trained under different data conditions and tested on the same 4 held-out patients. Any performance difference comes from the training data, not the model.</p>
+        <p class="text-gray-400 mb-1"><strong><a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></strong> is the primary metric - it only gives credit for correct, confident seizure predictions. Higher = better. With &lt;0.4% seizure prevalence, even 0.20 represents meaningful detection ability.</p>
+        <p class="text-gray-400"><strong>Caveat:</strong> These are single-split results (one fixed train/test partition). They indicate trends but are NOT the final publishable numbers - those come from the full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> evaluation (23 folds &times; 3 seeds = 69 runs per experiment, currently running on the uni machine).</p>
+      </div>
+
+      <div class="overflow-x-auto mb-3">
+        <p class="text-xs text-gray-600 mb-1">Mean &plusmn; std across 3 seeds (42, 123, 456). Single fixed split: 18 train/ 2 val/ 4 test patients.</p>
+        <table class="w-full text-xs">
+          <thead><tr class="border-b border-gray-700 text-left text-gray-500"><th class="py-2 pr-3">Experiment</th><th class="py-2 pr-3">AUPRC</th><th class="py-2 pr-3">AUROC</th><th class="py-2 pr-3">F1</th><th class="py-2">Sens. @ 95% Spec.</th></tr></thead>
+          <tbody class="text-gray-400">
+            <tr class="border-b border-gray-800/50 bg-gray-800/20"><td class="py-2 pr-3 text-white font-medium">E1 Baseline (real only)</td><td class="py-2 pr-3 text-white font-semibold">0.177 &plusmn; 0.066</td><td class="py-2 pr-3">0.877 &plusmn; 0.044</td><td class="py-2 pr-3">0.287 &plusmn; 0.094</td><td class="py-2">0.618 &plusmn; 0.119</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-gray-500 font-medium">E2 SMOTE</td><td class="py-2 pr-3 text-rose-400">0.069 &plusmn; 0.076</td><td class="py-2 pr-3 text-rose-400">0.546 &plusmn; 0.166</td><td class="py-2 pr-3 text-rose-400">0.167 &plusmn; 0.141</td><td class="py-2 text-rose-400">0.300 &plusmn; 0.223</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-gray-500 font-medium">E2 ADASYN</td><td class="py-2 pr-3 text-rose-400">0.108 &plusmn; 0.090</td><td class="py-2 pr-3 text-rose-400">0.556 &plusmn; 0.042</td><td class="py-2 pr-3">0.233 &plusmn; 0.185</td><td class="py-2 text-rose-400">0.307 &plusmn; 0.112</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-rsch-400 font-medium">E3 TimeGAN</td><td class="py-2 pr-3">0.174 &plusmn; 0.103</td><td class="py-2 pr-3 text-rose-400">0.703 &plusmn; 0.164</td><td class="py-2 pr-3">0.261 &plusmn; 0.103</td><td class="py-2">0.482 &plusmn; 0.149</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-cyan-400 font-medium">E4 CVAE</td><td class="py-2 pr-3">0.175 &plusmn; 0.090</td><td class="py-2 pr-3">0.844 &plusmn; 0.091</td><td class="py-2 pr-3">0.263 &plusmn; 0.126</td><td class="py-2">0.602 &plusmn; 0.254</td></tr>
+            <tr><td class="py-2 pr-3 text-emerald-400 font-medium">E5 LDM</td><td class="py-2 pr-3 text-emerald-400 font-semibold">0.227 &plusmn; 0.024</td><td class="py-2 pr-3 text-emerald-400">0.893 &plusmn; 0.016</td><td class="py-2 pr-3 text-emerald-400 font-semibold">0.367 &plusmn; 0.025</td><td class="py-2 text-emerald-400 font-semibold">0.717 &plusmn; 0.095</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-3 space-y-2">
+        <strong class="text-gray-400">What this means:</strong>
+        <p><strong class="text-white">E1 baseline</strong> (real data + class-weighted loss) achieves AUPRC 0.177 - this is the bar everything else must beat. Note the high variance across seeds, typical for small test sets.</p>
+        <p><strong class="text-gray-400">SMOTE and ADASYN (E2)</strong> actively hurt performance - SMOTE drops AUPRC to 0.069. This confirms the thesis motivation: naive interpolation in 23,552-dimensional space destroys temporal and spectral structure. The synthetic windows are just blends that confuse the detector rather than teaching it new patterns.</p>
+        <p><strong class="text-rose-400">TimeGAN (E3)</strong> matches the baseline (0.174 vs 0.177) but doesn't improve it. Combined with the fidelity results above (wrong spectral shape, erratic temporal structure), this makes sense: the synthetic data is different enough from real to not actively hurt, but too unrealistic to provide useful new signal.</p>
+        <p><strong class="text-cyan-400">CVAE (E4)</strong> also matches baseline (0.175) but with better AUROC. The good spectral fidelity translates to "doesn't hurt", but doesn't clearly help either at this ratio. High seed variance suggests the effect is inconsistent.</p>
+        <p><strong class="text-emerald-400">LDM (E5)</strong> is the only generator that clearly improves over baseline: +0.050 AUPRC (+28%), +0.080 F1 (+28%), +0.099 Sensitivity (+16%). Crucially, it also has the lowest variance across seeds, meaning the improvement is consistent. This aligns with its fidelity profile: best low-frequency reproduction (where seizure energy lives) combined with correct temporal structure.</p>
+        <p class="text-gray-500 mt-2"><strong>Important:</strong> These are preliminary single-split results. The full LOPO evaluation (currently running) will provide the statistically rigorous comparison across all 23 patients.</p>
+      </div>
     </div>
 
     <!-- Hardware -->
@@ -2903,11 +3127,13 @@ tailwind.config = {
         <a href="#gl-adam" class="text-cyan-600 hover:text-cyan-400">Adam/ AdamW</a>
         <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400">AUPRC</a>
         <a href="#gl-auroc" class="text-cyan-600 hover:text-cyan-400">AUROC</a>
+        <a href="#gl-autocorrelation" class="text-cyan-600 hover:text-cyan-400">Autocorrelation</a>
         <a href="#gl-butterworth" class="text-cyan-600 hover:text-cyan-400">Butterworth Filter</a>
         <a href="#gl-chbmit" class="text-cyan-600 hover:text-cyan-400">CHB-MIT</a>
         <a href="#gl-classweighted" class="text-cyan-600 hover:text-cyan-400">Class-Weighted Cross-Entropy</a>
         <a href="#gl-cnn" class="text-cyan-600 hover:text-cyan-400">CNN/ 1D-CNN</a>
         <a href="#gl-crispdm" class="text-cyan-600 hover:text-cyan-400">CRISP-DM</a>
+        <a href="#gl-crosschannel" class="text-cyan-600 hover:text-cyan-400">Cross-Channel Correlation</a>
         <a href="#gl-cv" class="text-cyan-600 hover:text-cyan-400">Cross-Validation</a>
         <a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400">CVAE</a>
         <a href="#gl-ddpm" class="text-cyan-600 hover:text-cyan-400">DDPM/ DDIM</a>
@@ -3064,6 +3290,18 @@ tailwind.config = {
           <p class="text-gray-400">Shows how much signal power is present at each frequency. For <a href="#gl-eeg" class="text-cyan-600 hover:text-cyan-400 hover:underline">EEG</a>, this reveals the characteristic spectral signature of different brain states (e.g., seizure activity produces elevated theta/alpha power). Used here to compare real vs synthetic EEG: if a generator produces signals with the wrong spectral profile, its synthetic data is not realistic even if it looks plausible in the time domain.</p>
           <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Think of an audio equalizer showing bass, mid, and treble levels. PSD does the same for brain signals: it shows how much &ldquo;bass&rdquo; (slow waves) and &ldquo;treble&rdquo; (fast waves) are present. A seizure has a recognizable pattern on this display. If synthetic signals have the wrong pattern, they&rsquo;re not realistic - even if they look OK when you just view the raw squiggly line.</p></details>
           <p class="text-gray-600 text-sm mt-2">PSD comparison as a fidelity metric for synthetic EEG: <a href="#cite-carrle2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Carrle et al., 2023</a> showed GANs produce smoothed spectral peaks. <a href="#cite-you2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">You et al., 2025</a> list PSD as a standard evaluation metric.</p>
+        </div>
+        <div id="gl-autocorrelation" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
+          <div class="font-semibold text-cyan-500 mb-1">Autocorrelation <span class="text-gray-600 font-normal">(Temporal Dependence)</span></div>
+          <p class="text-gray-400">Measures how much a signal at time <em>t</em> predicts the signal at time <em>t + lag</em>. For <a href="#gl-eeg" class="text-cyan-600 hover:text-cyan-400 hover:underline">EEG</a>, high autocorrelation at short lags (0-50 ms) is expected because brain activity is smooth and continuous. The autocorrelation function decays as the lag increases, with the decay rate characterising the temporal structure. Used here to check whether synthetic signals preserve realistic time-dependencies: a generator that produces temporally incoherent signals (random noise at each step) will have autocorrelation that drops off too quickly, while one that produces overly smooth signals will have autocorrelation that stays high for too long.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">If you know what the brain signal looks like right now, can you guess what it looks like a few milliseconds later? For real EEG, the answer is &ldquo;mostly yes&rdquo; at very short delays (brain activity is smooth), and &ldquo;not really&rdquo; at longer delays. Autocorrelation puts a number on this. If a generator produces signals that jump around randomly from one moment to the next, its autocorrelation will look nothing like real EEG. If it produces signals that are too smooth, the autocorrelation will stay too high for too long.</p></details>
+          <p class="text-gray-600 text-sm mt-2">Standard time-series analysis metric. Applied to synthetic data validation by <a href="#cite-yoon2019" class="text-cyan-600 hover:text-cyan-400 hover:underline">Yoon et al., 2019</a> (TimeGAN evaluation).</p>
+        </div>
+        <div id="gl-crosschannel" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
+          <div class="font-semibold text-cyan-500 mb-1">Cross-Channel Correlation <span class="text-gray-600 font-normal">(Spatial Structure)</span></div>
+          <p class="text-gray-400">A 23&times;23 matrix showing how correlated each pair of <a href="#gl-eeg" class="text-cyan-600 hover:text-cyan-400 hover:underline">EEG</a> channels is. Brain regions don&rsquo;t act independently - seizures propagate from one area to another, and neighbouring electrodes pick up similar signals (volume conduction). The correlation matrix captures this spatial structure. Used here to assess whether synthetic data preserves realistic inter-channel relationships: the difference matrix (real minus synthetic) should be near zero everywhere if the generator captures spatial structure correctly.</p>
+          <details class="mt-2"><summary class="text-cyan-700 text-xs cursor-pointer hover:text-cyan-400">In plain terms&hellip;</summary><p class="text-gray-500 text-xs mt-1">Each EEG electrode picks up activity from a different part of the brain. Neighbouring electrodes usually show similar patterns (they&rsquo;re listening to nearby regions). The cross-channel correlation matrix is like a &ldquo;friendship chart&rdquo; showing which channels move together. For real seizures, specific channels correlate strongly as the seizure spreads. If a generator produces channels that are too independent (or too correlated), the spatial pattern is wrong - and a seizure detector that relies on spatial spread would be confused by it.</p></details>
+          <p class="text-gray-600 text-sm mt-2">Inter-channel coherence is a standard EEG analysis tool. Spatial structure preservation is a key requirement for multichannel synthetic EEG identified by <a href="#cite-you2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">You et al., 2025</a>.</p>
         </div>
         <div id="gl-butterworth" class="bg-gray-900 border border-gray-800 rounded-lg p-4">
           <div class="font-semibold text-cyan-500 mb-1">Butterworth Filter</div>
