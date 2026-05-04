@@ -616,6 +616,9 @@ class CHBMITDataset(Dataset):
         split_config_path: path to split_config.json
         normalize: whether to apply z-score normalization
         ictal_only: if True, only return ictal (seizure) windows
+        tstr: if True, exclude real ictal windows from training (TSTR mode).
+            Only synthetic ictal + real interictal are used. Requires
+            synthetic_windows to be provided.
         fold: if set, use LOPO fold N instead of single_split
         synthetic_windows: optional list of (window, label, patient_id) tuples.
             ONLY allowed for split="train".
@@ -634,6 +637,7 @@ class CHBMITDataset(Dataset):
         split_config_path: Optional[str] = None,
         normalize: bool = True,
         ictal_only: bool = False,
+        tstr: bool = False,
         fold: Optional[int] = None,
         synthetic_windows: Optional[List[Tuple[np.ndarray, int, int]]] = None,
         seed: int = 42,
@@ -642,7 +646,15 @@ class CHBMITDataset(Dataset):
         self.split = split
         self.normalize = normalize
         self.ictal_only = ictal_only
+        self.tstr = tstr
         self.seed = seed
+
+        if tstr and split != "train":
+            raise ValueError("TSTR mode only applies to split='train'")
+        if tstr and synthetic_windows is None:
+            raise ValueError("TSTR mode requires synthetic_windows (no ictal source otherwise)")
+        if tstr and ictal_only:
+            raise ValueError("Cannot combine tstr=True with ictal_only=True")
 
         config_path = split_config_path or str(SPLIT_CONFIG_PATH)
         with open(config_path, "r") as f:
@@ -736,6 +748,15 @@ class CHBMITDataset(Dataset):
             self._active_indices = np.concatenate([real_ictal_idx, syn_ictal_idx]) if len(syn_ictal_idx) > 0 else real_ictal_idx
             self._n_ictal = len(self._active_indices)
             self._n_interictal = 0
+
+        # TSTR: exclude real ictal, keep real interictal + synthetic ictal
+        if tstr:
+            real_interictal_idx = np.where(self._all_labels == 0)[0]
+            syn_all_idx = np.arange(self._n_real, self._n_real + self._n_synthetic, dtype=np.int64)
+            self._active_indices = np.concatenate([real_interictal_idx, syn_all_idx])
+            syn_ictal_count = sum(1 for _, l, _ in self._synthetic_windows if l == 1)
+            self._n_ictal = syn_ictal_count
+            self._n_interictal = len(real_interictal_idx) + (self._n_synthetic - syn_ictal_count)
 
         self.windows = _WindowsProxy(self)
 

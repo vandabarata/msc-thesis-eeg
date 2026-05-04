@@ -42,11 +42,11 @@ msc_thesis_code/
 │   └── ldm.py                     Latent Diffusion (UNet-1D + DDPM/DDIM, 2.3M params)
 │
 ├── training/                    Training, evaluation, and analysis
-│   ├── train.py                   Detector training (E1-E5), early stopping
+│   ├── train.py                   Detector training (E1-E5), TSTR, early stopping
 │   ├── generate.py                Generator training + synthetic window production (E3-E5)
 │   ├── evaluate.py                AUPRC, AUROC, F1, per-patient, Wilcoxon test
 │   ├── visualize.py               PSD comparison, t-SNE, amplitude distributions
-│   └── subject_identity.py        E7 linear probe for subject-ID analysis
+│   └── subject_identity.py        E7 linear probe + proximity check
 │
 ├── experiment_scripts/          Shell scripts for running on the remote GPU machine
 │   ├── run_e1.sh ... run_e5.sh    Per-experiment single-split launchers
@@ -87,7 +87,7 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 <details>
 <summary>Dataset</summary>
 
-Download the [CHB-MIT Scalp EEG Database](https://physionet.org/content/chbmit/1.0.0/) and place it under `chb-mit-scalp-eeg-database-1.0.0/`. The homogenization script (`data/homogenize.py`) produces the `clean_edfs/` directory with 686 standardized EDF+ files. Both directories are large and excluded from git.
+Download the [CHB-MIT Scalp EEG Database](https://physionet.org/content/chbmit/1.0.0/) and place it under `chb-mit-scalp-eeg-database-1.0.0/`. The homogenization script (`data/homogenize.py`) produces the `clean_edfs/` directory with 683 standardized EDF+ files. Both directories are large and excluded from git.
 </details>
 
 ---
@@ -96,13 +96,13 @@ Download the [CHB-MIT Scalp EEG Database](https://physionet.org/content/chbmit/1
 
 | Experiment | Description | Status |
 |:----------:|-------------|:------:|
-| **E1** | Baseline 1D-CNN detector (real data, class-weighted cross-entropy) | Single-split done |
-| **E2** | Non-synthetic controls (SMOTE, ADASYN) | Single-split done |
-| **E3** | TimeGAN augmentation (ratio 1.0) | Single-split done |
-| **E4** | CVAE augmentation (ratio 1.0) | Single-split done |
-| **E5** | Latent Diffusion augmentation (ratio 1.0, reuses CVAE encoder) | Single-split done |
+| **E1** | Baseline 1D-CNN detector (real data, class-weighted cross-entropy) | LOPO complete |
+| **E2** | Non-synthetic controls (SMOTE, ADASYN) | LOPO running |
+| **E3** | TimeGAN augmentation (4 ratios: 25/ 50/ 100/ 200%) | LOPO queued |
+| **E4** | CVAE augmentation (4 ratios: 25/ 50/ 100/ 200%) | LOPO queued |
+| **E5** | Latent Diffusion augmentation (4 ratios, reuses CVAE encoder) | LOPO queued |
 | **E6** | Cross-generator comparison (Wilcoxon signed-rank test) | After LOPO |
-| **E7** | Subject-identity analysis (linear probe on embeddings) | After E6 |
+| **E7** | Subject-identity analysis (linear probe + proximity check) | After E6 |
 
 ### Results (single-split, 3 seeds)
 
@@ -114,7 +114,17 @@ Download the [CHB-MIT Scalp EEG Database](https://physionet.org/content/chbmit/1
 | **E3** | TimeGAN | 0.1742 +/- 0.0842 | 0.1943 +/- 0.1063 | ~101 min |
 | **E2** | ADASYN | 0.1078 +/- 0.0732 | 0.1302 +/- 0.0713 | ~80 min |
 
-LDM augmentation improves AUPRC by +29% over baseline with the lowest cross-seed variance. Full LOPO evaluation (23 folds x 3 seeds) is in progress. Detailed results and interpretations on the [project website](https://vandabarata.github.io/msc-thesis-eeg/).
+LDM augmentation improves AUPRC by +29% over baseline with the lowest cross-seed variance (single-split).
+
+### Results (LOPO, 23 folds x 3 seeds)
+
+E1 baseline LOPO complete (4 May 2026). E2-E5 LOPO running sequentially.
+
+| Experiment | Generator | AUPRC (cross-seed) | AUROC | F1 | Sens. @ 95% Spec. |
+|:----------:|-----------|:-------------------:|:-----:|:--:|:-----------------:|
+| **E1** | None (baseline) | 0.3941 +/- 0.0228 | 0.8438 +/- 0.0147 | 0.4333 +/- 0.0194 | 0.6459 +/- 0.0123 |
+
+Remaining experiments will be added as they complete. Detailed results, per-fold breakdowns, and fidelity analysis on the [project website](https://vandabarata.github.io/msc-thesis-eeg/).
 
 <details>
 <summary>Protocol rules enforced in code</summary>
@@ -123,6 +133,8 @@ LDM augmentation improves AUPRC by +29% over baseline with the lowest cross-seed
 - Normalization from training data only
 - Synthetic data in training only (val/test raise `ValueError`)
 - Same frozen detector across E1-E5
+- TSTR: synthetic ictal + real interictal only (no real ictal in training)
+- 4 synthetic ratios (25%, 50%, 100%, 200%) per generator in LOPO
 - 3 seeds (42, 123, 456), mean +/- std
 - AUPRC as primary metric
 </details>
@@ -135,11 +147,11 @@ source .venv/bin/activate
 # E1: Baseline
 python -m training.train --experiment e1 --mode single --seeds 42 123 456
 
-# E2: SMOTE / ADASYN controls
+# E2: SMOTE/ ADASYN controls
 python -m training.train --experiment e2 --augmentation smote --mode single --seeds 42 123 456
 python -m training.train --experiment e2 --augmentation adasyn --mode single --seeds 42 123 456
 
-# E3: TimeGAN
+# E3: TimeGAN (single-split, ratio 1.0)
 python -m training.generate --model timegan --mode single --seed 42
 python -m training.train --experiment e3 --mode single --seeds 42 123 456
 
@@ -152,8 +164,17 @@ python -m training.generate --model ldm --mode single --seed 42 \
     --cvae-checkpoint results/e4/seed_42/single_split/cvae.pt
 python -m training.train --experiment e5 --mode single --seeds 42 123 456
 
-# Full LOPO evaluation (E1-E5, 23 folds x 3 seeds)
+# TSTR evaluation (E3-E5, after generator LOPO completes)
+python -m training.train --experiment e3 --mode tstr
+python -m training.train --experiment e4 --mode tstr
+python -m training.train --experiment e5 --mode tstr
+
+# Full LOPO evaluation (E1-E5, 23 folds x 3 seeds x 4 ratios, includes TSTR)
 bash experiment_scripts/run_lopo.sh
+
+# Manual multi-ratio LOPO (generate at 4 ratios, train at 4 ratios)
+python -m training.generate --model cvae --mode lopo --seed 42 --ratio 0.25 0.5 1.0 2.0
+python -m training.train --experiment e4 --mode lopo --seeds 42 --ratio 0.25 0.5 1.0 2.0
 ```
 
 ### Results Structure
@@ -163,10 +184,20 @@ results/<experiment>/
 ├── seed_42/
 │   ├── single_split/
 │   │   ├── best_model.pt           Model checkpoint (or best_model_<aug>.pt for E2)
-│   │   └── results.json            Metrics + history (or results_<aug>.json for E2)
-│   └── lopo/
-│       ├── fold_00/ ... fold_22/   LOPO folds (same structure per fold)
-│       └── lopo_summary.json       Aggregated results
+│   │   ├── results.json            Metrics + history (or results_<aug>.json for E2)
+│   │   └── plots/                  Fidelity plots (E3-E5 only)
+│   ├── fold_00/ ... fold_22/       LOPO folds (same structure per fold)
+│   │   ├── results.json              AUGM results (ratio 1.0, or single-ratio default)
+│   │   ├── results_ratio_0.25.json   AUGM at 25% ratio (multi-ratio runs)
+│   │   ├── results_ratio_0.50.json   AUGM at 50% ratio
+│   │   ├── results_ratio_1.00.json   AUGM at 100% ratio
+│   │   ├── results_ratio_2.00.json   AUGM at 200% ratio
+│   │   ├── tstr_results.json         TSTR results (E3-E5 only)
+│   │   ├── tstr_model.pt             TSTR model checkpoint (E3-E5 only)
+│   │   └── plots/                    Fidelity plots (E3-E5 only)
+│   └── ...
+├── lopo_summary.json               Aggregated LOPO results
+├── tstr_summary.json               Aggregated TSTR results (E3-E5 only)
 └── lopo_status/                    Checkpoint files from run_lopo.sh
 ```
 
@@ -190,7 +221,7 @@ The 12 GB VRAM and 32 GB RAM constraints shaped the data pipeline design (memory
 
 ## Dataset
 
-**[CHB-MIT Scalp EEG Database](https://physionet.org/content/chbmit/1.0.0/)**: 24 cases, 23 unique patients, 23-channel bipolar montage at 256 Hz. 686 EDF files after homogenization, ~5% seizure windows.
+**[CHB-MIT Scalp EEG Database](https://physionet.org/content/chbmit/1.0.0/)**: 24 cases, 23 unique patients, 23-channel bipolar montage at 256 Hz. 683 EDF files after homogenization (3 dropped from original 686), <0.4% seizure windows.
 
 Dataset exploration, patient demographics, and the preprocessing pipeline are documented on the [project website](https://vandabarata.github.io/msc-thesis-eeg/).
 

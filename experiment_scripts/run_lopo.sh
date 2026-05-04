@@ -126,11 +126,11 @@ run_experiment() {
     for seed in "${SEEDS[@]}"; do
         local seed_start=$SECONDS
 
-        # Generator phase (E3-E5)
+        # Generator phase (E3-E5): generate at ALL 4 ratios
         if [ "$gen_model" != "none" ] && [ "$gen_model" != "builtin" ]; then
-            echo ">>> ${exp^^} seed $seed: generate ($gen_model) — $(date)"
+            echo ">>> ${exp^^} seed $seed: generate ($gen_model) at 4 ratios — $(date)"
 
-            local gen_cmd="python -m training.generate --model $gen_model --mode lopo --seed $seed"
+            local gen_cmd="python -m training.generate --model $gen_model --mode lopo --seed $seed --ratio 0.25 0.5 1.0 2.0"
             if [ "$gen_model" = "ldm" ]; then
                 local cvae_ckpt="results/e4/seed_${seed}/fold_00/cvae.pt"
                 if [ ! -f "$cvae_ckpt" ]; then
@@ -150,10 +150,14 @@ run_experiment() {
             fi
         fi
 
-        # Detector training phase
+        # Detector training phase: train at ALL 4 ratios for generators, single for E1/E2
         echo ">>> ${exp^^} seed $seed: train LOPO — $(date)"
 
-        local train_cmd="python -m training.train --experiment $exp --mode lopo --seeds $seed"
+        if [ "$gen_model" != "none" ] && [ "$gen_model" != "builtin" ]; then
+            local train_cmd="python -m training.train --experiment $exp --mode lopo --seeds $seed --ratio 0.25 0.5 1.0 2.0"
+        else
+            local train_cmd="python -m training.train --experiment $exp --mode lopo --seeds $seed"
+        fi
         [ -n "$aug_flag" ] && train_cmd="$train_cmd --augmentation $aug_flag"
 
         if ! eval "$train_cmd"; then
@@ -164,6 +168,17 @@ run_experiment() {
             return 1
         fi
 
+        # Clean up npz files to save disk (keep ratio 1.00 for TSTR, delete others)
+        if [ "$gen_model" != "none" ] && [ "$gen_model" != "builtin" ]; then
+            for npz in results/${exp}/seed_${seed}/fold_*/synthetic_ratio_*.npz; do
+                [ -f "$npz" ] || continue
+                case "$npz" in
+                    *ratio_1.00.npz) ;;  # keep for TSTR
+                    *) rm -f "$npz" ;;
+                esac
+            done
+        fi
+
         # Seed done — summarize and notify
         local seed_elapsed=$(( (SECONDS - seed_start) / 60 ))
         local seed_summary
@@ -172,6 +187,17 @@ run_experiment() {
         discord "✔️ **${exp^^}** seed $seed done (${seed_elapsed}min)\\n$seed_summary" 3066993
         echo "  SEED $seed DONE $(date '+%Y-%m-%d %H:%M:%S') (${seed_elapsed}min)" >> "$STATUS_DIR/${exp}.status"
     done
+
+    # TSTR phase (E3-E5 only, uses ratio 1.0)
+    if [ "$gen_model" != "none" ] && [ "$gen_model" != "builtin" ]; then
+        echo ">>> ${exp^^}: TSTR evaluation — $(date)"
+        if python -m training.train --experiment "$exp" --mode tstr; then
+            discord "✔️ **${exp^^}** TSTR complete" 3066993
+        else
+            echo "  WARNING: TSTR failed for ${exp^^} (non-fatal, continuing)"
+            discord "⚠️ **${exp^^}** TSTR failed (non-fatal)" 15105570
+        fi
+    fi
 
     # Experiment done — full summary
     local exp_elapsed=$(( (SECONDS - t_start) / 60 ))

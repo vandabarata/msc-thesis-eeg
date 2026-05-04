@@ -305,6 +305,138 @@ def wilcoxon_compare(
     }
 
 
+def ratio_sensitivity_analysis(
+    ratio_results: Dict[float, List[float]],
+    baseline_auprcs: Optional[List[float]] = None,
+) -> Dict:
+    """
+    Analyse AUPRC as a function of synthetic ratio for a single generator (E6).
+
+    Identifies diminishing returns and degradation at high ratios.
+
+    Args:
+        ratio_results: dict mapping ratio (e.g. 0.25, 0.5, 1.0, 2.0) to
+            list of per-fold AUPRC values
+        baseline_auprcs: optional per-fold AUPRC values from E1 (for relative gain)
+
+    Returns:
+        Dict with:
+            per_ratio: {ratio: {mean, std, median, gain_vs_baseline, n_folds}}
+            best_ratio: ratio with highest mean AUPRC
+            diminishing_returns: True if gain at max ratio < gain at best ratio
+            degradation_ratio: first ratio where mean AUPRC drops below baseline (or None)
+    """
+    baseline_mean = float(np.mean(baseline_auprcs)) if baseline_auprcs else 0.0
+
+    per_ratio = {}
+    for ratio in sorted(ratio_results.keys()):
+        values = [v for v in ratio_results[ratio] if not np.isnan(v)]
+        if not values:
+            continue
+        mean = float(np.mean(values))
+        per_ratio[ratio] = {
+            "mean": mean,
+            "std": float(np.std(values)),
+            "median": float(np.median(values)),
+            "gain_vs_baseline": mean - baseline_mean,
+            "n_folds": len(values),
+        }
+
+    if not per_ratio:
+        return {"per_ratio": {}, "best_ratio": None, "diminishing_returns": False, "degradation_ratio": None}
+
+    # Best ratio (highest mean AUPRC)
+    best_ratio = max(per_ratio.keys(), key=lambda r: per_ratio[r]["mean"])
+
+    # Diminishing returns: does max ratio do worse than best?
+    max_ratio = max(per_ratio.keys())
+    diminishing = (
+        max_ratio != best_ratio and
+        per_ratio[max_ratio]["mean"] < per_ratio[best_ratio]["mean"]
+    )
+
+    # Degradation: first ratio where AUPRC drops below baseline
+    degradation_ratio = None
+    if baseline_auprcs:
+        for ratio in sorted(per_ratio.keys()):
+            if per_ratio[ratio]["mean"] < baseline_mean:
+                degradation_ratio = ratio
+                break
+
+    # Wilcoxon test: is best ratio significantly better than baseline?
+    best_vs_baseline_p = None
+    if baseline_auprcs and best_ratio in ratio_results:
+        best_values = [v for v in ratio_results[best_ratio] if not np.isnan(v)]
+        bl_values = [v for v in baseline_auprcs if not np.isnan(v)]
+        if len(best_values) == len(bl_values) and len(best_values) >= 5:
+            _, p = wilcoxon(best_values, bl_values, alternative="two-sided")
+            best_vs_baseline_p = float(p)
+
+    return {
+        "per_ratio": per_ratio,
+        "best_ratio": best_ratio,
+        "best_ratio_gain": per_ratio[best_ratio]["gain_vs_baseline"],
+        "diminishing_returns": diminishing,
+        "degradation_ratio": degradation_ratio,
+        "best_vs_baseline_p_value": best_vs_baseline_p,
+    }
+
+
+def cost_benefit_analysis(
+    experiment_results: Dict[str, Dict],
+) -> Dict:
+    """
+    Compare generators on quality gain vs computational cost (E6).
+
+    For each experiment, extracts:
+      - AUPRC gain over baseline (E1)
+      - Total training time (sum of epoch_times across folds/seeds)
+      - Generation time (if recorded)
+      - Gain-per-hour metric
+
+    Args:
+        experiment_results: dict mapping experiment name -> aggregated results.
+            Each value must contain:
+                "auprc_mean": float
+                "total_train_seconds": float (sum of all epoch_times)
+                "total_gen_seconds": float (generation wall time, 0 if N/A)
+
+    Returns:
+        Dict with per-experiment cost-benefit metrics and ranking
+    """
+    baseline_auprc = experiment_results.get("e1", {}).get("auprc_mean", 0.0)
+
+    analysis = {}
+    for exp, data in experiment_results.items():
+        auprc = data.get("auprc_mean", float("nan"))
+        train_sec = data.get("total_train_seconds", 0.0)
+        gen_sec = data.get("total_gen_seconds", 0.0)
+        total_sec = train_sec + gen_sec
+
+        gain = auprc - baseline_auprc
+        total_hours = total_sec / 3600.0
+
+        analysis[exp] = {
+            "auprc_mean": auprc,
+            "auprc_gain_over_baseline": gain,
+            "train_time_hours": train_sec / 3600.0,
+            "generation_time_hours": gen_sec / 3600.0,
+            "total_time_hours": total_hours,
+            "gain_per_hour": gain / max(total_hours, 1e-6),
+        }
+
+    # Rank by gain_per_hour (descending)
+    ranked = sorted(
+        [(k, v) for k, v in analysis.items() if k != "e1"],
+        key=lambda x: x[1]["gain_per_hour"],
+        reverse=True,
+    )
+    for rank, (exp, _) in enumerate(ranked, 1):
+        analysis[exp]["cost_benefit_rank"] = rank
+
+    return analysis
+
+
 def format_results_table(results: Dict, experiment_name: str = "") -> str:
     """
     Format metrics as a readable text table for logging.

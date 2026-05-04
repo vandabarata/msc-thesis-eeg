@@ -5,6 +5,7 @@ Supports:
   E1: Baseline detector (real data only, class-weighted CE)
   E2: Non-synthetic controls (SMOTE, ADASYN augmentation)
   E3-E5: Generator augmentation (synthetic windows injected into training)
+  TSTR: Train on Synthetic, Test on Real (synthetic ictal + real interictal only)
 
 Training follows standard practices from the thesis SLR:
   - Optimizer: Adam, lr=1e-3
@@ -449,6 +450,7 @@ def train_lopo(
     seeds: List[int] = None,
     device: Optional[str] = None,
     folds: Optional[List[int]] = None,
+    result_suffix: str = "",
 ) -> Dict:
     """
     Run an experiment using full LOPO cross-validation (final results).
@@ -463,6 +465,8 @@ def train_lopo(
         seeds: list of random seeds (default: [42, 123, 456])
         device: "cpu" or "cuda"
         folds: specific fold indices to run (default: all 23)
+        result_suffix: suffix appended to result filenames for multi-ratio runs
+            (e.g. "_ratio_0.25")
 
     Returns:
         Dict with per-fold, per-seed results + aggregated statistics
@@ -496,7 +500,10 @@ def train_lopo(
 
         for fold in folds:
             # Resume: skip completed folds
-            fold_results_name = f"results_{augmentation}.json" if augmentation else "results.json"
+            if augmentation:
+                fold_results_name = f"results_{augmentation}{result_suffix}.json"
+            else:
+                fold_results_name = f"results{result_suffix}.json"
             fold_result_path = RESULTS_DIR / experiment / f"seed_{seed}" / f"fold_{fold:02d}" / fold_results_name
             if fold_result_path.exists():
                 print(f"\n  Fold {fold}/22, Seed {seed} — skipping (already complete)")
@@ -576,7 +583,10 @@ def train_lopo(
             # Train
             trainer = Trainer(config)
             checkpoint_dir = RESULTS_DIR / experiment / f"seed_{seed}" / f"fold_{fold:02d}"
-            fold_ckpt_name = f"best_model_{augmentation}.pt" if augmentation else "best_model.pt"
+            if augmentation:
+                fold_ckpt_name = f"best_model_{augmentation}{result_suffix}.pt"
+            else:
+                fold_ckpt_name = f"best_model{result_suffix}.pt"
             model, history = trainer.train(
                 train_loader, val_loader, class_weights, checkpoint_dir, fold_ckpt_name,
             )
@@ -599,16 +609,8 @@ def train_lopo(
             # Save per-fold results incrementally
             fold_dir = RESULTS_DIR / experiment / f"seed_{seed}" / f"fold_{fold:02d}"
             fold_dir.mkdir(parents=True, exist_ok=True)
-            fold_results_filename = f"results_{augmentation}.json" if augmentation else "results.json"
-            with open(fold_dir / fold_results_filename, "w") as f:
+            with open(fold_dir / fold_results_name, "w") as f:
                 json.dump(seed_results[fold], f, indent=2, default=str)
-
-            # Free disk: delete large synthetic npz now that results are saved.
-            # Fidelity plots already ran during generation; the npz is no longer needed.
-            if synthetic_windows_fn is not None:
-                npz_path = fold_dir / "synthetic_ratio_1.00.npz"
-                if npz_path.exists():
-                    npz_path.unlink()
 
         all_results[seed] = seed_results
 
@@ -659,7 +661,10 @@ def train_lopo(
 
     summary_dir = RESULTS_DIR / experiment
     summary_dir.mkdir(parents=True, exist_ok=True)
-    summary_filename = f"lopo_summary_{augmentation}.json" if augmentation else "lopo_summary.json"
+    if augmentation:
+        summary_filename = f"lopo_summary_{augmentation}{result_suffix}.json"
+    else:
+        summary_filename = f"lopo_summary{result_suffix}.json"
     summary_path = summary_dir / summary_filename
 
     # Merge with existing summary (allows split-machine runs)
@@ -685,12 +690,192 @@ def train_lopo(
     return summary
 
 
+# ── TSTR (Train on Synthetic, Test on Real) ──────────────────────────────
+def train_tstr(
+    experiment: str,
+    synthetic_windows_fn,
+    seeds: List[int] = None,
+    device: Optional[str] = None,
+    folds: Optional[List[int]] = None,
+) -> Dict:
+    """
+    Run TSTR evaluation: train detector on synthetic ictal + real interictal
+    only (no real ictal in training), then test on real data.
+
+    TSTR measures whether synthetic data captures decision-relevant structure.
+    Performance close to AUGM/baseline means the generator learned useful
+    representations; much worse means it failed to capture key patterns.
+
+    Args:
+        experiment: experiment label ("e3", "e4", "e5")
+        synthetic_windows_fn: callable(fold, seed) -> list of synthetic windows
+        seeds: list of random seeds (default: [42, 123, 456])
+        device: "cpu" or "cuda"
+        folds: specific fold indices to run (default: all 23)
+
+    Returns:
+        Dict with per-fold, per-seed TSTR results + aggregated statistics
+    """
+    if seeds is None:
+        seeds = [42, 123, 456]
+    if folds is None:
+        folds = list(range(23))
+
+    config_base = TrainConfig(experiment=experiment)
+    if device:
+        config_base.device = device
+
+    print(f"\n{'=' * 60}")
+    print(f"  Experiment: {experiment.upper()} — TSTR")
+    print(f"  Mode: LOPO ({len(folds)} folds × {len(seeds)} seeds = {len(folds) * len(seeds)} runs)")
+    print(f"  Training: synthetic ictal + real interictal ONLY")
+    print(f"  Seeds: {seeds}")
+    print(f"  Device: {config_base.device}")
+    print(f"{'=' * 60}")
+
+    with open(str(SPLIT_CONFIG_PATH)) as _f:
+        _split_config = json.load(_f)
+    lopo_folds_config = _split_config["lopo_folds"]
+
+    all_results = {}
+
+    for seed in seeds:
+        seed_results = {}
+
+        for fold in folds:
+            fold_result_path = (
+                RESULTS_DIR / experiment / f"seed_{seed}"
+                / f"fold_{fold:02d}" / "tstr_results.json"
+            )
+            if fold_result_path.exists():
+                print(f"\n  TSTR Fold {fold}/22, Seed {seed} — skipping (already complete)")
+                try:
+                    with open(fold_result_path) as _rf:
+                        seed_results[fold] = json.load(_rf)
+                    continue
+                except (json.JSONDecodeError, KeyError):
+                    pass
+
+            print(f"\n{'─' * 50}")
+            print(f"  TSTR Fold {fold}/22, Seed {seed}")
+            print(f"{'─' * 50}")
+
+            synthetic = synthetic_windows_fn(fold, seed)
+            if synthetic is None or len(synthetic) == 0:
+                print(f"  Skipping fold {fold} — no synthetic data available")
+                continue
+
+            config = TrainConfig(
+                experiment=experiment,
+                seed=seed,
+                device=config_base.device,
+            )
+
+            train_ds = CHBMITDataset(
+                split="train", fold=fold, seed=seed,
+                synthetic_windows=synthetic,
+                tstr=True,
+            )
+
+            val_ds = CHBMITDataset(split="val", fold=fold, seed=seed)
+            test_ds = CHBMITDataset(split="test", fold=fold, seed=seed)
+
+            class_weights = train_ds.get_class_weights()
+            n_inter, n_ictal = train_ds.get_class_counts()
+            print(f"  Train (TSTR): {len(train_ds)} windows ({n_ictal} synthetic ictal, {n_inter} real interictal)")
+            print(f"  Val:   {len(val_ds)}")
+            print(f"  Test:  {len(test_ds)}")
+
+            train_sampler = CaseAwareSampler(train_ds, seed=seed)
+            train_loader = DataLoader(
+                train_ds, batch_size=config.batch_size, sampler=train_sampler,
+                num_workers=config.num_workers, pin_memory=True, drop_last=True,
+            )
+            val_loader = DataLoader(
+                val_ds, batch_size=config.batch_size, shuffle=False,
+                num_workers=config.num_workers, pin_memory=True,
+            )
+            test_loader = DataLoader(
+                test_ds, batch_size=config.batch_size, shuffle=False,
+                num_workers=config.num_workers, pin_memory=True,
+            )
+
+            trainer = Trainer(config)
+            checkpoint_dir = RESULTS_DIR / experiment / f"seed_{seed}" / f"fold_{fold:02d}"
+            model, history = trainer.train(
+                train_loader, val_loader, class_weights, checkpoint_dir, "tstr_model.pt",
+            )
+
+            test_metrics = evaluate_model(model, test_loader, device=config.device)
+            test_metrics["fold"] = fold
+            test_metrics["test_subject"] = lopo_folds_config[fold]["test_subject"]
+
+            print(format_results_table(
+                test_metrics,
+                f"TSTR Fold {fold} — {test_metrics['test_subject']}",
+            ))
+
+            seed_results[fold] = {
+                "train_history": history,
+                "test_metrics": test_metrics,
+            }
+
+            fold_dir = RESULTS_DIR / experiment / f"seed_{seed}" / f"fold_{fold:02d}"
+            fold_dir.mkdir(parents=True, exist_ok=True)
+            with open(fold_dir / "tstr_results.json", "w") as f:
+                json.dump(seed_results[fold], f, indent=2, default=str)
+
+        all_results[seed] = seed_results
+
+    # ── Aggregate TSTR results ────────────────────────────────────────────
+    print(f"\n{'=' * 60}")
+    print(f"  TSTR Summary — {experiment.upper()}")
+    print(f"{'=' * 60}")
+
+    all_auprcs = []
+    for seed in seeds:
+        fold_auprcs = [
+            all_results[seed][f]["test_metrics"]["auprc"]
+            for f in folds
+            if f in all_results[seed]
+        ]
+        valid = [a for a in fold_auprcs if not np.isnan(a)]
+        if valid:
+            print(f"  Seed {seed}: TSTR AUPRC = {np.mean(valid):.4f} ± {np.std(valid):.4f} "
+                  f"({len(valid)}/{len(folds)} folds)")
+            all_auprcs.extend(valid)
+
+    if all_auprcs:
+        print(f"\n  Overall TSTR: AUPRC = {np.mean(all_auprcs):.4f} ± {np.std(all_auprcs):.4f} "
+              f"(N={len(all_auprcs)} fold-seed pairs)")
+
+    summary = {
+        "experiment": experiment,
+        "mode": "tstr",
+        "seeds": seeds,
+        "folds": folds,
+        "all_results": all_results,
+        "summary": {
+            "overall_auprc_mean": float(np.mean(all_auprcs)) if all_auprcs else float("nan"),
+            "overall_auprc_std": float(np.std(all_auprcs)) if all_auprcs else float("nan"),
+            "n_fold_seed_pairs": len(all_auprcs),
+        },
+    }
+
+    summary_dir = RESULTS_DIR / experiment
+    summary_dir.mkdir(parents=True, exist_ok=True)
+    with open(summary_dir / "tstr_summary.json", "w") as f:
+        json.dump(summary, f, indent=2, default=str)
+
+    return summary
+
+
 # ── CLI ────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Train seizure detection experiments (E1/E2).",
+        description="Train seizure detection experiments (E1-E5, TSTR).",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -703,8 +888,8 @@ Examples:
   # E2: SMOTE augmentation — single-split
   python train.py --experiment e2 --augmentation smote --mode single
 
-  # E2: ADASYN augmentation — single-split
-  python train.py --experiment e2 --augmentation adasyn --mode single
+  # E3-E5: TSTR evaluation (train on synthetic only, test on real)
+  python train.py --experiment e3 --mode tstr
 
   # Specific seeds and folds
   python train.py --experiment e1 --mode lopo --seeds 42 123 --folds 0 1 2
@@ -714,13 +899,16 @@ Examples:
                         choices=["e1", "e2", "e3", "e4", "e5"],
                         help="Experiment label (default: e1)")
     parser.add_argument("--mode", type=str, default="single",
-                        choices=["single", "lopo"],
+                        choices=["single", "lopo", "tstr"],
                         help="Evaluation mode (default: single)")
     parser.add_argument("--augmentation", type=str, default=None,
                         choices=["smote", "adasyn"],
                         help="Oversampling method for E2 (default: None)")
     parser.add_argument("--synthetic-windows", type=str, default=None,
                         help="Path to synthetic windows .npz file (for E3-E5)")
+    parser.add_argument("--ratio", type=float, nargs="+", default=[1.0],
+                        help="Synthetic ratio(s) to train on (default: 1.0). "
+                             "E.g. --ratio 0.25 0.5 1.0 2.0 for full sweep.")
     parser.add_argument("--seeds", type=int, nargs="+", default=[42, 123, 456],
                         help="Random seeds (default: 42 123 456)")
     parser.add_argument("--folds", type=int, nargs="+", default=None,
@@ -747,33 +935,70 @@ Examples:
                 seed=seed,
                 device=args.device,
             )
-    else:
-        syn_fn = None
-        if synthetic_windows is not None:
-            syn_fn = lambda fold, seed: synthetic_windows  # noqa: E731
-            print("  Note: same synthetic windows will be used for all LOPO folds.")
-        elif args.experiment in ("e3", "e4", "e5"):
-            # Auto-discover per-fold synthetic windows from generate.py output
-            from training.generate import load_synthetic_windows as _load_syn
+    elif args.mode == "tstr":
+        if args.experiment not in ("e3", "e4", "e5"):
+            parser.error("TSTR mode only applies to generator experiments (e3, e4, e5)")
 
-            def _per_fold_syn_fn(fold, seed):
-                synth_path = (
-                    RESULTS_DIR / args.experiment / f"seed_{seed}"
-                    / f"fold_{fold:02d}" / "synthetic_ratio_1.00.npz"
-                )
-                if not synth_path.exists():
-                    print(f"  WARNING: no synthetic data for fold {fold} seed {seed}")
-                    return None
-                return _load_syn(str(synth_path))
+        from training.generate import load_synthetic_windows as _load_syn
 
-            syn_fn = _per_fold_syn_fn
-            print(f"  Using per-fold synthetic windows from results/{args.experiment}/")
+        def _tstr_syn_fn(fold, seed):
+            synth_path = (
+                RESULTS_DIR / args.experiment / f"seed_{seed}"
+                / f"fold_{fold:02d}" / "synthetic_ratio_1.00.npz"
+            )
+            if not synth_path.exists():
+                print(f"  WARNING: no synthetic data for fold {fold} seed {seed}")
+                return None
+            return _load_syn(str(synth_path))
 
-        train_lopo(
+        train_tstr(
             experiment=args.experiment,
-            augmentation=args.augmentation,
-            synthetic_windows_fn=syn_fn,
+            synthetic_windows_fn=_tstr_syn_fn,
             seeds=args.seeds,
             device=args.device,
             folds=args.folds,
         )
+    else:
+        ratios = args.ratio if args.experiment in ("e3", "e4", "e5") else [1.0]
+
+        for ratio in ratios:
+            ratio_str = f"{ratio:.2f}"
+            if len(ratios) > 1:
+                print(f"\n{'#' * 60}")
+                print(f"  RATIO {ratio_str}")
+                print(f"{'#' * 60}")
+
+            syn_fn = None
+            if synthetic_windows is not None:
+                syn_fn = lambda fold, seed: synthetic_windows  # noqa: E731
+                print("  Note: same synthetic windows will be used for all LOPO folds.")
+            elif args.experiment in ("e3", "e4", "e5"):
+                from training.generate import load_synthetic_windows as _load_syn
+
+                def _make_syn_fn(r_str):
+                    def _per_fold_syn_fn(fold, seed):
+                        synth_path = (
+                            RESULTS_DIR / args.experiment / f"seed_{seed}"
+                            / f"fold_{fold:02d}" / f"synthetic_ratio_{r_str}.npz"
+                        )
+                        if not synth_path.exists():
+                            print(f"  WARNING: no synthetic data for fold {fold} seed {seed} ratio {r_str}")
+                            return None
+                        return _load_syn(str(synth_path))
+                    return _per_fold_syn_fn
+
+                syn_fn = _make_syn_fn(ratio_str)
+                print(f"  Using per-fold synthetic windows (ratio={ratio_str}) from results/{args.experiment}/")
+
+            # For multi-ratio runs, save results with ratio suffix
+            result_suffix = f"_ratio_{ratio_str}" if len(ratios) > 1 else ""
+
+            train_lopo(
+                experiment=args.experiment,
+                augmentation=args.augmentation,
+                synthetic_windows_fn=syn_fn,
+                seeds=args.seeds,
+                device=args.device,
+                folds=args.folds,
+                result_suffix=result_suffix,
+            )

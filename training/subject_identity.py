@@ -199,6 +199,91 @@ def train_probe(
     return probe, results
 
 
+def compute_proximity(
+    real_embeddings: np.ndarray,
+    synthetic_embeddings: np.ndarray,
+    k: int = 5,
+    batch_size: int = 512,
+) -> Dict:
+    """
+    Measure how close synthetic samples are to real training samples in
+    embedding space. High proximity suggests memorisation; low proximity
+    suggests the generator produces novel patterns.
+
+    Computes per-synthetic-sample distance to k-nearest real neighbours
+    (cosine distance), then reports statistics.
+
+    Also computes a "real-to-real" baseline: average k-NN distance among
+    real samples themselves. If synthetic distances are significantly
+    smaller than the real baseline, the generator may be copying.
+
+    Args:
+        real_embeddings: (N_real, D) embeddings of real training windows
+        synthetic_embeddings: (N_syn, D) embeddings of synthetic windows
+        k: number of nearest neighbours
+        batch_size: process synthetic embeddings in batches to limit memory
+
+    Returns:
+        Dict with:
+            synth_knn_mean: mean k-NN distance (synthetic to real)
+            synth_knn_std: std of k-NN distances
+            synth_knn_median: median
+            real_knn_mean: baseline mean k-NN distance (real to real)
+            real_knn_std: baseline std
+            real_knn_median: baseline median
+            proximity_ratio: synth_knn_mean / real_knn_mean
+                (<1.0 means synthetic is closer than typical real samples)
+            n_real: number of real samples
+            n_synthetic: number of synthetic samples
+            k: number of neighbours used
+    """
+    from sklearn.metrics.pairwise import cosine_distances
+
+    n_real = len(real_embeddings)
+    n_syn = len(synthetic_embeddings)
+
+    # Synthetic-to-real k-NN distances
+    synth_knn_dists = []
+    for i in range(0, n_syn, batch_size):
+        batch = synthetic_embeddings[i:i + batch_size]
+        dists = cosine_distances(batch, real_embeddings)  # (batch, n_real)
+        topk = np.partition(dists, k, axis=1)[:, :k]
+        synth_knn_dists.append(topk.mean(axis=1))
+    synth_knn_dists = np.concatenate(synth_knn_dists)
+
+    # Real-to-real baseline (sample a subset if large)
+    rng = np.random.RandomState(42)
+    max_real_probe = min(n_real, 2000)
+    probe_idx = rng.choice(n_real, max_real_probe, replace=False)
+    real_knn_dists = []
+    for i in range(0, max_real_probe, batch_size):
+        batch_idx = probe_idx[i:i + batch_size]
+        batch = real_embeddings[batch_idx]
+        dists = cosine_distances(batch, real_embeddings)  # (batch, n_real)
+        # Set self-distances to inf so they don't appear in k-NN
+        for row, col in enumerate(batch_idx):
+            dists[row, col] = np.inf
+        topk = np.partition(dists, k, axis=1)[:, :k]
+        real_knn_dists.append(topk.mean(axis=1))
+    real_knn_dists = np.concatenate(real_knn_dists)
+
+    synth_mean = float(np.mean(synth_knn_dists))
+    real_mean = float(np.mean(real_knn_dists))
+
+    return {
+        "synth_knn_mean": synth_mean,
+        "synth_knn_std": float(np.std(synth_knn_dists)),
+        "synth_knn_median": float(np.median(synth_knn_dists)),
+        "real_knn_mean": real_mean,
+        "real_knn_std": float(np.std(real_knn_dists)),
+        "real_knn_median": float(np.median(real_knn_dists)),
+        "proximity_ratio": synth_mean / max(real_mean, 1e-10),
+        "n_real": n_real,
+        "n_synthetic": n_syn,
+        "k": k,
+    }
+
+
 def run_e7(
     detector_baseline: SeizureDetector,
     detector_augmented: Optional[SeizureDetector],
@@ -292,6 +377,32 @@ def run_e7(
                 }
                 if verbose:
                     print(f"    Accuracy: {acc:.4f} ({known_mask.sum()}/{len(synthetic_patient_ids)} windows with known PIDs)")
+
+    # ── Proximity check ─────────────────────────────────────────────────
+    if synthetic_windows is not None:
+        if verbose:
+            print("\n  Proximity: measuring synthetic-to-real embedding distance...")
+        # emb_synth may already exist from E7b; compute if not
+        try:
+            _ = emb_synth  # noqa: F821 — set in E7b block above
+        except NameError:
+            synth_tensor = torch.from_numpy(synthetic_windows).float()
+            synth_ds_prox = TensorDataset(
+                synth_tensor,
+                torch.ones(len(synth_tensor), dtype=torch.long),
+                torch.zeros(len(synth_tensor), dtype=torch.long),
+            )
+            synth_loader_prox = DataLoader(synth_ds_prox, batch_size=256, shuffle=False)
+            emb_synth, _ = extract_embeddings(detector_baseline, synth_loader_prox, device)
+
+        proximity = compute_proximity(emb_real, emb_synth)
+        results["proximity"] = proximity
+        if verbose:
+            ratio = proximity["proximity_ratio"]
+            print(f"    Synth k-NN distance: {proximity['synth_knn_mean']:.4f} "
+                  f"(real baseline: {proximity['real_knn_mean']:.4f})")
+            print(f"    Proximity ratio: {ratio:.4f} "
+                  f"({'CLOSER than real - possible memorisation' if ratio < 0.8 else 'comparable to real' if ratio < 1.2 else 'FARTHER than real - high novelty'})")
 
     # ── E7c: Augmented model ──────────────────────────────────────────
     if detector_augmented is not None:

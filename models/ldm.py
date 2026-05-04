@@ -13,9 +13,9 @@ The denoiser operates on the 128-dim latent vector from the CVAE. Since a
 
 UNet-1D Denoiser:
   - Input: (batch, 16, 8) noisy latent + sinusoidal timestep embedding
-  - 3 down blocks: 16→32→64→128 channels
-  - Bottleneck: 128 channels
-  - 3 up blocks: 128→64→32→16 channels (with skip connections)
+  - 3 down blocks: 64→128→256 channels
+  - Bottleneck: 256 channels
+  - 3 up blocks: 256→128→64 channels (with skip connections)
   - Output: (batch, 16, 8) predicted noise
 
 Diffusion:
