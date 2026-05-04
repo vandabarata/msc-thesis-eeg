@@ -323,11 +323,20 @@ class TimeGAN(nn.Module):
 
                 opt_ae.zero_grad()
                 loss.backward()
+                torch.nn.utils.clip_grad_norm_(
+                    list(self.embedder.parameters()) + list(self.recovery.parameters()),
+                    max_norm=1.0,
+                )
                 opt_ae.step()
                 epoch_loss += loss.item()
                 n_batches += 1
 
             avg = epoch_loss / max(n_batches, 1)
+            if torch.isnan(torch.tensor(avg)) or torch.isinf(torch.tensor(avg)):
+                raise RuntimeError(
+                    f"TimeGAN Phase 1 diverged at epoch {epoch+1} "
+                    f"(loss={avg}). Training aborted."
+                )
             history["phase1_loss"].append(avg)
             if verbose and (epoch + 1) % 100 == 0:
                 print(f"    Epoch {epoch+1}/{n_epochs_ae}: recon_loss={avg:.6f}")
@@ -354,11 +363,17 @@ class TimeGAN(nn.Module):
 
                 opt_sup.zero_grad()
                 loss.backward()
+                torch.nn.utils.clip_grad_norm_(self.supervisor.parameters(), max_norm=1.0)
                 opt_sup.step()
                 epoch_loss += loss.item()
                 n_batches += 1
 
             avg = epoch_loss / max(n_batches, 1)
+            if torch.isnan(torch.tensor(avg)) or torch.isinf(torch.tensor(avg)):
+                raise RuntimeError(
+                    f"TimeGAN Phase 2 diverged at epoch {epoch+1} "
+                    f"(loss={avg}). Training aborted."
+                )
             history["phase2_loss"].append(avg)
             if verbose and (epoch + 1) % 100 == 0:
                 print(f"    Epoch {epoch+1}/{n_epochs_sup}: supervisor_loss={avg:.6f}")
@@ -409,6 +424,7 @@ class TimeGAN(nn.Module):
 
                 opt_d.zero_grad()
                 d_loss.backward()
+                torch.nn.utils.clip_grad_norm_(self.discriminator.parameters(), max_norm=1.0)
                 opt_d.step()
 
                 # ── Generator step (2 updates per D update) ────────────
@@ -454,6 +470,13 @@ class TimeGAN(nn.Module):
 
                     opt_g.zero_grad()
                     g_loss.backward()
+                    torch.nn.utils.clip_grad_norm_(
+                        list(self.generator.parameters()) +
+                        list(self.supervisor.parameters()) +
+                        list(self.embedder.parameters()) +
+                        list(self.recovery.parameters()),
+                        max_norm=1.0,
+                    )
                     opt_g.step()
 
                 epoch_g_loss += g_loss.item()
@@ -462,6 +485,11 @@ class TimeGAN(nn.Module):
 
             avg_g = epoch_g_loss / max(n_batches, 1)
             avg_d = epoch_d_loss / max(n_batches, 1)
+            if torch.isnan(torch.tensor(avg_g)) or torch.isinf(torch.tensor(avg_g)):
+                raise RuntimeError(
+                    f"TimeGAN Phase 3 diverged at epoch {epoch+1} "
+                    f"(g_loss={avg_g}, d_loss={avg_d}). Training aborted."
+                )
             history["phase3_g_loss"].append(avg_g)
             history["phase3_d_loss"].append(avg_d)
             if verbose and (epoch + 1) % 100 == 0:

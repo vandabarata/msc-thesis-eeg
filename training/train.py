@@ -143,7 +143,11 @@ def apply_oversampling(
         patient_ids[i] = pid
 
     n_before = len(X)
-    X_resampled, y_resampled = sampler.fit_resample(X, y)
+    try:
+        X_resampled, y_resampled = sampler.fit_resample(X, y)
+    except (ValueError, RuntimeError) as exc:
+        print(f"  WARNING: {method} failed on this fold ({exc}). Returning empty.")
+        return []
 
     n_new = len(X_resampled) - n_before
     if n_new <= 0:
@@ -492,7 +496,8 @@ def train_lopo(
 
         for fold in folds:
             # Resume: skip completed folds
-            fold_result_path = RESULTS_DIR / experiment / f"seed_{seed}" / f"fold_{fold:02d}" / "results.json"
+            fold_results_name = f"results_{augmentation}.json" if augmentation else "results.json"
+            fold_result_path = RESULTS_DIR / experiment / f"seed_{seed}" / f"fold_{fold:02d}" / fold_results_name
             if fold_result_path.exists():
                 print(f"\n  Fold {fold}/22, Seed {seed} — skipping (already complete)")
                 try:
@@ -597,6 +602,13 @@ def train_lopo(
             fold_results_filename = f"results_{augmentation}.json" if augmentation else "results.json"
             with open(fold_dir / fold_results_filename, "w") as f:
                 json.dump(seed_results[fold], f, indent=2, default=str)
+
+            # Free disk: delete large synthetic npz now that results are saved.
+            # Fidelity plots already ran during generation; the npz is no longer needed.
+            if synthetic_windows_fn is not None:
+                npz_path = fold_dir / "synthetic_ratio_1.00.npz"
+                if npz_path.exists():
+                    npz_path.unlink()
 
         all_results[seed] = seed_results
 
@@ -736,16 +748,26 @@ Examples:
                 device=args.device,
             )
     else:
-        # For LOPO, wrap the static synthetic windows in a callable
-        # that returns the same windows for every fold.
-        # NOTE: For proper per-fold generator training (where each fold needs
-        # its own synthetic data), use the Python API with a custom
-        # synthetic_windows_fn(fold, seed) callable instead of the CLI.
         syn_fn = None
         if synthetic_windows is not None:
             syn_fn = lambda fold, seed: synthetic_windows  # noqa: E731
             print("  Note: same synthetic windows will be used for all LOPO folds.")
-            print("  For per-fold generation, use the Python API with synthetic_windows_fn.")
+        elif args.experiment in ("e3", "e4", "e5"):
+            # Auto-discover per-fold synthetic windows from generate.py output
+            from training.generate import load_synthetic_windows as _load_syn
+
+            def _per_fold_syn_fn(fold, seed):
+                synth_path = (
+                    RESULTS_DIR / args.experiment / f"seed_{seed}"
+                    / f"fold_{fold:02d}" / "synthetic_ratio_1.00.npz"
+                )
+                if not synth_path.exists():
+                    print(f"  WARNING: no synthetic data for fold {fold} seed {seed}")
+                    return None
+                return _load_syn(str(synth_path))
+
+            syn_fn = _per_fold_syn_fn
+            print(f"  Using per-fold synthetic windows from results/{args.experiment}/")
 
         train_lopo(
             experiment=args.experiment,

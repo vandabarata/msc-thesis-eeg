@@ -10,10 +10,8 @@
 #
 # Usage (on the uni machine, from project root):
 #   nohup bash experiment_scripts/run_lopo.sh &> lopo.log &
-#
-# Run a single experiment:
-#   bash experiment_scripts/run_lopo.sh e1
-#   bash experiment_scripts/run_lopo.sh e5
+#   nohup bash experiment_scripts/run_lopo.sh e2 e3 e4 e5 &> lopo.log &
+#   bash experiment_scripts/run_lopo.sh e3 e4
 
 set -uo pipefail
 
@@ -54,7 +52,14 @@ summarize_seed() {
     python3 -c "
 import json, glob, numpy as np, os
 os.chdir('$PROJECT_ROOT')
-files = sorted(glob.glob('results/$exp/seed_$seed/lopo/fold_*/results.json'))
+# E2 saves as results_smote.json / results_adasyn.json
+patterns = ['results/$exp/seed_$seed/fold_*/results.json',
+            'results/$exp/seed_$seed/fold_*/results_smote.json',
+            'results/$exp/seed_$seed/fold_*/results_adasyn.json']
+files = []
+for p in patterns:
+    files.extend(glob.glob(p))
+files = sorted(set(files))
 if not files:
     print('No fold results found yet')
 else:
@@ -64,7 +69,7 @@ else:
             d = json.load(fh)
         auprcs.append(d['test_metrics']['auprc'])
     n = len(auprcs)
-    print(f'{n}/23 folds — AUPRC: {np.mean(auprcs):.4f} +/- {np.std(auprcs):.4f} (min {np.min(auprcs):.4f}, max {np.max(auprcs):.4f})')
+    print(f'{n} results — AUPRC: {np.mean(auprcs):.4f} +/- {np.std(auprcs):.4f} (min {np.min(auprcs):.4f}, max {np.max(auprcs):.4f})')
 " 2>/dev/null || echo "Could not read results"
 }
 
@@ -75,7 +80,12 @@ import json, glob, numpy as np, os
 os.chdir('$PROJECT_ROOT')
 seed_means = []
 for seed in [42, 123, 456]:
-    files = sorted(glob.glob(f'results/$exp/seed_{seed}/lopo/fold_*/results.json'))
+    files = []
+    for pattern in [f'results/$exp/seed_{seed}/fold_*/results.json',
+                    f'results/$exp/seed_{seed}/fold_*/results_smote.json',
+                    f'results/$exp/seed_{seed}/fold_*/results_adasyn.json']:
+        files.extend(glob.glob(pattern))
+    files = sorted(set(files))
     if not files:
         continue
     auprcs = [json.load(open(f))['test_metrics']['auprc'] for f in files]
@@ -85,10 +95,14 @@ if not seed_means:
 else:
     print(f'Mean AUPRC across seeds: {np.mean(seed_means):.4f} +/- {np.std(seed_means):.4f}')
     print(f'Per-seed means: {\" / \".join(f\"{m:.4f}\" for m in seed_means)}')
-    # Also get AUROC
     seed_aurocs = []
     for seed in [42, 123, 456]:
-        files = sorted(glob.glob(f'results/$exp/seed_{seed}/lopo/fold_*/results.json'))
+        files = []
+        for pattern in [f'results/$exp/seed_{seed}/fold_*/results.json',
+                        f'results/$exp/seed_{seed}/fold_*/results_smote.json',
+                        f'results/$exp/seed_{seed}/fold_*/results_adasyn.json']:
+            files.extend(glob.glob(pattern))
+        files = sorted(set(files))
         if not files:
             continue
         aurocs = [json.load(open(f))['test_metrics']['auroc'] for f in files]
@@ -118,8 +132,12 @@ run_experiment() {
 
             local gen_cmd="python -m training.generate --model $gen_model --mode lopo --seed $seed"
             if [ "$gen_model" = "ldm" ]; then
-                local cvae_ckpt="results/e4/seed_${seed}/lopo/cvae.pt"
-                [ ! -f "$cvae_ckpt" ] && cvae_ckpt="results/e4/seed_${seed}/single_split/cvae.pt"
+                local cvae_ckpt="results/e4/seed_${seed}/fold_00/cvae.pt"
+                if [ ! -f "$cvae_ckpt" ]; then
+                    discord "❌ **${exp^^}** FAILED — E4 per-fold CVAE checkpoints missing. Run E4 LOPO first." 15158332
+                    echo "FAILED $(date '+%Y-%m-%d %H:%M:%S') missing e4 cvae checkpoints" > "$STATUS_DIR/${exp}.status"
+                    return 1
+                fi
                 gen_cmd="$gen_cmd --cvae-checkpoint $cvae_ckpt"
             fi
 
@@ -205,21 +223,36 @@ run_e2_lopo() {
 
 # --- Main ---
 
-FILTER="${1:-all}"
 TOTAL_START=$SECONDS
+
+if [ $# -eq 0 ] || [ "$1" = "all" ]; then
+    EXPERIMENTS=(e1 e2 e3 e4 e5)
+else
+    EXPERIMENTS=("$@")
+fi
+
+FILTER="${EXPERIMENTS[*]}"
 
 echo "============================================"
 echo "  LOPO Evaluation — $(date '+%Y-%m-%d %H:%M:%S')"
-echo "  Filter: $FILTER"
+echo "  Experiments: $FILTER"
 echo "============================================"
 
-discord "🚀 **LOPO run started** — $FILTER ($(date '+%d %b %H:%M'))\\nOrder: E1 → E2 → E3 → E4 → E5\\n3 seeds × 23 folds each" 3447003
-
-if [ "$FILTER" = "all" ]; then
-    EXPERIMENTS=(e1 e2 e3 e4 e5)
-else
-    EXPERIMENTS=("$FILTER")
+# Free disk space: delete single-split synthetic npz files (results already saved).
+# These are ~380 MB each and no longer needed — fidelity plots and detector training
+# already completed for single-split. Frees ~3.4 GB for LOPO npz files.
+FREED=0
+for npz in "$PROJECT_ROOT"/results/e*/seed_*/single_split/synthetic_ratio_*.npz; do
+    if [ -f "$npz" ]; then
+        rm -f "$npz"
+        FREED=$((FREED + 1))
+    fi
+done
+if [ $FREED -gt 0 ]; then
+    echo "  Freed disk: deleted $FREED single-split synthetic .npz files"
 fi
+
+discord "🚀 **LOPO run started** — $FILTER ($(date '+%d %b %H:%M'))\\n3 seeds × 23 folds each" 3447003
 
 FAILED=0
 for exp in "${EXPERIMENTS[@]}"; do

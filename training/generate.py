@@ -217,6 +217,7 @@ def generate_synthetic(
     ratio: float = 1.0,
     device: str = "cpu",
     patient_id: int = -1,
+    seed: int = 42,
 ) -> List[Tuple[np.ndarray, int, int]]:
     """
     Generate synthetic ictal windows at a given ratio.
@@ -227,6 +228,7 @@ def generate_synthetic(
         ratio: synthetic:real ratio (0.25, 0.5, 1.0, 2.0)
         device: torch device
         patient_id: patient ID to assign to synthetic windows (-1 = synthetic sentinel)
+        seed: RNG seed for reproducible generation from checkpoint
 
     Returns:
         List of (window, label=1, patient_id) tuples
@@ -234,6 +236,7 @@ def generate_synthetic(
     n_synthetic = max(1, int(n_real_ictal * ratio))
     print(f"  Generating {n_synthetic} synthetic windows (ratio={ratio}, real_ictal={n_real_ictal})")
 
+    torch.manual_seed(seed)
     synthetic = model.generate(
         n_samples=n_synthetic,
         device=device,
@@ -335,7 +338,7 @@ def _run_single_split(args, device: str, experiment: str):
     save_generator(model, save_dir, args.model)
 
     for ratio in args.ratio:
-        synthetic = generate_synthetic(model, n_ictal, ratio, device)
+        synthetic = generate_synthetic(model, n_ictal, ratio, device, seed=args.seed)
         save_synthetic_windows(synthetic, save_dir, ratio)
 
     # Fidelity plots on the primary ratio (1.0 if available, else first ratio)
@@ -368,9 +371,11 @@ def _run_lopo(args, device: str, experiment: str):
 
         save_dir = RESULTS_DIR / experiment / f"seed_{args.seed}" / f"fold_{fold:02d}"
 
-        # Skip if already done
-        if (save_dir / f"{args.model}.pt").exists() and all(
-            (save_dir / f"synthetic_ratio_{r:.2f}.npz").exists() for r in args.ratio
+        # Skip if already done (check .pt checkpoint; npz may have been cleaned
+        # up by train.py after detector training completed for this fold)
+        if (save_dir / f"{args.model}.pt").exists() and (
+            all((save_dir / f"synthetic_ratio_{r:.2f}.npz").exists() for r in args.ratio)
+            or (save_dir / "results.json").exists()
         ):
             print(f"  Skipping fold {fold} — already complete")
             continue
@@ -385,22 +390,42 @@ def _run_lopo(args, device: str, experiment: str):
             print(f"  Skipping fold {fold} — only {n_ictal} ictal windows")
             continue
 
-        model = _train_generator(args, train_ds, device)
-        save_generator(model, save_dir, args.model)
+        # LDM: require per-fold CVAE checkpoint from E4 LOPO
+        if args.model == "ldm":
+            fold_cvae = RESULTS_DIR / "e4" / f"seed_{args.seed}" / f"fold_{fold:02d}" / "cvae.pt"
+            if not fold_cvae.exists():
+                raise FileNotFoundError(
+                    f"E4 CVAE checkpoint missing for fold {fold}: {fold_cvae}\n"
+                    f"Run E4 LOPO first: python -m training.generate --model cvae --mode lopo --seed {args.seed}"
+                )
+            args.cvae_checkpoint = str(fold_cvae)
+            print(f"  Using per-fold CVAE: {fold_cvae}")
 
-        for ratio in args.ratio:
-            synthetic = generate_synthetic(model, n_ictal, ratio, device)
-            save_synthetic_windows(synthetic, save_dir, ratio)
+        try:
+            model = _train_generator(args, train_ds, device)
+            save_generator(model, save_dir, args.model)
 
-        # Fidelity plots per fold
-        fidelity_ratio = 1.0 if 1.0 in args.ratio else args.ratio[0]
-        synth_path = save_dir / f"synthetic_ratio_{fidelity_ratio:.2f}.npz"
-        if synth_path.exists():
-            _run_fidelity_plots(
-                train_ds, synth_path,
-                output_dir=save_dir / "plots",
-                generator_name=f"{args.model.upper()} fold {fold}",
-            )
+            for ratio in args.ratio:
+                synthetic = generate_synthetic(model, n_ictal, ratio, device, seed=args.seed)
+                save_synthetic_windows(synthetic, save_dir, ratio)
+
+            # Fidelity plots per fold
+            fidelity_ratio = 1.0 if 1.0 in args.ratio else args.ratio[0]
+            synth_path = save_dir / f"synthetic_ratio_{fidelity_ratio:.2f}.npz"
+            if synth_path.exists():
+                _run_fidelity_plots(
+                    train_ds, synth_path,
+                    output_dir=save_dir / "plots",
+                    generator_name=f"{args.model.upper()} fold {fold}",
+                )
+        except RuntimeError as exc:
+            print(f"  ERROR: fold {fold} failed — {exc}")
+            print(f"  Skipping fold {fold}, continuing with remaining folds.")
+            continue
+
+        # Free GPU memory between folds
+        del model
+        torch.cuda.empty_cache()
 
     print(f"\nDone. Outputs in {RESULTS_DIR / experiment}/")
 
