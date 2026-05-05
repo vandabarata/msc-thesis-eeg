@@ -91,7 +91,7 @@ class TrainConfig:
 
 
 # ── SMOTE/ ADASYN Augmentation ────────────────────────────────────────────
-_INTERICTAL_RATIO = 10  # interictal subsample = 10× ictal count
+_INTERICTAL_RATIO = 5  # interictal subsample = 5× ictal count
 
 def apply_oversampling(
     dataset: CHBMITDataset,
@@ -103,7 +103,7 @@ def apply_oversampling(
     Apply SMOTE or ADASYN oversampling to the ictal class in the dataset.
 
     Loads all ictal windows plus a random subsample of interictal windows
-    (10x ictal count) to keep memory feasible on 32 GB machines. SMOTE
+    (5x ictal count) to keep memory feasible on 32 GB machines. SMOTE
     only uses k-NN from the minority class, so the full majority set is
     not needed. Returns NEW synthetic windows only (not the originals).
     """
@@ -144,18 +144,23 @@ def apply_oversampling(
         patient_ids[i] = pid
 
     n_before = len(X)
+    ictal_pids = patient_ids[y == 1]
+
     try:
         X_resampled, y_resampled = sampler.fit_resample(X, y)
     except (ValueError, RuntimeError) as exc:
         print(f"  WARNING: {method} failed on this fold ({exc}). Returning empty.")
         return []
 
+    # Free the original arrays immediately to reduce peak memory
+    del X, y, patient_ids
+    import gc; gc.collect()
+
     n_new = len(X_resampled) - n_before
     if n_new <= 0:
         print(f"Warning: {method} generated 0 new samples (class may already be balanced)")
         return []
 
-    ictal_pids = patient_ids[y == 1]
     synthetic = []
     for i in range(n_before, len(X_resampled)):
         window = X_resampled[i].reshape(N_CHANNELS, WINDOW_SAMPLES)

@@ -371,12 +371,14 @@ def _run_lopo(args, device: str, experiment: str):
 
         save_dir = RESULTS_DIR / experiment / f"seed_{args.seed}" / f"fold_{fold:02d}"
 
-        # Skip if already done (check .pt checkpoint; npz may have been cleaned
-        # up by train.py after detector training completed for this fold)
-        if (save_dir / f"{args.model}.pt").exists() and (
-            all((save_dir / f"synthetic_ratio_{r:.2f}.npz").exists() for r in args.ratio)
-            or (save_dir / "results.json").exists()
-        ):
+        # Skip if already done: either npz files exist (generation complete) or
+        # detector results exist (training already consumed the synthetic data)
+        has_npz = all((save_dir / f"synthetic_ratio_{r:.2f}.npz").exists() for r in args.ratio)
+        has_results = (
+            (save_dir / "results.json").exists()
+            or (save_dir / "results_ratio_1.00.json").exists()
+        )
+        if has_npz or has_results:
             print(f"  Skipping fold {fold} — already complete")
             continue
 

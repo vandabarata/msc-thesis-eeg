@@ -14,6 +14,7 @@
 #   bash experiment_scripts/run_lopo.sh e3 e4
 
 set -uo pipefail
+export PYTHONUNBUFFERED=1
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -39,9 +40,22 @@ mkdir -p "$STATUS_DIR"
 discord() {
     local msg="$1"
     local color="${2:-3447003}"
-    curl -s -H "Content-Type: application/json" \
-        -d "{\"embeds\":[{\"title\":\"LOPO\",\"description\":\"$msg\",\"color\":$color}]}" \
-        "$DISCORD_WEBHOOK" > /dev/null 2>&1 || true
+    [ -z "$DISCORD_WEBHOOK" ] && return 0
+
+    # Log all notifications locally (survives curl failures)
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $msg" >> "$STATUS_DIR/notifications.log"
+
+    # Retry up to 3 times with backoff
+    local attempt
+    for attempt in 1 2 3; do
+        if curl -s --max-time 10 -H "Content-Type: application/json" \
+            -d "{\"embeds\":[{\"title\":\"LOPO\",\"description\":\"$msg\",\"color\":$color}]}" \
+            "$DISCORD_WEBHOOK" > /dev/null 2>&1; then
+            return 0
+        fi
+        sleep $((attempt * 2))
+    done
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] WARNING: Discord notification failed after 3 attempts" >> "$STATUS_DIR/notifications.log"
 }
 
 # --- Results extraction (called after each seed/experiment) ---
@@ -52,10 +66,10 @@ summarize_seed() {
     python3 -c "
 import json, glob, numpy as np, os
 os.chdir('$PROJECT_ROOT')
-# E2 saves as results_smote.json / results_adasyn.json
 patterns = ['results/$exp/seed_$seed/fold_*/results.json',
             'results/$exp/seed_$seed/fold_*/results_smote.json',
-            'results/$exp/seed_$seed/fold_*/results_adasyn.json']
+            'results/$exp/seed_$seed/fold_*/results_adasyn.json',
+            'results/$exp/seed_$seed/fold_*/results_ratio_*.json']
 files = []
 for p in patterns:
     files.extend(glob.glob(p))
@@ -63,13 +77,23 @@ files = sorted(set(files))
 if not files:
     print('No fold results found yet')
 else:
-    auprcs = []
+    # Group by ratio if multi-ratio
+    from collections import defaultdict
+    by_ratio = defaultdict(list)
     for f in files:
-        with open(f) as fh:
-            d = json.load(fh)
-        auprcs.append(d['test_metrics']['auprc'])
-    n = len(auprcs)
-    print(f'{n} results — AUPRC: {np.mean(auprcs):.4f} +/- {np.std(auprcs):.4f} (min {np.min(auprcs):.4f}, max {np.max(auprcs):.4f})')
+        name = os.path.basename(f)
+        if 'ratio_' in name:
+            ratio = name.split('ratio_')[1].replace('.json','')
+            by_ratio[ratio].append(f)
+        else:
+            by_ratio['default'].append(f)
+    lines = []
+    for key in sorted(by_ratio.keys()):
+        flist = by_ratio[key]
+        auprcs = [json.load(open(f))['test_metrics']['auprc'] for f in flist]
+        label = f'ratio {key}' if key != 'default' else ''
+        lines.append(f'{len(auprcs)} folds {label}: AUPRC {np.mean(auprcs):.4f} +/- {np.std(auprcs):.4f}')
+    print('; '.join(lines))
 " 2>/dev/null || echo "Could not read results"
 }
 
@@ -77,42 +101,57 @@ summarize_experiment() {
     local exp="$1"
     python3 -c "
 import json, glob, numpy as np, os
+from collections import defaultdict
 os.chdir('$PROJECT_ROOT')
-seed_means = []
+patterns = [
+    'results/$exp/seed_{seed}/fold_*/results.json',
+    'results/$exp/seed_{seed}/fold_*/results_smote.json',
+    'results/$exp/seed_{seed}/fold_*/results_adasyn.json',
+    'results/$exp/seed_{seed}/fold_*/results_ratio_*.json',
+]
+# Group by ratio
+by_ratio = defaultdict(lambda: defaultdict(list))
 for seed in [42, 123, 456]:
-    files = []
-    for pattern in [f'results/$exp/seed_{seed}/fold_*/results.json',
-                    f'results/$exp/seed_{seed}/fold_*/results_smote.json',
-                    f'results/$exp/seed_{seed}/fold_*/results_adasyn.json']:
-        files.extend(glob.glob(pattern))
-    files = sorted(set(files))
-    if not files:
-        continue
-    auprcs = [json.load(open(f))['test_metrics']['auprc'] for f in files]
-    seed_means.append(np.mean(auprcs))
-if not seed_means:
+    for pat in patterns:
+        for f in glob.glob(pat.format(seed=seed)):
+            name = os.path.basename(f)
+            if 'ratio_' in name:
+                ratio = name.split('ratio_')[1].replace('.json','')
+            elif '_smote' in name:
+                ratio = 'smote'
+            elif '_adasyn' in name:
+                ratio = 'adasyn'
+            else:
+                ratio = 'default'
+            d = json.load(open(f))
+            by_ratio[ratio][seed].append(d['test_metrics']['auprc'])
+if not by_ratio:
     print('No results found')
 else:
-    print(f'Mean AUPRC across seeds: {np.mean(seed_means):.4f} +/- {np.std(seed_means):.4f}')
-    print(f'Per-seed means: {\" / \".join(f\"{m:.4f}\" for m in seed_means)}')
-    seed_aurocs = []
-    for seed in [42, 123, 456]:
-        files = []
-        for pattern in [f'results/$exp/seed_{seed}/fold_*/results.json',
-                        f'results/$exp/seed_{seed}/fold_*/results_smote.json',
-                        f'results/$exp/seed_{seed}/fold_*/results_adasyn.json']:
-            files.extend(glob.glob(pattern))
-        files = sorted(set(files))
-        if not files:
-            continue
-        aurocs = [json.load(open(f))['test_metrics']['auroc'] for f in files]
-        seed_aurocs.append(np.mean(aurocs))
-    if seed_aurocs:
-        print(f'Mean AUROC across seeds: {np.mean(seed_aurocs):.4f} +/- {np.std(seed_aurocs):.4f}')
+    lines = []
+    for ratio in sorted(by_ratio.keys()):
+        seed_data = by_ratio[ratio]
+        seed_means = [np.mean(v) for v in seed_data.values()]
+        n_folds = sum(len(v) for v in seed_data.values())
+        label = f'ratio {ratio}' if ratio not in ('default','smote','adasyn') else ratio
+        lines.append(f'{label}: AUPRC {np.mean(seed_means):.4f} +/- {np.std(seed_means):.4f} ({n_folds} results)')
+    print('; '.join(lines))
 " 2>/dev/null || echo "Could not read results"
 }
 
 # --- Core runner ---
+
+check_disk() {
+    local min_gb="${1:-2}"
+    local avail_kb
+    avail_kb=$(df --output=avail "$PROJECT_ROOT" | tail -1)
+    local avail_gb=$((avail_kb / 1048576))
+    if [ "$avail_gb" -lt "$min_gb" ]; then
+        echo "DISK CRITICAL: only ${avail_gb}GB free (need ${min_gb}GB)"
+        return 1
+    fi
+    return 0
+}
 
 run_experiment() {
     local exp="$1"
@@ -126,57 +165,81 @@ run_experiment() {
     for seed in "${SEEDS[@]}"; do
         local seed_start=$SECONDS
 
-        # Generator phase (E3-E5): generate at ALL 4 ratios
         if [ "$gen_model" != "none" ] && [ "$gen_model" != "builtin" ]; then
-            echo ">>> ${exp^^} seed $seed: generate ($gen_model) at 4 ratios — $(date)"
+            # E3-E5: per-fold generate+train to avoid filling disk
+            for fold in $(seq 0 22); do
+                local fold_dir="results/${exp}/seed_${seed}/fold_$(printf '%02d' $fold)"
 
-            local gen_cmd="python -m training.generate --model $gen_model --mode lopo --seed $seed --ratio 0.25 0.5 1.0 2.0"
-            if [ "$gen_model" = "ldm" ]; then
-                local cvae_ckpt="results/e4/seed_${seed}/fold_00/cvae.pt"
-                if [ ! -f "$cvae_ckpt" ]; then
-                    discord "❌ **${exp^^}** FAILED — E4 per-fold CVAE checkpoints missing. Run E4 LOPO first." 15158332
-                    echo "FAILED $(date '+%Y-%m-%d %H:%M:%S') missing e4 cvae checkpoints" > "$STATUS_DIR/${exp}.status"
+                # Skip if detector already trained for this fold (all ratios done)
+                if [ -f "${fold_dir}/results_ratio_0.25.json" ] && \
+                   [ -f "${fold_dir}/results_ratio_2.00.json" ]; then
+                    echo "  Fold $fold seed $seed — skipping (already complete)"
+                    continue
+                fi
+
+                # Disk space check before each fold
+                if ! check_disk 3; then
+                    discord "❌ **${exp^^}** FAILED — disk full at fold $fold seed $seed" 15158332
+                    echo "FAILED $(date '+%Y-%m-%d %H:%M:%S') disk full fold=$fold seed=$seed" > "$STATUS_DIR/${exp}.status"
                     return 1
                 fi
-                gen_cmd="$gen_cmd --cvae-checkpoint $cvae_ckpt"
-            fi
 
-            if ! eval "$gen_cmd"; then
+                echo ">>> ${exp^^} seed $seed fold $fold: generate ($gen_model) — $(date)"
+
+                local gen_cmd="python -m training.generate --model $gen_model --mode lopo --seed $seed --ratio 0.25 0.5 1.0 2.0 --folds $fold"
+                if [ "$gen_model" = "ldm" ]; then
+                    local cvae_ckpt="results/e4/seed_${seed}/fold_$(printf '%02d' $fold)/cvae.pt"
+                    if [ ! -f "$cvae_ckpt" ]; then
+                        discord "❌ **${exp^^}** FAILED — E4 CVAE checkpoint missing for fold $fold. Run E4 LOPO first." 15158332
+                        echo "FAILED $(date '+%Y-%m-%d %H:%M:%S') missing e4 cvae fold=$fold" > "$STATUS_DIR/${exp}.status"
+                        return 1
+                    fi
+                    gen_cmd="$gen_cmd --cvae-checkpoint $cvae_ckpt"
+                fi
+
+                if ! eval "$gen_cmd"; then
+                    local err_tail
+                    err_tail=$(tail -8 "$PROJECT_ROOT/lopo.log" 2>/dev/null)
+                    discord "❌ **${exp^^}** FAILED — generate fold=$fold seed=$seed\\n\`\`\`\\n${err_tail}\\n\`\`\`" 15158332
+                    echo "FAILED $(date '+%Y-%m-%d %H:%M:%S') generate fold=$fold seed=$seed" > "$STATUS_DIR/${exp}.status"
+                    return 1
+                fi
+
+                # Train detector on this fold at all ratios
+                echo ">>> ${exp^^} seed $seed fold $fold: train — $(date)"
+                if ! python -m training.train --experiment "$exp" --mode lopo --seeds "$seed" --ratio 0.25 0.5 1.0 2.0 --folds "$fold"; then
+                    local err_tail
+                    err_tail=$(tail -8 "$PROJECT_ROOT/lopo.log" 2>/dev/null)
+                    discord "❌ **${exp^^}** FAILED — train fold=$fold seed=$seed\\n\`\`\`\\n${err_tail}\\n\`\`\`" 15158332
+                    echo "FAILED $(date '+%Y-%m-%d %H:%M:%S') train fold=$fold seed=$seed" > "$STATUS_DIR/${exp}.status"
+                    return 1
+                fi
+
+                # Clean up: delete all npz except ratio 1.00 (needed for TSTR)
+                for npz in "${fold_dir}"/synthetic_ratio_*.npz; do
+                    [ -f "$npz" ] || continue
+                    case "$npz" in
+                        *ratio_1.00.npz) ;;
+                        *) rm -f "$npz" ;;
+                    esac
+                done
+                # Delete generator checkpoint (only needed during generation)
+                rm -f "${fold_dir}/${gen_model}.pt"
+            done
+        else
+            # E1/E2: no generator, just train all folds
+            echo ">>> ${exp^^} seed $seed: train LOPO — $(date)"
+
+            local train_cmd="python -m training.train --experiment $exp --mode lopo --seeds $seed"
+            [ -n "$aug_flag" ] && train_cmd="$train_cmd --augmentation $aug_flag"
+
+            if ! eval "$train_cmd"; then
                 local err_tail
                 err_tail=$(tail -8 "$PROJECT_ROOT/lopo.log" 2>/dev/null)
-                discord "❌ **${exp^^}** FAILED — generate seed=$seed\\n\`\`\`\\n${err_tail}\\n\`\`\`" 15158332
-                echo "FAILED $(date '+%Y-%m-%d %H:%M:%S') generate seed=$seed" > "$STATUS_DIR/${exp}.status"
+                discord "❌ **${exp^^}** FAILED — train seed=$seed\\n\`\`\`\\n${err_tail}\\n\`\`\`" 15158332
+                echo "FAILED $(date '+%Y-%m-%d %H:%M:%S') train seed=$seed" > "$STATUS_DIR/${exp}.status"
                 return 1
             fi
-        fi
-
-        # Detector training phase: train at ALL 4 ratios for generators, single for E1/E2
-        echo ">>> ${exp^^} seed $seed: train LOPO — $(date)"
-
-        if [ "$gen_model" != "none" ] && [ "$gen_model" != "builtin" ]; then
-            local train_cmd="python -m training.train --experiment $exp --mode lopo --seeds $seed --ratio 0.25 0.5 1.0 2.0"
-        else
-            local train_cmd="python -m training.train --experiment $exp --mode lopo --seeds $seed"
-        fi
-        [ -n "$aug_flag" ] && train_cmd="$train_cmd --augmentation $aug_flag"
-
-        if ! eval "$train_cmd"; then
-            local err_tail
-            err_tail=$(tail -8 "$PROJECT_ROOT/lopo.log" 2>/dev/null)
-            discord "❌ **${exp^^}** FAILED — train seed=$seed\\n\`\`\`\\n${err_tail}\\n\`\`\`" 15158332
-            echo "FAILED $(date '+%Y-%m-%d %H:%M:%S') train seed=$seed" > "$STATUS_DIR/${exp}.status"
-            return 1
-        fi
-
-        # Clean up npz files to save disk (keep ratio 1.00 for TSTR, delete others)
-        if [ "$gen_model" != "none" ] && [ "$gen_model" != "builtin" ]; then
-            for npz in results/${exp}/seed_${seed}/fold_*/synthetic_ratio_*.npz; do
-                [ -f "$npz" ] || continue
-                case "$npz" in
-                    *ratio_1.00.npz) ;;  # keep for TSTR
-                    *) rm -f "$npz" ;;
-                esac
-            done
         fi
 
         # Seed done — summarize and notify
@@ -220,20 +283,34 @@ run_e2_lopo() {
         local seed_start=$SECONDS
 
         echo ">>> E2 SMOTE seed $seed: LOPO — $(date)"
-        if ! python -m training.train --experiment e2 --augmentation smote --mode lopo --seeds "$seed"; then
-            local err_tail
+        python -m training.train --experiment e2 --augmentation smote --mode lopo --seeds "$seed"
+        local rc=$?
+        if [ $rc -ne 0 ]; then
+            local err_tail err_msg
             err_tail=$(tail -8 "$PROJECT_ROOT/lopo.log" 2>/dev/null)
-            discord "❌ **E2 SMOTE** FAILED seed=$seed\\n\`\`\`\\n${err_tail}\\n\`\`\`" 15158332
-            echo "FAILED $(date '+%Y-%m-%d %H:%M:%S') smote seed=$seed" > "$STATUS_DIR/e2.status"
+            if [ $rc -eq 137 ]; then
+                err_msg="OOM-killed (signal 9)"
+            else
+                err_msg="exit code $rc"
+            fi
+            discord "❌ **E2 SMOTE** FAILED seed=$seed ($err_msg)\\n\`\`\`\\n${err_tail}\\n\`\`\`" 15158332
+            echo "FAILED $(date '+%Y-%m-%d %H:%M:%S') smote seed=$seed ($err_msg)" > "$STATUS_DIR/e2.status"
             return 1
         fi
 
         echo ">>> E2 ADASYN seed $seed: LOPO — $(date)"
-        if ! python -m training.train --experiment e2 --augmentation adasyn --mode lopo --seeds "$seed"; then
-            local err_tail
+        python -m training.train --experiment e2 --augmentation adasyn --mode lopo --seeds "$seed"
+        rc=$?
+        if [ $rc -ne 0 ]; then
+            local err_tail err_msg
             err_tail=$(tail -8 "$PROJECT_ROOT/lopo.log" 2>/dev/null)
-            discord "❌ **E2 ADASYN** FAILED seed=$seed\\n\`\`\`\\n${err_tail}\\n\`\`\`" 15158332
-            echo "FAILED $(date '+%Y-%m-%d %H:%M:%S') adasyn seed=$seed" > "$STATUS_DIR/e2.status"
+            if [ $rc -eq 137 ]; then
+                err_msg="OOM-killed (signal 9)"
+            else
+                err_msg="exit code $rc"
+            fi
+            discord "❌ **E2 ADASYN** FAILED seed=$seed ($err_msg)\\n\`\`\`\\n${err_tail}\\n\`\`\`" 15158332
+            echo "FAILED $(date '+%Y-%m-%d %H:%M:%S') adasyn seed=$seed ($err_msg)" > "$STATUS_DIR/e2.status"
             return 1
         fi
 
