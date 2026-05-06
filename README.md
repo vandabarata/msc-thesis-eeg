@@ -44,8 +44,8 @@ msc_thesis_code/
 ├── training/                    Training, evaluation, and analysis
 │   ├── train.py                   Detector training (E1-E5), TSTR, early stopping
 │   ├── generate.py                Generator training + synthetic window production (E3-E5)
-│   ├── evaluate.py                AUPRC, AUROC, F1, per-patient, Wilcoxon test
-│   ├── visualize.py               PSD comparison, t-SNE, amplitude distributions
+│   ├── evaluate.py                Metrics (AUPRC, AUROC, F1, sens@95%spec), Wilcoxon, E6 analysis
+│   ├── visualize.py               Fidelity evaluation (PSD, KL, C2ST, autocorrelation, t-SNE)
 │   └── subject_identity.py        E7 linear probe + proximity check
 │
 ├── experiment_scripts/          Shell scripts for running on the remote GPU machine
@@ -98,23 +98,23 @@ Download the [CHB-MIT Scalp EEG Database](https://physionet.org/content/chbmit/1
 |:----------:|-------------|:------:|
 | **E1** | Baseline 1D-CNN detector (real data, class-weighted cross-entropy) | LOPO complete |
 | **E2** | Non-synthetic controls (SMOTE, ADASYN) | LOPO running |
-| **E3** | TimeGAN augmentation (4 ratios: 25/ 50/ 100/ 200%) | LOPO queued |
-| **E4** | CVAE augmentation (4 ratios: 25/ 50/ 100/ 200%) | LOPO queued |
-| **E5** | Latent Diffusion augmentation (4 ratios, reuses CVAE encoder) | LOPO queued |
-| **E6** | Cross-generator comparison (Wilcoxon signed-rank test) | After LOPO |
+| **E3** | TimeGAN augmentation (4 ratios: 25/ 50/ 100/ 200%) | LOPO running |
+| **E4** | CVAE augmentation (4 ratios: 25/ 50/ 100/ 200%) | LOPO running |
+| **E5** | Latent Diffusion augmentation (4 ratios, reuses CVAE encoder) | LOPO running |
+| **E6** | Cross-generator comparison (Wilcoxon, ratio sensitivity, cost-benefit) | After LOPO |
 | **E7** | Subject-identity analysis (linear probe + proximity check) | After E6 |
 
 > **Note (5 May 2026):** First LOPO run failed due to OOM (E2) and disk-full (E3). Fixed: reduced SMOTE interictal subsample from 10x to 5x, rewrote pipeline to generate+train per fold instead of all-at-once. Relaunched.
 
 ### Results (single-split, 3 seeds)
 
-| Experiment | Generator | AUPRC | Per-Patient AUPRC | Train time |
-|:----------:|-----------|:-----:|:-----------------:|:----------:|
-| **E5** | LDM | **0.2272 +/- 0.0193** | **0.3759 +/- 0.0419** | ~130 min |
-| **E1** | None (baseline) | 0.1766 +/- 0.0542 | 0.2264 +/- 0.0646 | ~205 min |
-| **E4** | CVAE | 0.1750 +/- 0.0732 | 0.2877 +/- 0.1239 | ~141 min |
-| **E3** | TimeGAN | 0.1742 +/- 0.0842 | 0.1943 +/- 0.1063 | ~101 min |
-| **E2** | ADASYN | 0.1078 +/- 0.0732 | 0.1302 +/- 0.0713 | ~80 min |
+| Experiment | Generator | AUPRC | Per-Patient AUPRC | Gen. train (avg/ seed) | Det. train (avg/ seed) |
+|:----------:|-----------|:-----:|:-----------------:|:----------------------:|:----------------------:|
+| **E5** | LDM | **0.2272 +/- 0.0193** | **0.3759 +/- 0.0419** | ~58 min | ~72 min |
+| **E1** | None (baseline) | 0.1766 +/- 0.0542 | 0.2264 +/- 0.0646 | - | ~205 min |
+| **E4** | CVAE | 0.1750 +/- 0.0732 | 0.2877 +/- 0.1239 | ~42 min | ~99 min |
+| **E3** | TimeGAN | 0.1742 +/- 0.0842 | 0.1943 +/- 0.1063 | ~17 min | ~84 min |
+| **E2** | ADASYN | 0.1078 +/- 0.0732 | 0.1302 +/- 0.0713 | - | ~79 min |
 
 LDM augmentation improves AUPRC by +29% over baseline with the lowest cross-seed variance (single-split).
 
@@ -122,9 +122,9 @@ LDM augmentation improves AUPRC by +29% over baseline with the lowest cross-seed
 
 E1 baseline LOPO complete (4 May 2026). E2-E5 LOPO relaunched 5 May 2026 (after OOM/disk-full fixes).
 
-| Experiment | Generator | AUPRC (cross-seed) | AUROC | F1 | Sens. @ 95% Spec. |
-|:----------:|-----------|:-------------------:|:-----:|:--:|:-----------------:|
-| **E1** | None (baseline) | 0.3941 +/- 0.0228 | 0.8438 +/- 0.0147 | 0.4333 +/- 0.0194 | 0.6459 +/- 0.0123 |
+| Experiment | Generator | AUPRC (cross-seed) | AUROC | F1 | Sens. @ 95% Spec. | Det. train (avg/ seed/ fold) |
+|:----------:|-----------|:-------------------:|:-----:|:--:|:-----------------:|:---------------------------:|
+| **E1** | None (baseline) | 0.3941 +/- 0.0228 | 0.8438 +/- 0.0147 | 0.4333 +/- 0.0194 | 0.6459 +/- 0.0123 | ~92 min |
 
 Remaining experiments will be added as they complete. Detailed results, per-fold breakdowns, and fidelity analysis on the [project website](https://vandabarata.github.io/msc-thesis-eeg/).
 
