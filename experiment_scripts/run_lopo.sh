@@ -11,7 +11,8 @@
 # Usage (on the uni machine, from project root):
 #   nohup bash experiment_scripts/run_lopo.sh &> lopo.log &
 #   nohup bash experiment_scripts/run_lopo.sh e2 e3 e4 e5 &> lopo.log &
-#   bash experiment_scripts/run_lopo.sh e3 e4
+#   bash experiment_scripts/run_lopo.sh --ratio 0.5 1.0 -- e3 e4
+#   bash experiment_scripts/run_lopo.sh e3 e4          # uses default ratios
 
 set -uo pipefail
 export PYTHONUNBUFFERED=1
@@ -22,6 +23,19 @@ cd "$PROJECT_ROOT"
 
 # Activate venv
 source "$PROJECT_ROOT/.venv/bin/activate"
+
+# Parse --ratio flag (must come before experiment names)
+RATIOS=(0.5 1.0)  # default
+if [ "${1:-}" = "--ratio" ]; then
+    shift
+    RATIOS=()
+    while [ $# -gt 0 ] && [ "$1" != "--" ]; do
+        RATIOS+=("$1")
+        shift
+    done
+    [ "${1:-}" = "--" ] && shift  # consume the -- separator
+fi
+RATIOS_STR="${RATIOS[*]}"
 
 DISCORD_WEBHOOK="${DISCORD_WEBHOOK:-}"
 if [ -z "$DISCORD_WEBHOOK" ] && [ -f "$PROJECT_ROOT/.discord_webhook" ]; then
@@ -171,8 +185,16 @@ run_experiment() {
                 local fold_dir="results/${exp}/seed_${seed}/fold_$(printf '%02d' $fold)"
 
                 # Skip if detector already trained for this fold (all ratios done)
-                if [ -f "${fold_dir}/results_ratio_0.25.json" ] && \
-                   [ -f "${fold_dir}/results_ratio_2.00.json" ]; then
+                local all_done=true
+                for r in "${RATIOS[@]}"; do
+                    local r_fmt
+                    r_fmt=$(printf "%.2f" "$r")
+                    if [ ! -f "${fold_dir}/results_ratio_${r_fmt}.json" ]; then
+                        all_done=false
+                        break
+                    fi
+                done
+                if [ "$all_done" = true ]; then
                     echo "  Fold $fold seed $seed — skipping (already complete)"
                     continue
                 fi
@@ -186,7 +208,7 @@ run_experiment() {
 
                 echo ">>> ${exp^^} seed $seed fold $fold: generate ($gen_model) — $(date)"
 
-                local gen_cmd="python -m training.generate --model $gen_model --mode lopo --seed $seed --ratio 0.25 0.5 1.0 2.0 --folds $fold"
+                local gen_cmd="python -m training.generate --model $gen_model --mode lopo --seed $seed --ratio $RATIOS_STR --folds $fold"
                 if [ "$gen_model" = "ldm" ]; then
                     local cvae_ckpt="results/e4/seed_${seed}/fold_$(printf '%02d' $fold)/cvae.pt"
                     if [ ! -f "$cvae_ckpt" ]; then
@@ -207,7 +229,7 @@ run_experiment() {
 
                 # Train detector on this fold at all ratios
                 echo ">>> ${exp^^} seed $seed fold $fold: train — $(date)"
-                if ! python -m training.train --experiment "$exp" --mode lopo --seeds "$seed" --ratio 0.25 0.5 1.0 2.0 --folds "$fold"; then
+                if ! python -m training.train --experiment "$exp" --mode lopo --seeds "$seed" --ratio $RATIOS_STR --folds "$fold"; then
                     local err_tail
                     err_tail=$(tail -8 "$PROJECT_ROOT/lopo.log" 2>/dev/null)
                     discord "❌ **${exp^^}** FAILED — train fold=$fold seed=$seed\\n\`\`\`\\n${err_tail}\\n\`\`\`" 15158332

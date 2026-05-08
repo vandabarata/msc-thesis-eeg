@@ -97,14 +97,14 @@ Download the [CHB-MIT Scalp EEG Database](https://physionet.org/content/chbmit/1
 | Experiment | Description | Status |
 |:----------:|-------------|:------:|
 | **E1** | Baseline 1D-CNN detector (real data, class-weighted cross-entropy) | LOPO complete |
-| **E2** | Non-synthetic controls (SMOTE, ADASYN) | LOPO running |
-| **E3** | TimeGAN augmentation (4 ratios: 25/ 50/ 100/ 200%) | LOPO running |
-| **E4** | CVAE augmentation (4 ratios: 25/ 50/ 100/ 200%) | LOPO running |
-| **E5** | Latent Diffusion augmentation (4 ratios, reuses CVAE encoder) | LOPO running |
+| **E2** | Non-synthetic controls (SMOTE, ADASYN) | LOPO seed 42 done, seed 123 running |
+| **E3** | TimeGAN augmentation (2 ratios: 50/ 100%) | LOPO running |
+| **E4** | CVAE augmentation (2 ratios: 50/ 100%) | LOPO running |
+| **E5** | Latent Diffusion augmentation (2 ratios, reuses CVAE encoder) | LOPO running |
 | **E6** | Cross-generator comparison (Wilcoxon, ratio sensitivity, cost-benefit) | After LOPO |
 | **E7** | Subject-identity analysis (linear probe + proximity check) | After E6 |
 
-> **Note (5 May 2026):** First LOPO run failed due to OOM (E2) and disk-full (E3). Fixed: reduced SMOTE interictal subsample from 10x to 5x, rewrote pipeline to generate+train per fold instead of all-at-once. Relaunched.
+> **Note (8 May 2026):** E2 LOPO seed 42 complete (23/23 folds, both SMOTE and ADASYN). Seed 123 in progress (6/23 folds). Both methods substantially underperform E1 baseline in LOPO (AUPRC 0.147/0.177 vs 0.394), confirming single-split findings at scale.
 
 ### Results (single-split, 3 seeds)
 
@@ -120,13 +120,15 @@ LDM augmentation improves AUPRC by +29% over baseline with the lowest cross-seed
 
 ### Results (LOPO, 23 folds x 3 seeds)
 
-E1 baseline LOPO complete (4 May 2026). E2-E5 LOPO relaunched 5 May 2026 (after OOM/disk-full fixes).
+E1 baseline LOPO complete (4 May 2026). E2 LOPO seed 42 complete (8 May 2026), seed 123 running. E3-E5 LOPO pending.
 
 | Experiment | Generator | AUPRC (cross-seed) | AUROC | F1 | Sens. @ 95% Spec. | Det. train (avg/ seed/ fold) |
 |:----------:|-----------|:-------------------:|:-----:|:--:|:-----------------:|:---------------------------:|
 | **E1** | None (baseline) | 0.3941 +/- 0.0228 | 0.8438 +/- 0.0147 | 0.4333 +/- 0.0194 | 0.6459 +/- 0.0123 | ~92 min |
+| **E2** | SMOTE (seed 42 only) | 0.1468 | 0.6017 | 0.2242 | 0.3456 | ~5 min |
+| **E2** | ADASYN (seed 42 only) | 0.1773 | 0.6379 | 0.2544 | 0.3806 | ~5 min |
 
-Remaining experiments will be added as they complete. Detailed results, per-fold breakdowns, and fidelity analysis on the [project website](https://vandabarata.github.io/msc-thesis-eeg/).
+E2 seed 42 complete (8 May 2026). Seed 123 in progress (6/23 folds). Cross-seed means will be added when all 3 seeds finish. Remaining experiments (E3-E5) will be added as they complete. Detailed results, per-fold breakdowns, and fidelity analysis on the [project website](https://vandabarata.github.io/msc-thesis-eeg/).
 
 <details>
 <summary>Protocol rules enforced in code</summary>
@@ -136,7 +138,7 @@ Remaining experiments will be added as they complete. Detailed results, per-fold
 - Synthetic data in training only (val/test raise `ValueError`)
 - Same frozen detector across E1-E5
 - TSTR: synthetic ictal + real interictal only (no real ictal in training)
-- 4 synthetic ratios (25%, 50%, 100%, 200%) per generator in LOPO
+- 2 synthetic ratios (50%, 100%) per generator in LOPO
 - 3 seeds (42, 123, 456), mean +/- std
 - AUPRC as primary metric
 </details>
@@ -171,12 +173,12 @@ python -m training.train --experiment e3 --mode tstr
 python -m training.train --experiment e4 --mode tstr
 python -m training.train --experiment e5 --mode tstr
 
-# Full LOPO evaluation (E1-E5, 23 folds x 3 seeds x 4 ratios, includes TSTR)
+# Full LOPO evaluation (E1-E5, 23 folds x 3 seeds x 2 ratios, includes TSTR)
 bash experiment_scripts/run_lopo.sh
 
-# Manual multi-ratio LOPO (generate at 4 ratios, train at 4 ratios)
-python -m training.generate --model cvae --mode lopo --seed 42 --ratio 0.25 0.5 1.0 2.0
-python -m training.train --experiment e4 --mode lopo --seeds 42 --ratio 0.25 0.5 1.0 2.0
+# Manual multi-ratio LOPO (generate at 2 ratios, train at 2 ratios)
+python -m training.generate --model cvae --mode lopo --seed 42 --ratio 0.5 1.0
+python -m training.train --experiment e4 --mode lopo --seeds 42 --ratio 0.5 1.0
 ```
 
 ### Results Structure
