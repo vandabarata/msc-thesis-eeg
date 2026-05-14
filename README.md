@@ -97,14 +97,14 @@ Download the [CHB-MIT Scalp EEG Database](https://physionet.org/content/chbmit/1
 | Experiment | Description | Status |
 |:----------:|-------------|:------:|
 | **E1** | Baseline 1D-CNN detector (real data, class-weighted cross-entropy) | LOPO complete |
-| **E2** | Non-synthetic controls (SMOTE, ADASYN) | LOPO seed 42 done, seed 123 running |
-| **E3** | TimeGAN augmentation (2 ratios: 50/ 100%) | LOPO running |
-| **E4** | CVAE augmentation (2 ratios: 50/ 100%) | LOPO running |
-| **E5** | Latent Diffusion augmentation (2 ratios, reuses CVAE encoder) | LOPO running |
+| **E2** | Non-synthetic controls (SMOTE, ADASYN) | LOPO complete (3 seeds) |
+| **E3** | TimeGAN augmentation (2 ratios: 50/ 100%) | LOPO running (14 May) |
+| **E4** | CVAE augmentation (2 ratios: 50/ 100%) | LOPO queued (after E3) |
+| **E5** | Latent Diffusion augmentation (2 ratios, reuses CVAE encoder) | LOPO queued (after E4) |
 | **E6** | Cross-generator comparison (Wilcoxon, ratio sensitivity, cost-benefit) | After LOPO |
 | **E7** | Subject-identity analysis (linear probe + proximity check) | After E6 |
 
-> **Note (8 May 2026):** E2 LOPO seed 42 complete (23/23 folds, both SMOTE and ADASYN). Seed 123 in progress (6/23 folds). Both methods substantially underperform E1 baseline in LOPO (AUPRC 0.147/0.177 vs 0.394), confirming single-split findings at scale.
+> **Note (14 May 2026):** E2 LOPO complete (all 3 seeds, both SMOTE and ADASYN). Both methods substantially underperform E1 baseline (AUPRC 0.158/0.184 vs 0.394), confirming single-split findings at scale. E3-E5 LOPO now running.
 
 ### Results (single-split, 3 seeds)
 
@@ -120,15 +120,15 @@ LDM augmentation improves AUPRC by +29% over baseline with the lowest cross-seed
 
 ### Results (LOPO, 23 folds x 3 seeds)
 
-E1 baseline LOPO complete (4 May 2026). E2 LOPO seed 42 complete (8 May 2026), seed 123 running. E3-E5 LOPO pending.
+E1 baseline LOPO complete (4 May 2026). E2 LOPO complete (14 May 2026). E3-E5 LOPO running (14 May 2026).
 
 | Experiment | Generator | AUPRC (cross-seed) | AUROC | F1 | Sens. @ 95% Spec. | Det. train (avg/ seed/ fold) |
 |:----------:|-----------|:-------------------:|:-----:|:--:|:-----------------:|:---------------------------:|
 | **E1** | None (baseline) | 0.3941 +/- 0.0228 | 0.8438 +/- 0.0147 | 0.4333 +/- 0.0194 | 0.6459 +/- 0.0123 | ~92 min |
-| **E2** | SMOTE (seed 42 only) | 0.1468 | 0.6017 | 0.2242 | 0.3456 | ~5 min |
-| **E2** | ADASYN (seed 42 only) | 0.1773 | 0.6379 | 0.2544 | 0.3806 | ~5 min |
+| **E2** | SMOTE | 0.1580 +/- 0.0212 | 0.6283 +/- 0.0193 | 0.2295 +/- 0.0204 | 0.3835 +/- 0.0276 | ~5 min |
+| **E2** | ADASYN | 0.1844 +/- 0.0550 | 0.6458 +/- 0.0139 | 0.2514 +/- 0.0515 | 0.4046 +/- 0.0416 | ~5 min |
 
-E2 seed 42 complete (8 May 2026). Seed 123 in progress (6/23 folds). Cross-seed means will be added when all 3 seeds finish. Remaining experiments (E3-E5) will be added as they complete. Detailed results, per-fold breakdowns, and fidelity analysis on the [project website](https://vandabarata.github.io/msc-thesis-eeg/).
+E2 LOPO complete (14 May 2026, 3 seeds x 23 folds). E3-E5 LOPO running (started 14 May). Results will be added as they complete. Detailed results, per-fold breakdowns, and fidelity analysis on the [project website](https://vandabarata.github.io/msc-thesis-eeg/).
 
 <details>
 <summary>Protocol rules enforced in code</summary>

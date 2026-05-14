@@ -9,6 +9,7 @@ Data-level evaluation plots (Carrle et al. 2023; You et al. 2025; Zhao et al. 20
   5. Cross-channel correlation: spatial structure preservation
   6. Per-channel distribution: amplitude stats per channel
   7. Waveform examples: side-by-side visual inspection
+  8. Per-channel KL divergence: spectral fidelity per dimension (channel x band)
 
 Usage:
     from training.visualize import generate_all_plots
@@ -108,6 +109,114 @@ def compute_psd_kl_divergence(real: np.ndarray, synthetic: np.ndarray, fs: int =
         kl_per_band[name] = kl
 
     return kl_per_band
+
+
+def compute_psd_kl_per_channel(
+    real: np.ndarray, synthetic: np.ndarray, fs: int = FS
+) -> dict:
+    """
+    KL divergence between real and synthetic PSD per channel per frequency band.
+
+    Args:
+        real: (N, n_channels, seq_len)
+        synthetic: (M, n_channels, seq_len)
+
+    Returns:
+        Dict with:
+          "per_channel": list of dicts (one per channel), each mapping band → KL
+          "channel_means": dict mapping band → mean KL across channels
+          "worst_channels": dict mapping band → (channel_idx, KL value) for worst channel
+    """
+    n_ch = real.shape[1]
+    per_channel = []
+
+    for ch in range(n_ch):
+        # PSD for this channel only
+        real_psd_list = []
+        for i in range(len(real)):
+            freqs, psd = welch(real[i, ch], fs=fs, nperseg=min(256, real.shape[2]))
+            real_psd_list.append(psd)
+        psd_r = np.mean(real_psd_list, axis=0)
+
+        synth_psd_list = []
+        for i in range(len(synthetic)):
+            freqs_s, psd = welch(synthetic[i, ch], fs=fs, nperseg=min(256, synthetic.shape[2]))
+            synth_psd_list.append(psd)
+        psd_s = np.mean(synth_psd_list, axis=0)
+
+        ch_kl = {}
+        for name, (lo, hi) in BANDS.items():
+            mask = (freqs >= lo) & (freqs <= hi)
+            p = psd_r[mask] + 1e-12
+            q = psd_s[mask] + 1e-12
+            p = p / p.sum()
+            q = q / q.sum()
+            ch_kl[name] = float(np.sum(p * np.log(p / q)))
+        per_channel.append(ch_kl)
+
+    # Aggregate stats
+    band_names = list(BANDS.keys())
+    channel_means = {}
+    worst_channels = {}
+    for band in band_names:
+        vals = [per_channel[ch][band] for ch in range(n_ch)]
+        channel_means[band] = float(np.mean(vals))
+        worst_idx = int(np.argmax(vals))
+        worst_channels[band] = {"channel": worst_idx, "kl": vals[worst_idx]}
+
+    return {
+        "per_channel": per_channel,
+        "channel_means": channel_means,
+        "worst_channels": worst_channels,
+    }
+
+
+def plot_psd_kl_per_channel(
+    real_windows: np.ndarray,
+    synthetic_windows: np.ndarray,
+    save_path: Optional[str] = None,
+    title: str = "Per-Channel KL Divergence (Spectral)",
+):
+    """
+    Heatmap of KL divergence per (channel, frequency band).
+    Reveals which channels the generator struggles with.
+    """
+    result = compute_psd_kl_per_channel(real_windows, synthetic_windows)
+    per_channel = result["per_channel"]
+    n_ch = len(per_channel)
+    band_names = list(BANDS.keys())
+
+    # Build matrix: (n_channels, n_bands)
+    matrix = np.array([[per_channel[ch][band] for band in band_names] for ch in range(n_ch)])
+
+    fig, ax = plt.subplots(figsize=(8, 10))
+    im = ax.imshow(matrix, aspect="auto", cmap="YlOrRd", interpolation="nearest")
+
+    ax.set_xticks(range(len(band_names)))
+    ax.set_xticklabels([b.capitalize() for b in band_names], fontsize=9)
+    ax.set_yticks(range(n_ch))
+    ax.set_yticklabels([f"Ch {i+1}" for i in range(n_ch)], fontsize=8)
+    ax.set_xlabel("Frequency Band")
+    ax.set_ylabel("Channel")
+    ax.set_title(title, fontsize=12, fontweight="bold")
+
+    # Annotate cells with values
+    for i in range(n_ch):
+        for j in range(len(band_names)):
+            val = matrix[i, j]
+            color = "white" if val > matrix.max() * 0.6 else "black"
+            ax.text(j, i, f"{val:.3f}", ha="center", va="center", fontsize=7, color=color)
+
+    fig.colorbar(im, ax=ax, fraction=0.03, pad=0.02, label="KL Divergence")
+    plt.tight_layout()
+
+    if save_path:
+        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(save_path, dpi=150, bbox_inches="tight")
+        print(f"  Saved per-channel KL heatmap to {save_path}")
+    plt.close(fig)
+
+    return result
 
 
 def _band_powers_from_psd(freqs: np.ndarray, psd_mean: np.ndarray, psd_std: np.ndarray) -> dict:
@@ -674,7 +783,7 @@ def generate_all_plots(
 
     Saves: psd.png, tsne.png, amplitude.png, autocorrelation.png,
            cross_channel_corr.png, per_channel_dist.png, waveforms.png,
-           kl_divergence.json, c2st.json
+           kl_per_channel.png, kl_divergence.json, kl_per_channel.json, c2st.json
     """
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
@@ -726,12 +835,22 @@ def generate_all_plots(
         title=f"Waveforms: Real vs {generator_name}",
     )
 
-    # PSD KL divergence
+    # PSD KL divergence (aggregated)
     kl = compute_psd_kl_divergence(real_ictal, synthetic_windows)
     import json
     with open(out / "kl_divergence.json", "w") as f:
         json.dump(kl, f, indent=2)
     print(f"  KL divergence per band: {kl}")
+
+    # Per-channel KL divergence
+    kl_per_ch = plot_psd_kl_per_channel(
+        real_ictal, synthetic_windows,
+        save_path=str(out / "kl_per_channel.png"),
+        title=f"Per-Channel KL: Real vs {generator_name}",
+    )
+    with open(out / "kl_per_channel.json", "w") as f:
+        json.dump(kl_per_ch, f, indent=2)
+    print(f"  Per-channel KL worst channels: {kl_per_ch['worst_channels']}")
 
     # C2ST (discriminative score)
     c2st = compute_c2st(real_ictal, synthetic_windows)

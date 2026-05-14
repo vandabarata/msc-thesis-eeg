@@ -184,7 +184,7 @@ tailwind.config = {
             <span class="w-2 h-2 bg-iscte-400 rounded-full animate-pulse shrink-0"></span>
             MSc Thesis &middot; Running ~65%
           </a>
-          <span class="text-xs text-gray-600">Last updated: 8 May 2026</span>
+          <span class="text-xs text-gray-600">Last updated: 14 May 2026</span>
         </div>
         <h1 class="text-3xl sm:text-4xl lg:text-6xl font-extrabold text-white leading-tight mb-3 sm:mb-3">
           Synthetic Data in Healthcare:<br>
@@ -369,7 +369,7 @@ tailwind.config = {
         <div class="space-y-2 text-sm">
           <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Primary metric:</strong> <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a> - doesn't fall for the "always say no seizure" trick that inflates accuracy and AUROC</span></div>
           <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Secondary:</strong> <a href="#gl-auroc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUROC</a>, <a href="#gl-f1" class="text-cyan-600 hover:text-cyan-400 hover:underline">F1</a> at optimal threshold, <a href="#gl-sens95spec" class="text-cyan-600 hover:text-cyan-400 hover:underline">sensitivity at 95% specificity</a></span></div>
-          <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Fidelity:</strong> <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a> comparison per frequency band, <a href="#gl-kl" class="text-cyan-600 hover:text-cyan-400 hover:underline">KL divergence</a> per band, <a href="#gl-discriminative" class="text-cyan-600 hover:text-cyan-400 hover:underline">discriminative score</a> (real-vs-synthetic classifier &rarr; 0.5 = indistinguishable)</span></div>
+          <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Fidelity:</strong> <a href="#gl-psd" class="text-cyan-600 hover:text-cyan-400 hover:underline">PSD</a> comparison per frequency band, <a href="#gl-kl" class="text-cyan-600 hover:text-cyan-400 hover:underline">KL divergence</a> per band (aggregated + per-channel), <a href="#gl-discriminative" class="text-cyan-600 hover:text-cyan-400 hover:underline">discriminative score</a> (real-vs-synthetic classifier &rarr; 0.5 = indistinguishable)</span></div>
           <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Utility:</strong> <a href="#gl-tstr" class="text-cyan-600 hover:text-cyan-400 hover:underline">TSTR</a> - train on only synthetic data, test on real: if the generator is good, a model that never saw a real seizure should still detect them</span></div>
           <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Statistical:</strong> <a href="#gl-wilcoxon" class="text-cyan-600 hover:text-cyan-400 hover:underline">Wilcoxon signed-rank test</a> across LOPO folds</span></div>
           <div class="flex gap-2"><span class="text-cyan-500 shrink-0">&#9679;</span><span class="text-gray-400"><strong class="text-gray-300">Stability:</strong> Per-patient <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a> dispersion, 3 seeds per experiment</span></div>
@@ -505,6 +505,11 @@ tailwind.config = {
                 <td class="py-2 pr-3 text-gray-300 font-medium"><span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1"></span><a href="#gl-kl" class="text-cyan-600 hover:text-cyan-400 hover:underline">KL divergence</a> per band</td>
                 <td class="py-2 pr-3">Quantifies how far synthetic spectral distribution is from real, per band</td>
                 <td class="py-2">A scalar summary of PSD difference per band - makes cross-generator comparison possible (PSD plots are visual, KL is a number). Standard in distribution matching.</td>
+              </tr>
+              <tr class="border-b border-gray-800/50">
+                <td class="py-2 pr-3 text-gray-300 font-medium"><span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1"></span>Per-channel <a href="#gl-kl" class="text-cyan-600 hover:text-cyan-400 hover:underline">KL divergence</a></td>
+                <td class="py-2 pr-3">Is spectral fidelity uniform across all 23 channels, or do specific channels fail?</td>
+                <td class="py-2">The aggregated KL averages across channels first, which can mask localised failures. Per-channel evaluation (23 channels x 5 bands heatmap) reveals whether a generator struggles with specific electrode positions - important because seizure foci are spatially localised and different channels carry different clinical information.</td>
               </tr>
               <tr class="border-b border-gray-800/50">
                 <td class="py-2 pr-3 text-gray-300 font-medium"><span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1"></span><a href="#gl-discriminative" class="text-cyan-600 hover:text-cyan-400 hover:underline">C2ST</a> (discriminative score)</td>
@@ -1513,6 +1518,18 @@ tailwind.config = {
            <span class="text-white font-semibold text-xs">CVAE with 1-D Conv encoder/decoder</span>
          </div>
          <p class="text-xs text-gray-400 mb-3 leading-relaxed">A <em>Conditional</em> VAE (CVAE) extends the standard VAE by conditioning on a label (patient ID + class) so it can generate seizures for a specific patient on demand. The encoder compresses each 23x1024 window down to a small 128-dimensional <a href="#gl-latentspace" class="text-cyan-600 hover:text-cyan-400 hover:underline">latent vector</a>, and the decoder rebuilds the full signal from that compressed representation. Both use 1-D convolutional layers. <a href="#gl-elbo" class="text-cyan-600 hover:text-cyan-400 hover:underline">KL annealing</a> prevents posterior collapse (where the model ignores the latent code and produces near-identical outputs).</p>
+         <!-- Why CVAE over other VAE variants -->
+         <details class="bg-gray-800/30 border border-gray-700/30 rounded mb-3">
+           <summary class="text-xs text-gray-400 font-semibold cursor-pointer hover:text-cyan-400 p-3">Why CVAE over other VAE variants? (click to expand)</summary>
+           <div class="p-3 pt-0 text-xs text-gray-400 space-y-2">
+             <p><strong class="text-gray-300">Prior work said VAEs fail for EEG generation.</strong> <a href="#cite-carrle2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Carrle et al., 2023</a> found that "VAE were only used for comparison... and always performed worse." The four studies they reference (Luo et al., 2020; Zhang et al., 2020; Fahimi et al., 2021; Song et al., 2021) all used unconditional VAEs as baselines against GAN architectures. We test whether <em>conditioning + convolutional architecture</em> changes that conclusion.</p>
+             <p><strong class="text-gray-300">Why <em>Conditional</em> specifically?</strong> A standard <a href="#gl-vae" class="text-cyan-600 hover:text-cyan-400 hover:underline">VAE</a> generates from random noise without control over what it produces. For augmentation we need to generate specifically <em>ictal</em> windows - and ideally steer toward specific patient characteristics. The <a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a> (<a href="#cite-sohn2015" class="text-cyan-600 hover:text-cyan-400 hover:underline">Sohn et al., 2015</a>) takes class and patient labels as input, enabling targeted generation. <a href="#cite-bing2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Bing et al., 2022</a> demonstrated conditional generation for medical time-series (EHR data) using this approach.</p>
+             <p><strong class="text-gray-300">Why not Beta-VAE?</strong> Beta-VAE (<a href="#cite-higgins2017" class="text-cyan-600 hover:text-cyan-400 hover:underline">Higgins et al., 2017</a>) adds a weighting factor to the <a href="#gl-kl" class="text-cyan-600 hover:text-cyan-400 hover:underline">KL term</a> to learn disentangled representations. This is valuable for interpretability in image domains but irrelevant here - we don't need disentangled latent factors, we need high-fidelity time-series. Increasing beta encourages more compressed representations at the cost of reconstruction quality, which would worsen the already-present <a href="#gl-vae" class="text-cyan-600 hover:text-cyan-400 hover:underline">VAE smoothing</a> problem.</p>
+             <p><strong class="text-gray-300">Why not VQ-VAE?</strong> VQ-VAE (<a href="#cite-oord2017" class="text-cyan-600 hover:text-cyan-400 hover:underline">van den Oord et al., 2017</a>) uses discrete latent codes via a learned codebook. This works well for speech and images with natural discrete structure, but: (1) a discrete latent space is incompatible with the <a href="#gl-ldm" class="text-cyan-600 hover:text-cyan-400 hover:underline">LDM</a> in E5, which requires continuous latent vectors to run Gaussian diffusion; (2) codebook collapse is a known failure mode that adds training complexity; (3) the only EEG application (<a href="#cite-you2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">You et al., 2025</a>, Table 8) operates on CWT spectrograms, not raw time-series - a fundamentally different input modality.</p>
+             <p><strong class="text-gray-300">Why 1D-Conv encoder/decoder?</strong> Convolutional layers directly process the waveform, preserving temporal and spectral structure at multiple scales. The alternative would be recurrent layers (GRU/LSTM), but these are slower, harder to train, and already tested via <a href="#gl-timegan" class="text-cyan-600 hover:text-cyan-400 hover:underline">TimeGAN</a> (E3). <a href="#cite-carrle2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Carrle et al., 2023</a> note that CNNs are "well suited for processing biological data" due to hierarchical feature extraction.</p>
+             <p><strong class="text-gray-300">Dual purpose:</strong> The CVAE encoder/decoder is reused by the <a href="#gl-ldm" class="text-cyan-600 hover:text-cyan-400 hover:underline">LDM</a> (E5). This gives a clean controlled comparison: E4 samples directly from the learned latent distribution, E5 uses iterative denoising in the same space. Any quality difference isolates the generation method, not the reconstruction capability.</p>
+           </div>
+         </details>
          <!-- Architecture at a glance -->
          <div class="bg-gray-800/40 border border-gray-700/40 rounded-lg p-3 mb-3 text-xs">
            <div class="font-semibold text-gray-300 mb-1">Architecture at a glance (1D-Conv, inspired by <a href="#cite-carrle2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Carrle et al., 2023</a>)</div>
@@ -2050,15 +2067,15 @@ tailwind.config = {
       <div class="space-y-4">
         <div class="border-l-2 border-rsch-500/50 pl-4">
           <div class="font-semibold text-rsch-400 text-sm mb-1">E3: TimeGAN - Established GAN baseline for time-series</div>
-          <p class="text-xs text-gray-400"><a href="#cite-you2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">You et al., 2025</a> (Table 8) shows all prior CHB-MIT augmentation used WGAN-GP or DCGAN. TimeGAN (<a href="#cite-yoon2019" class="text-cyan-600 hover:text-cyan-400 hover:underline">Yoon et al., 2019</a>) extends the GAN paradigm with a supervised temporal embedding loss - the GAN-family representative. Corpus: GAN in 18/26 papers; TimeGAN in 4/26.</p>
+          <p class="text-xs text-gray-400"><a href="#cite-you2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">You et al., 2025</a> (Table 8) shows all prior CHB-MIT augmentation used WGAN-GP or DCGAN. TimeGAN (<a href="#cite-yoon2019" class="text-cyan-600 hover:text-cyan-400 hover:underline">Yoon et al., 2019</a>) extends the GAN paradigm with a supervised temporal embedding loss - the GAN-family representative. Corpus: GAN in 18/26 papers; TimeGAN in 4/26 (<a href="#cite-bing2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Bing et al., 2022</a>; <a href="#cite-ibrahim2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">Ibrahim et al., 2025</a>; <a href="#cite-lange2024" class="text-cyan-600 hover:text-cyan-400 hover:underline">Lange et al., 2024</a>; <a href="#cite-pezoulas2024" class="text-cyan-600 hover:text-cyan-400 hover:underline">Pezoulas et al., 2024</a>).</p>
         </div>
         <div class="border-l-2 border-cyan-500/50 pl-4">
           <div class="font-semibold text-cyan-400 text-sm mb-1">E4: CVAE - Addressing the "VAE always worse" finding</div>
-          <p class="text-xs text-gray-400"><a href="#cite-carrle2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Carrle et al., 2023</a> found that "VAE were only used for comparison... and always performed worse" - but those were unconditional MLPs. Our CVAE uses 1D-Conv, class conditioning, and a 128-dim latent space. Tests whether architecture and conditioning change the outcome. Encoder/decoder shared with E5. Corpus: CVAE in 4/26 papers.</p>
+          <p class="text-xs text-gray-400"><a href="#cite-carrle2023" class="text-cyan-600 hover:text-cyan-400 hover:underline">Carrle et al., 2023</a> found that "VAE were only used for comparison... and always performed worse" - but those were unconditional VAEs used as GAN baselines (Luo et al., 2020; Zhang et al., 2020; Fahimi et al., 2021; Song et al., 2021). Our <a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a> (<a href="#cite-sohn2015" class="text-cyan-600 hover:text-cyan-400 hover:underline">Sohn et al., 2015</a>) uses 1D-Conv, class + patient conditioning, and a 128-dim <a href="#gl-latentspace" class="text-cyan-600 hover:text-cyan-400 hover:underline">latent space</a>. Tests whether architecture and conditioning change the outcome. Chosen over <a href="#gl-vae" class="text-cyan-600 hover:text-cyan-400 hover:underline">Beta-VAE</a> (<a href="#cite-higgins2017" class="text-cyan-600 hover:text-cyan-400 hover:underline">Higgins et al., 2017</a> - prioritises disentanglement over fidelity) and VQ-VAE (<a href="#cite-oord2017" class="text-cyan-600 hover:text-cyan-400 hover:underline">van den Oord et al., 2017</a> - discrete latent codes incompatible with E5 diffusion). Encoder/decoder shared with E5. Corpus: CVAE in 4/26 papers (<a href="#cite-bing2022" class="text-cyan-600 hover:text-cyan-400 hover:underline">Bing et al., 2022</a>; <a href="#cite-ibrahim2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">Ibrahim et al., 2025</a>; <a href="#cite-pezoulas2024" class="text-cyan-600 hover:text-cyan-400 hover:underline">Pezoulas et al., 2024</a>; <a href="#cite-you2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">You et al., 2025</a>).</p>
         </div>
         <div class="border-l-2 border-emerald-500/50 pl-4">
           <div class="font-semibold text-emerald-400 text-sm mb-1">E5: LDM - Implementing the recommended hybrid approach</div>
-          <p class="text-xs text-gray-400"><a href="#cite-you2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">You et al., 2025</a> (Section 8) recommend "combining VAE and diffusion models to perform diffusion in a low-dimensional space." Our LDM implements exactly this: DDPM denoising in the CVAE's 128-dim latent space (encode, denoise, decode) rather than on the raw 23x1024 signal. Corpus: latent diffusion in 3/26 (0 primary EEG studies). First application to epilepsy EEG.</p>
+          <p class="text-xs text-gray-400"><a href="#cite-you2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">You et al., 2025</a> (Section 8) recommend "combining VAE and diffusion models to perform diffusion in a low-dimensional space." Our LDM implements exactly this: DDPM denoising in the CVAE's 128-dim latent space (encode, denoise, decode) rather than on the raw 23x1024 signal. Corpus: latent diffusion in 3/26 (<a href="#cite-ibrahim2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">Ibrahim et al., 2025</a>; <a href="#cite-rouzrokh2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">Rouzrokh et al., 2025</a>; <a href="#cite-you2025" class="text-cyan-600 hover:text-cyan-400 hover:underline">You et al., 2025</a>) - all reviews, 0 primary EEG studies implement it. First application to epilepsy EEG.</p>
         </div>
       </div>
     </div>
@@ -2300,7 +2317,7 @@ tailwind.config = {
       <!-- Gantt chart -->
       <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-3">
         <h3 class="font-semibold text-white mb-1">Phase Overview (30 Mar &ndash; 26 Jul 2026, updated 6 May with measured timings)</h3>
-        <p class="text-xs text-gray-500 mb-3">Sequential execution on a single machine (RTX 3080 Ti 12GB). All single-split experiments (E1-E5) complete. Full LOPO relaunched 5 May 2026 after OOM/disk-full fixes (E2 SMOTE reduced interictal subsample 10x&rarr;5x; E3-E5 now generate+train per fold to fit in 98 GB disk). E1 complete (4 May), E2-E5 running. Measured detector time: ~90 min/fold (mean per seed). Generator times (measured in single-split, estimated ~1.2x in LOPO due to larger training set): TimeGAN ~20 min/fold, CVAE ~50 min/fold, LDM ~68 min/fold. Total LOPO estimate: 5&ndash;6 weeks (completing mid Jun 2026). Thesis writing ongoing since Jan 2026 (midterm submitted 31 Jan).</p>
+        <p class="text-xs text-gray-500 mb-3">Sequential execution on a single machine (RTX 3080 Ti 12GB). All single-split experiments (E1-E5) complete. Full LOPO relaunched 5 May 2026 after OOM/disk-full fixes (E2 SMOTE reduced interictal subsample 10x&rarr;5x; E3-E5 now generate+train per fold to fit in 98 GB disk). E1 complete (4 May), E2 complete (14 May), E3-E5 LOPO running (14 May). Measured detector time: ~90 min/fold (mean per seed). Generator times (measured in single-split, estimated ~1.2x in LOPO due to larger training set): TimeGAN ~20 min/fold, CVAE ~50 min/fold, LDM ~68 min/fold. Total LOPO estimate: 5&ndash;6 weeks (completing mid Jun 2026). Thesis writing ongoing since Jan 2026 (midterm submitted 31 Jan).</p>
         <div class="chart-wrap" style="height:clamp(260px,40vw,340px)"><canvas id="chart-gantt"></canvas></div>
       </div>
 
@@ -2575,7 +2592,7 @@ tailwind.config = {
 <div id="page-status" class="page">
   <section class="max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12">
     <h1 class="text-3xl font-bold text-white mb-2">Current Status</h1>
-    <p class="text-gray-500 mb-3">Implementation progress. Last updated: 8 May 2026. See <a href="#results" data-page="results" class="text-cyan-600 hover:text-cyan-400 hover:underline">Results</a> for experimental data and <a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">Roadmap</a> for the full experiment plan.</p>
+    <p class="text-gray-500 mb-3">Implementation progress. Last updated: 14 May 2026. See <a href="#results" data-page="results" class="text-cyan-600 hover:text-cyan-400 hover:underline">Results</a> for experimental data and <a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">Roadmap</a> for the full experiment plan.</p>
 
     <!-- Progress overview -->
     <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-3">
@@ -2628,7 +2645,7 @@ tailwind.config = {
         <h3 class="font-semibold text-white mb-3 text-sm">What's Left</h3>
         <div class="space-y-2 text-xs">
           <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-1 mb-1">Full evaluation (in progress)</div>
-          <div class="flex items-start gap-2"><span class="text-iscte-400 shrink-0">&#9654;</span><span class="text-gray-400">Full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> evaluation (23 folds &times; 3 seeds per experiment) - relaunched 5 May 2026 after OOM/disk-full fixes. E1 complete (4 May). E2-E5 running (per-fold pipeline). For E3-E5, each fold generates at 4 <a href="#gl-syntheticratio" class="text-cyan-600 hover:text-cyan-400 hover:underline">ratios</a> (25/ 50/ 100/ 200%), trains detectors at each ratio, and runs <a href="#gl-tstr" class="text-cyan-600 hover:text-cyan-400 hover:underline">TSTR</a> (at ratio 1.0). Estimated 5&ndash;6 weeks total (completing mid Jun 2026)</span></div>
+          <div class="flex items-start gap-2"><span class="text-iscte-400 shrink-0">&#9654;</span><span class="text-gray-400">Full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> evaluation (23 folds &times; 3 seeds per experiment) - relaunched 5 May 2026 after OOM/disk-full fixes. E1 complete (4 May). E2 complete (14 May). E3-E5 LOPO running (14 May, 2 <a href="#gl-syntheticratio" class="text-cyan-600 hover:text-cyan-400 hover:underline">ratios</a>: 50/ 100%). Estimated completion mid Jun 2026</span></div>
           <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">Run E6 + E7 (after E3-E5 LOPO completes)</span></div>
           <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-3 mb-1">Thesis document (Chapters 1&ndash;5 written, 29 pages)</div>
           <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">Results &amp; Discussion chapter (after LOPO + E6/E7 complete)</span></div>
@@ -2674,7 +2691,7 @@ tailwind.config = {
 <div id="page-results" class="page">
   <section class="max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12">
     <h1 class="text-3xl font-bold text-white mb-2">Experimental Results</h1>
-    <p class="text-gray-500 mb-3">LOPO and single-split results for all experiments. See <a href="#roadmap" data-page="roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">Roadmap</a> for experiment definitions, <a href="#models" data-page="models" class="text-cyan-600 hover:text-cyan-400 hover:underline">Models</a> for architecture details, and <a href="#runtime-decisions" data-page="status" class="text-cyan-600 hover:text-cyan-400 hover:underline">runtime decisions</a> for issues encountered during execution. Last updated: 8 May 2026.</p>
+    <p class="text-gray-500 mb-3">LOPO and single-split results for all experiments. See <a href="#roadmap" data-page="roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">Roadmap</a> for experiment definitions, <a href="#models" data-page="models" class="text-cyan-600 hover:text-cyan-400 hover:underline">Models</a> for architecture details, and <a href="#runtime-decisions" data-page="status" class="text-cyan-600 hover:text-cyan-400 hover:underline">runtime decisions</a> for issues encountered during execution. Last updated: 14 May 2026.</p>
 
     <!-- E1 LOPO Results -->
     <div id="lopo-results" class="bg-gray-900 border border-emerald-500/30 rounded-xl p-5 mb-3">
@@ -2748,64 +2765,75 @@ tailwind.config = {
       <div class="flex items-center gap-3 mb-3">
         <div class="w-10 h-8 rounded-full bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 font-bold text-xs shrink-0">LOPO</div>
         <div>
-          <h3 class="font-semibold text-white text-sm">E2 Non-Synthetic Controls - LOPO Results (23 folds)</h3>
-          <p class="text-xs text-gray-500">Seed 42 complete (8 May 2026). Seed 123 in progress (6/23 folds). Seed 456 pending.</p>
+          <h3 class="font-semibold text-white text-sm">E2 Non-Synthetic Controls - Full LOPO Results (23 folds &times; 3 seeds)</h3>
+          <p class="text-xs text-gray-500">Completed 14 May 2026. Both methods substantially underperform the E1 baseline, confirming that naive oversampling hurts seizure detection under LOPO.</p>
         </div>
-        <span class="ml-auto text-xs font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded">1/3 SEEDS</span>
+        <span class="ml-auto text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded">DONE</span>
       </div>
 
       <div class="overflow-x-auto mb-3">
-        <p class="text-xs text-gray-600 mb-1">Seed 42 results (23 folds). Cross-seed summary will be added when all 3 seeds complete.</p>
+        <p class="text-xs text-gray-600 mb-1">Cross-seed summary (mean of per-seed means &plusmn; std across 3 seeds, 69 runs).</p>
         <table class="w-full text-xs">
-          <thead><tr class="border-b border-gray-700 text-left text-gray-500"><th class="py-2 pr-3">Metric</th><th class="py-2 pr-3">SMOTE (seed 42)</th><th class="py-2 pr-3">ADASYN (seed 42)</th><th class="py-2 pr-3 text-gray-400">E1 Baseline (cross-seed)</th></tr></thead>
+          <thead><tr class="border-b border-gray-700 text-left text-gray-500"><th class="py-2 pr-3">Metric</th><th class="py-2 pr-3">SMOTE</th><th class="py-2 pr-3">ADASYN</th><th class="py-2 pr-3 text-gray-400">E1 Baseline</th></tr></thead>
           <tbody class="text-gray-400">
-            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-gray-300 font-medium"><a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></td><td class="py-2 pr-3 text-rose-400">0.1468</td><td class="py-2 pr-3 text-rose-400">0.1773</td><td class="py-2 pr-3 text-emerald-400">0.3941</td></tr>
-            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-gray-300 font-medium"><a href="#gl-auroc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUROC</a></td><td class="py-2 pr-3 text-rose-400">0.6017</td><td class="py-2 pr-3 text-rose-400">0.6379</td><td class="py-2 pr-3 text-emerald-400">0.8438</td></tr>
-            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-gray-300 font-medium"><a href="#gl-f1" class="text-cyan-600 hover:text-cyan-400 hover:underline">F1</a></td><td class="py-2 pr-3 text-rose-400">0.2242</td><td class="py-2 pr-3 text-rose-400">0.2544</td><td class="py-2 pr-3 text-emerald-400">0.4333</td></tr>
-            <tr><td class="py-2 pr-3 text-gray-300 font-medium"><a href="#gl-sens95spec" class="text-cyan-600 hover:text-cyan-400 hover:underline">Sens. @ 95% Spec.</a></td><td class="py-2 pr-3 text-rose-400">0.3456</td><td class="py-2 pr-3 text-rose-400">0.3806</td><td class="py-2 pr-3 text-emerald-400">0.6459</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-gray-300 font-medium"><a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></td><td class="py-2 pr-3 text-rose-400">0.1580 &plusmn; 0.0212</td><td class="py-2 pr-3 text-rose-400">0.1844 &plusmn; 0.0550</td><td class="py-2 pr-3 text-emerald-400">0.3941 &plusmn; 0.0228</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-gray-300 font-medium"><a href="#gl-auroc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUROC</a></td><td class="py-2 pr-3 text-rose-400">0.6283 &plusmn; 0.0193</td><td class="py-2 pr-3 text-rose-400">0.6458 &plusmn; 0.0139</td><td class="py-2 pr-3 text-emerald-400">0.8438 &plusmn; 0.0147</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-gray-300 font-medium"><a href="#gl-f1" class="text-cyan-600 hover:text-cyan-400 hover:underline">F1</a></td><td class="py-2 pr-3 text-rose-400">0.2295 &plusmn; 0.0204</td><td class="py-2 pr-3 text-rose-400">0.2514 &plusmn; 0.0515</td><td class="py-2 pr-3 text-emerald-400">0.4333 &plusmn; 0.0194</td></tr>
+            <tr><td class="py-2 pr-3 text-gray-300 font-medium"><a href="#gl-sens95spec" class="text-cyan-600 hover:text-cyan-400 hover:underline">Sens. @ 95% Spec.</a></td><td class="py-2 pr-3 text-rose-400">0.3835 &plusmn; 0.0276</td><td class="py-2 pr-3 text-rose-400">0.4046 &plusmn; 0.0416</td><td class="py-2 pr-3 text-emerald-400">0.6459 &plusmn; 0.0123</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="overflow-x-auto mb-3">
+        <p class="text-xs text-gray-600 mb-1">Per-seed breakdown:</p>
+        <table class="w-full text-xs">
+          <thead><tr class="border-b border-gray-700 text-left text-gray-500"><th class="py-2 pr-3">Method</th><th class="py-2 pr-3">Seed 42</th><th class="py-2 pr-3">Seed 123</th><th class="py-2 pr-3">Seed 456</th></tr></thead>
+          <tbody class="text-gray-400">
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-gray-300 font-medium">SMOTE AUPRC</td><td class="py-2 pr-3">0.1468</td><td class="py-2 pr-3">0.1396</td><td class="py-2 pr-3">0.1876</td></tr>
+            <tr><td class="py-2 pr-3 text-gray-300 font-medium">ADASYN AUPRC</td><td class="py-2 pr-3">0.1773</td><td class="py-2 pr-3">0.1209</td><td class="py-2 pr-3">0.2551</td></tr>
           </tbody>
         </table>
       </div>
 
       <details class="bg-gray-800/30 border border-gray-700/30 rounded mb-3">
-        <summary class="text-xs text-gray-400 font-semibold cursor-pointer hover:text-cyan-400 p-3">Per-fold AUPRC breakdown - SMOTE seed 42 (click to expand)</summary>
+        <summary class="text-xs text-gray-400 font-semibold cursor-pointer hover:text-cyan-400 p-3">Per-fold AUPRC breakdown (mean &plusmn; std across 3 seeds)</summary>
         <div class="p-3 pt-0 overflow-x-auto">
           <table class="w-full text-xs">
-            <thead><tr class="border-b border-gray-700 text-left text-gray-500"><th class="py-1 pr-3">Fold</th><th class="py-1 pr-3">Test Subject</th><th class="py-1 pr-3">AUPRC (SMOTE)</th><th class="py-1 pr-3">AUPRC (ADASYN)</th><th class="py-1">Note</th></tr></thead>
+            <thead><tr class="border-b border-gray-700 text-left text-gray-500"><th class="py-1 pr-3">Fold</th><th class="py-1 pr-3">Test Subject</th><th class="py-1 pr-3">SMOTE</th><th class="py-1 pr-3">ADASYN</th><th class="py-1">Note</th></tr></thead>
             <tbody class="text-gray-400">
-              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">00</td><td class="py-1 pr-3">chb01+chb21</td><td class="py-1 pr-3">0.2390</td><td class="py-1 pr-3 text-emerald-400">0.5436</td><td class="py-1"></td></tr>
-              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">01</td><td class="py-1 pr-3">chb02</td><td class="py-1 pr-3">0.1925</td><td class="py-1 pr-3 text-rose-400">0.0455</td><td class="py-1"></td></tr>
-              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">02</td><td class="py-1 pr-3">chb03</td><td class="py-1 pr-3 text-rose-400">0.0373</td><td class="py-1 pr-3 text-emerald-400">0.4612</td><td class="py-1"></td></tr>
-              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">03</td><td class="py-1 pr-3">chb04</td><td class="py-1 pr-3">0.1863</td><td class="py-1 pr-3">0.1269</td><td class="py-1"></td></tr>
-              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">04</td><td class="py-1 pr-3">chb05</td><td class="py-1 pr-3 text-rose-400">0.0059</td><td class="py-1 pr-3 text-rose-400">0.0108</td><td class="py-1 text-rose-400">Near-zero</td></tr>
-              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">05</td><td class="py-1 pr-3">chb06</td><td class="py-1 pr-3 text-rose-400">0.0006</td><td class="py-1 pr-3 text-rose-400">0.0004</td><td class="py-1 text-rose-400">Near-zero</td></tr>
-              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">06</td><td class="py-1 pr-3">chb07</td><td class="py-1 pr-3">0.3817</td><td class="py-1 pr-3">0.1534</td><td class="py-1"></td></tr>
-              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">07</td><td class="py-1 pr-3">chb08</td><td class="py-1 pr-3">0.0847</td><td class="py-1 pr-3">0.1292</td><td class="py-1"></td></tr>
-              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">08</td><td class="py-1 pr-3">chb09</td><td class="py-1 pr-3 text-emerald-400">0.4524</td><td class="py-1 pr-3 text-emerald-400">0.4880</td><td class="py-1"></td></tr>
-              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">09</td><td class="py-1 pr-3">chb10</td><td class="py-1 pr-3">0.1801</td><td class="py-1 pr-3 text-emerald-400">0.6903</td><td class="py-1 text-emerald-400">ADASYN best</td></tr>
-              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">10</td><td class="py-1 pr-3">chb11</td><td class="py-1 pr-3">0.1231</td><td class="py-1 pr-3">0.3094</td><td class="py-1"></td></tr>
-              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">11</td><td class="py-1 pr-3">chb12</td><td class="py-1 pr-3 text-rose-400">0.0082</td><td class="py-1 pr-3 text-rose-400">0.0261</td><td class="py-1 text-rose-400">Near-zero</td></tr>
-              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">12</td><td class="py-1 pr-3">chb13</td><td class="py-1 pr-3 text-rose-400">0.0282</td><td class="py-1 pr-3 text-rose-400">0.0178</td><td class="py-1"></td></tr>
-              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">13</td><td class="py-1 pr-3">chb14</td><td class="py-1 pr-3 text-rose-400">0.0035</td><td class="py-1 pr-3 text-rose-400">0.0036</td><td class="py-1 text-rose-400">Near-zero</td></tr>
-              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">14</td><td class="py-1 pr-3">chb15</td><td class="py-1 pr-3 text-rose-400">0.0075</td><td class="py-1 pr-3 text-rose-400">0.0076</td><td class="py-1 text-rose-400">Near-zero</td></tr>
-              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">15</td><td class="py-1 pr-3">chb16</td><td class="py-1 pr-3 text-rose-400">0.0011</td><td class="py-1 pr-3 text-rose-400">0.0012</td><td class="py-1 text-rose-400">Near-zero</td></tr>
-              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">16</td><td class="py-1 pr-3">chb17</td><td class="py-1 pr-3">0.0863</td><td class="py-1 pr-3">0.0670</td><td class="py-1"></td></tr>
-              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">17</td><td class="py-1 pr-3">chb18</td><td class="py-1 pr-3 text-rose-400">0.0354</td><td class="py-1 pr-3">0.2715</td><td class="py-1"></td></tr>
-              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">18</td><td class="py-1 pr-3">chb19</td><td class="py-1 pr-3 text-emerald-400">0.6150</td><td class="py-1 pr-3 text-emerald-400">0.4587</td><td class="py-1"></td></tr>
-              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">19</td><td class="py-1 pr-3">chb20</td><td class="py-1 pr-3 text-rose-400">0.0025</td><td class="py-1 pr-3 text-rose-400">0.0025</td><td class="py-1 text-rose-400">Near-zero</td></tr>
-              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">20</td><td class="py-1 pr-3">chb22</td><td class="py-1 pr-3 text-emerald-400">0.5831</td><td class="py-1 pr-3 text-rose-400">0.0208</td><td class="py-1 text-amber-400">High divergence</td></tr>
-              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">21</td><td class="py-1 pr-3">chb23</td><td class="py-1 pr-3">0.0641</td><td class="py-1 pr-3 text-rose-400">0.0029</td><td class="py-1"></td></tr>
-              <tr><td class="py-1 pr-3">22</td><td class="py-1 pr-3">chb24</td><td class="py-1 pr-3">0.0591</td><td class="py-1 pr-3">0.2396</td><td class="py-1"></td></tr>
+              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">00</td><td class="py-1 pr-3">chb01+chb21</td><td class="py-1 pr-3">0.273 &plusmn; 0.091</td><td class="py-1 pr-3 text-emerald-400">0.564 &plusmn; 0.053</td><td class="py-1"></td></tr>
+              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">01</td><td class="py-1 pr-3">chb02</td><td class="py-1 pr-3">0.159 &plusmn; 0.106</td><td class="py-1 pr-3">0.294 &plusmn; 0.203</td><td class="py-1"></td></tr>
+              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">02</td><td class="py-1 pr-3">chb03</td><td class="py-1 pr-3 text-rose-400">0.026 &plusmn; 0.017</td><td class="py-1 pr-3">0.367 &plusmn; 0.202</td><td class="py-1 text-amber-400">High divergence</td></tr>
+              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">03</td><td class="py-1 pr-3">chb04</td><td class="py-1 pr-3">0.129 &plusmn; 0.042</td><td class="py-1 pr-3">0.157 &plusmn; 0.112</td><td class="py-1"></td></tr>
+              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">04</td><td class="py-1 pr-3">chb05</td><td class="py-1 pr-3">0.363 &plusmn; 0.282</td><td class="py-1 pr-3">0.106 &plusmn; 0.075</td><td class="py-1 text-amber-400">High variance</td></tr>
+              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">05</td><td class="py-1 pr-3">chb06</td><td class="py-1 pr-3 text-rose-400">0.002 &plusmn; 0.002</td><td class="py-1 pr-3 text-rose-400">0.000 &plusmn; 0.000</td><td class="py-1 text-rose-400">Near-zero</td></tr>
+              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">06</td><td class="py-1 pr-3">chb07</td><td class="py-1 pr-3">0.186 &plusmn; 0.152</td><td class="py-1 pr-3">0.143 &plusmn; 0.104</td><td class="py-1"></td></tr>
+              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">07</td><td class="py-1 pr-3">chb08</td><td class="py-1 pr-3 text-rose-400">0.049 &plusmn; 0.027</td><td class="py-1 pr-3">0.080 &plusmn; 0.047</td><td class="py-1"></td></tr>
+              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">08</td><td class="py-1 pr-3">chb09</td><td class="py-1 pr-3">0.235 &plusmn; 0.157</td><td class="py-1 pr-3">0.392 &plusmn; 0.219</td><td class="py-1"></td></tr>
+              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">09</td><td class="py-1 pr-3">chb10</td><td class="py-1 pr-3 text-emerald-400">0.460 &plusmn; 0.238</td><td class="py-1 pr-3 text-emerald-400">0.650 &plusmn; 0.213</td><td class="py-1"></td></tr>
+              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">10</td><td class="py-1 pr-3">chb11</td><td class="py-1 pr-3">0.397 &plusmn; 0.324</td><td class="py-1 pr-3">0.414 &plusmn; 0.321</td><td class="py-1 text-amber-400">High variance</td></tr>
+              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">11</td><td class="py-1 pr-3">chb12</td><td class="py-1 pr-3 text-rose-400">0.057 &plusmn; 0.063</td><td class="py-1 pr-3">0.083 &plusmn; 0.085</td><td class="py-1"></td></tr>
+              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">12</td><td class="py-1 pr-3">chb13</td><td class="py-1 pr-3 text-rose-400">0.019 &plusmn; 0.007</td><td class="py-1 pr-3 text-rose-400">0.033 &plusmn; 0.020</td><td class="py-1"></td></tr>
+              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">13</td><td class="py-1 pr-3">chb14</td><td class="py-1 pr-3 text-rose-400">0.027 &plusmn; 0.035</td><td class="py-1 pr-3 text-rose-400">0.003 &plusmn; 0.001</td><td class="py-1 text-rose-400">Near-zero</td></tr>
+              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">14</td><td class="py-1 pr-3">chb15</td><td class="py-1 pr-3 text-rose-400">0.010 &plusmn; 0.003</td><td class="py-1 pr-3 text-rose-400">0.010 &plusmn; 0.003</td><td class="py-1 text-rose-400">Near-zero</td></tr>
+              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">15</td><td class="py-1 pr-3">chb16</td><td class="py-1 pr-3 text-rose-400">0.001 &plusmn; 0.001</td><td class="py-1 pr-3 text-rose-400">0.002 &plusmn; 0.002</td><td class="py-1 text-rose-400">Near-zero</td></tr>
+              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">16</td><td class="py-1 pr-3">chb17</td><td class="py-1 pr-3">0.055 &plusmn; 0.023</td><td class="py-1 pr-3">0.072 &plusmn; 0.031</td><td class="py-1"></td></tr>
+              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">17</td><td class="py-1 pr-3">chb18</td><td class="py-1 pr-3">0.073 &plusmn; 0.051</td><td class="py-1 pr-3">0.092 &plusmn; 0.127</td><td class="py-1"></td></tr>
+              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">18</td><td class="py-1 pr-3">chb19</td><td class="py-1 pr-3 text-emerald-400">0.490 &plusmn; 0.112</td><td class="py-1 pr-3">0.345 &plusmn; 0.080</td><td class="py-1"></td></tr>
+              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">19</td><td class="py-1 pr-3">chb20</td><td class="py-1 pr-3 text-rose-400">0.002 &plusmn; 0.000</td><td class="py-1 pr-3 text-rose-400">0.003 &plusmn; 0.001</td><td class="py-1 text-rose-400">Near-zero</td></tr>
+              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">20</td><td class="py-1 pr-3">chb22</td><td class="py-1 pr-3">0.289 &plusmn; 0.238</td><td class="py-1 pr-3 text-rose-400">0.012 &plusmn; 0.006</td><td class="py-1 text-amber-400">High divergence</td></tr>
+              <tr class="border-b border-gray-800/50"><td class="py-1 pr-3">21</td><td class="py-1 pr-3">chb23</td><td class="py-1 pr-3">0.187 &plusmn; 0.093</td><td class="py-1 pr-3">0.088 &plusmn; 0.104</td><td class="py-1"></td></tr>
+              <tr><td class="py-1 pr-3">22</td><td class="py-1 pr-3">chb24</td><td class="py-1 pr-3">0.146 &plusmn; 0.095</td><td class="py-1 pr-3">0.333 &plusmn; 0.068</td><td class="py-1"></td></tr>
             </tbody>
           </table>
         </div>
       </details>
 
       <div class="text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-3 space-y-2">
-        <strong class="text-gray-400">Key observations (seed 42):</strong>
-        <p>Both <a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a> and <a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400 hover:underline">ADASYN</a> substantially underperform the E1 baseline in LOPO. AUPRC drops from 0.394 (E1) to 0.147 (SMOTE, -63%) and 0.177 (ADASYN, -55%). The single-split pattern holds at scale: naive feature-space interpolation hurts seizure detection.</p>
-        <p>Massive per-fold variance (std > 0.18 for both methods) confirms that oversampling is highly patient-dependent. Some folds (chb09, chb19, chb22 for SMOTE; chb09, chb10 for ADASYN) achieve reasonable AUPRC, while many collapse to near-zero. The methods diverge dramatically on specific patients: chb22 gets 0.583 with SMOTE but only 0.021 with ADASYN, while chb10 gets 0.180 with SMOTE but 0.690 with ADASYN.</p>
-        <p>ADASYN slightly outperforms SMOTE on average (0.177 vs 0.147 AUPRC), consistent with its adaptive sampling near decision boundaries. But both remain far below E1 baseline, confirming the thesis motivation: tabular oversampling cannot capture EEG temporal structure.</p>
+        <strong class="text-gray-400">Key observations (3 seeds, 69 runs per method):</strong>
+        <p>Both <a href="#gl-smote" class="text-cyan-600 hover:text-cyan-400 hover:underline">SMOTE</a> and <a href="#gl-adasyn" class="text-cyan-600 hover:text-cyan-400 hover:underline">ADASYN</a> substantially underperform the E1 baseline in LOPO. AUPRC drops from 0.394 (E1) to 0.158 (SMOTE, -60%) and 0.184 (ADASYN, -53%). The single-split pattern holds at scale: naive feature-space interpolation hurts seizure detection.</p>
+        <p>ADASYN has notably higher cross-seed variance (&plusmn;0.055 vs &plusmn;0.021 for SMOTE), meaning its performance is less stable across random initialisations. Both methods show massive per-fold variance - some patients (chb10, chb19 for SMOTE; chb00, chb10 for ADASYN) achieve reasonable AUPRC while many collapse to near-zero. The methods diverge dramatically on specific patients: chb22 gets 0.289 with SMOTE but only 0.012 with ADASYN, while chb03 gets 0.026 with SMOTE but 0.367 with ADASYN.</p>
+        <p>ADASYN slightly outperforms SMOTE on average (0.184 vs 0.158 AUPRC), consistent with its adaptive sampling near decision boundaries. But both remain far below E1 baseline, confirming the thesis motivation: tabular oversampling cannot capture EEG temporal structure.</p>
       </div>
     </div>
 
@@ -2838,6 +2866,19 @@ tailwind.config = {
       </div>
 
       <div class="overflow-x-auto mb-3">
+        <p class="text-xs text-gray-600 mb-1">Per-channel KL divergence (mean across 23 channels, 3 seeds) - dimension-by-dimension spectral fidelity:</p>
+        <table class="w-full text-xs">
+          <thead><tr class="border-b border-gray-700 text-left text-gray-500"><th class="py-2 pr-3">Per-Channel KL</th><th class="py-2 pr-3">Delta</th><th class="py-2 pr-3">Theta</th><th class="py-2 pr-3">Alpha</th><th class="py-2 pr-3">Beta</th><th class="py-2">Gamma</th></tr></thead>
+          <tbody class="text-gray-400">
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-rsch-400 font-medium">TimeGAN (E3)</td><td class="py-2 pr-3">0.304 &plusmn; 0.173</td><td class="py-2 pr-3">0.397 &plusmn; 0.138</td><td class="py-2 pr-3">0.304 &plusmn; 0.091</td><td class="py-2 pr-3 text-rose-400 font-semibold">2.93 &plusmn; 0.40</td><td class="py-2 text-rose-400 font-semibold">2.12 &plusmn; 0.29</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-cyan-400 font-medium">CVAE (E4)</td><td class="py-2 pr-3 text-emerald-400">0.006 &plusmn; 0.001</td><td class="py-2 pr-3 text-emerald-400">0.037 &plusmn; 0.004</td><td class="py-2 pr-3 text-emerald-400">0.032 &plusmn; 0.004</td><td class="py-2 pr-3 text-emerald-400">0.072 &plusmn; 0.006</td><td class="py-2 text-emerald-400">0.016 &plusmn; 0.000</td></tr>
+            <tr><td class="py-2 pr-3 text-emerald-400 font-medium">LDM (E5)</td><td class="py-2 pr-3 text-emerald-400">0.003 &plusmn; 0.001</td><td class="py-2 pr-3 text-emerald-400">0.017 &plusmn; 0.006</td><td class="py-2 pr-3">0.079 &plusmn; 0.002</td><td class="py-2 pr-3 text-emerald-400">0.056 &plusmn; 0.016</td><td class="py-2">0.040 &plusmn; 0.005</td></tr>
+          </tbody>
+        </table>
+        <p class="text-xs text-gray-600 mt-1">Unlike the aggregated KL above (which averages across all channels first), this computes KL per channel then averages - revealing whether any individual channels are poorly reproduced. Values are similar because no single channel is dramatically worse than others for CVAE/ LDM. For TimeGAN, worst-channel KL reaches 5.4 in beta (channel varies across seeds), confirming instability.</p>
+      </div>
+
+      <div class="overflow-x-auto mb-3">
         <table class="w-full text-xs">
           <thead><tr class="border-b border-gray-700 text-left text-gray-500"><th class="py-2 pr-3">C2ST</th><th class="py-2 pr-3">Accuracy (closer to 0.5 = better)</th><th class="py-2">AUROC</th></tr></thead>
           <tbody class="text-gray-400">
@@ -2848,7 +2889,73 @@ tailwind.config = {
         </table>
       </div>
 
-      <!-- Fidelity Plots -->
+      <!-- Best Fidelity Comparison -->
+      <div class="mb-3">
+        <details class="bg-gray-800/30 border border-gray-700/30 rounded">
+          <summary class="text-xs text-gray-400 font-semibold cursor-pointer hover:text-cyan-400 p-3">Best fidelity comparison - one plot per model (seed selection in progress)</summary>
+          <div class="p-3 pt-0 space-y-4">
+            <p class="text-xs text-gray-600">Best seed selected by lowest mean KL divergence across all bands: TimeGAN seed 42, CVAE seed 456, LDM seed 123.</p>
+            <div>
+              <p class="text-xs text-gray-500 mb-2 font-semibold">Power Spectral Density:</p>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div><p class="text-xs text-rsch-400 mb-1">TimeGAN (seed 42)</p><img src="results/e3/seed_42/single_split/plots/psd.png" alt="PSD: TimeGAN best" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-cyan-400 mb-1">CVAE (seed 456)</p><img src="results/e4/seed_456/single_split/plots/psd.png" alt="PSD: CVAE best" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-emerald-400 mb-1">LDM (seed 123)</p><img src="results/e5/seed_123/single_split/plots/psd.png" alt="PSD: LDM best" class="rounded border border-gray-700 w-full"></div>
+              </div>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 mb-2 font-semibold">Autocorrelation:</p>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div><p class="text-xs text-rsch-400 mb-1">TimeGAN (seed 42)</p><img src="results/e3/seed_42/single_split/plots/autocorrelation.png" alt="Autocorrelation: TimeGAN best" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-cyan-400 mb-1">CVAE (seed 456)</p><img src="results/e4/seed_456/single_split/plots/autocorrelation.png" alt="Autocorrelation: CVAE best" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-emerald-400 mb-1">LDM (seed 123)</p><img src="results/e5/seed_123/single_split/plots/autocorrelation.png" alt="Autocorrelation: LDM best" class="rounded border border-gray-700 w-full"></div>
+              </div>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 mb-2 font-semibold">Cross-channel correlation:</p>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div><p class="text-xs text-rsch-400 mb-1">TimeGAN (seed 42)</p><img src="results/e3/seed_42/single_split/plots/cross_channel_corr.png" alt="Cross-Channel: TimeGAN best" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-cyan-400 mb-1">CVAE (seed 456)</p><img src="results/e4/seed_456/single_split/plots/cross_channel_corr.png" alt="Cross-Channel: CVAE best" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-emerald-400 mb-1">LDM (seed 123)</p><img src="results/e5/seed_123/single_split/plots/cross_channel_corr.png" alt="Cross-Channel: LDM best" class="rounded border border-gray-700 w-full"></div>
+              </div>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 mb-2 font-semibold">Per-channel amplitude distribution:</p>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div><p class="text-xs text-rsch-400 mb-1">TimeGAN (seed 42)</p><img src="results/e3/seed_42/single_split/plots/per_channel_dist.png" alt="Per-Channel Dist: TimeGAN best" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-cyan-400 mb-1">CVAE (seed 456)</p><img src="results/e4/seed_456/single_split/plots/per_channel_dist.png" alt="Per-Channel Dist: CVAE best" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-emerald-400 mb-1">LDM (seed 123)</p><img src="results/e5/seed_123/single_split/plots/per_channel_dist.png" alt="Per-Channel Dist: LDM best" class="rounded border border-gray-700 w-full"></div>
+              </div>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 mb-2 font-semibold">Waveform examples:</p>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div><p class="text-xs text-rsch-400 mb-1">TimeGAN (seed 42)</p><img src="results/e3/seed_42/single_split/plots/waveforms.png" alt="Waveforms: TimeGAN best" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-cyan-400 mb-1">CVAE (seed 456)</p><img src="results/e4/seed_456/single_split/plots/waveforms.png" alt="Waveforms: CVAE best" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-emerald-400 mb-1">LDM (seed 123)</p><img src="results/e5/seed_123/single_split/plots/waveforms.png" alt="Waveforms: LDM best" class="rounded border border-gray-700 w-full"></div>
+              </div>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 mb-2 font-semibold">t-SNE embedding:</p>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div><p class="text-xs text-rsch-400 mb-1">TimeGAN (seed 42)</p><img src="results/e3/seed_42/single_split/plots/tsne.png" alt="t-SNE: TimeGAN best" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-cyan-400 mb-1">CVAE (seed 456)</p><img src="results/e4/seed_456/single_split/plots/tsne.png" alt="t-SNE: CVAE best" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-emerald-400 mb-1">LDM (seed 123)</p><img src="results/e5/seed_123/single_split/plots/tsne.png" alt="t-SNE: LDM best" class="rounded border border-gray-700 w-full"></div>
+              </div>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 mb-2 font-semibold">Per-channel KL divergence heatmap:</p>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div><p class="text-xs text-rsch-400 mb-1">TimeGAN (seed 42)</p><img src="results/e3/seed_42/single_split/plots/kl_per_channel.png" alt="Per-Channel KL: TimeGAN best" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-cyan-400 mb-1">CVAE (seed 456)</p><img src="results/e4/seed_456/single_split/plots/kl_per_channel.png" alt="Per-Channel KL: CVAE best" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-emerald-400 mb-1">LDM (seed 123)</p><img src="results/e5/seed_123/single_split/plots/kl_per_channel.png" alt="Per-Channel KL: LDM best" class="rounded border border-gray-700 w-full"></div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <!-- Per-model Fidelity Plots (all seeds) -->
       <div class="mb-3">
         <details class="bg-gray-800/30 border border-gray-700/30 rounded">
           <summary class="text-xs text-gray-400 font-semibold cursor-pointer hover:text-cyan-400 p-3">Fidelity plots - TimeGAN (E3) - all seeds</summary>
@@ -2867,6 +2974,14 @@ tailwind.config = {
                 <div><p class="text-xs text-gray-600 mb-1">Seed 42</p><img src="results/e3/seed_42/single_split/plots/autocorrelation.png" alt="Autocorrelation: TimeGAN seed 42" class="rounded border border-gray-700 w-full"></div>
                 <div><p class="text-xs text-gray-600 mb-1">Seed 123</p><img src="results/e3/seed_123/single_split/plots/autocorrelation.png" alt="Autocorrelation: TimeGAN seed 123" class="rounded border border-gray-700 w-full"></div>
                 <div><p class="text-xs text-gray-600 mb-1">Seed 456</p><img src="results/e3/seed_456/single_split/plots/autocorrelation.png" alt="Autocorrelation: TimeGAN seed 456" class="rounded border border-gray-700 w-full"></div>
+              </div>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 mb-2 font-semibold">Cross-channel correlation (spatial structure):</p>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div><p class="text-xs text-gray-600 mb-1">Seed 42</p><img src="results/e3/seed_42/single_split/plots/cross_channel_corr.png" alt="Cross-Channel: TimeGAN seed 42" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-gray-600 mb-1">Seed 123</p><img src="results/e3/seed_123/single_split/plots/cross_channel_corr.png" alt="Cross-Channel: TimeGAN seed 123" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-gray-600 mb-1">Seed 456</p><img src="results/e3/seed_456/single_split/plots/cross_channel_corr.png" alt="Cross-Channel: TimeGAN seed 456" class="rounded border border-gray-700 w-full"></div>
               </div>
             </div>
             <div>
@@ -2893,6 +3008,14 @@ tailwind.config = {
                 <div><p class="text-xs text-gray-600 mb-1">Seed 456</p><img src="results/e3/seed_456/single_split/plots/tsne.png" alt="t-SNE: TimeGAN seed 456" class="rounded border border-gray-700 w-full"></div>
               </div>
             </div>
+            <div>
+              <p class="text-xs text-gray-500 mb-2 font-semibold">Per-channel KL divergence heatmap (23 channels x 5 bands):</p>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div><p class="text-xs text-gray-600 mb-1">Seed 42</p><img src="results/e3/seed_42/single_split/plots/kl_per_channel.png" alt="Per-Channel KL: TimeGAN seed 42" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-gray-600 mb-1">Seed 123</p><img src="results/e3/seed_123/single_split/plots/kl_per_channel.png" alt="Per-Channel KL: TimeGAN seed 123" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-gray-600 mb-1">Seed 456</p><img src="results/e3/seed_456/single_split/plots/kl_per_channel.png" alt="Per-Channel KL: TimeGAN seed 456" class="rounded border border-gray-700 w-full"></div>
+              </div>
+            </div>
           </div>
         </details>
         <details class="bg-gray-800/30 border border-gray-700/30 rounded mt-2">
@@ -2912,6 +3035,14 @@ tailwind.config = {
                 <div><p class="text-xs text-gray-600 mb-1">Seed 42</p><img src="results/e4/seed_42/single_split/plots/autocorrelation.png" alt="Autocorrelation: CVAE seed 42" class="rounded border border-gray-700 w-full"></div>
                 <div><p class="text-xs text-gray-600 mb-1">Seed 123</p><img src="results/e4/seed_123/single_split/plots/autocorrelation.png" alt="Autocorrelation: CVAE seed 123" class="rounded border border-gray-700 w-full"></div>
                 <div><p class="text-xs text-gray-600 mb-1">Seed 456</p><img src="results/e4/seed_456/single_split/plots/autocorrelation.png" alt="Autocorrelation: CVAE seed 456" class="rounded border border-gray-700 w-full"></div>
+              </div>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 mb-2 font-semibold">Cross-channel correlation (spatial structure):</p>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div><p class="text-xs text-gray-600 mb-1">Seed 42</p><img src="results/e4/seed_42/single_split/plots/cross_channel_corr.png" alt="Cross-Channel: CVAE seed 42" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-gray-600 mb-1">Seed 123</p><img src="results/e4/seed_123/single_split/plots/cross_channel_corr.png" alt="Cross-Channel: CVAE seed 123" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-gray-600 mb-1">Seed 456</p><img src="results/e4/seed_456/single_split/plots/cross_channel_corr.png" alt="Cross-Channel: CVAE seed 456" class="rounded border border-gray-700 w-full"></div>
               </div>
             </div>
             <div>
@@ -2938,6 +3069,14 @@ tailwind.config = {
                 <div><p class="text-xs text-gray-600 mb-1">Seed 456</p><img src="results/e4/seed_456/single_split/plots/tsne.png" alt="t-SNE: CVAE seed 456" class="rounded border border-gray-700 w-full"></div>
               </div>
             </div>
+            <div>
+              <p class="text-xs text-gray-500 mb-2 font-semibold">Per-channel KL divergence heatmap (23 channels x 5 bands):</p>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div><p class="text-xs text-gray-600 mb-1">Seed 42</p><img src="results/e4/seed_42/single_split/plots/kl_per_channel.png" alt="Per-Channel KL: CVAE seed 42" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-gray-600 mb-1">Seed 123</p><img src="results/e4/seed_123/single_split/plots/kl_per_channel.png" alt="Per-Channel KL: CVAE seed 123" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-gray-600 mb-1">Seed 456</p><img src="results/e4/seed_456/single_split/plots/kl_per_channel.png" alt="Per-Channel KL: CVAE seed 456" class="rounded border border-gray-700 w-full"></div>
+              </div>
+            </div>
           </div>
         </details>
         <details class="bg-gray-800/30 border border-gray-700/30 rounded mt-2">
@@ -2957,6 +3096,14 @@ tailwind.config = {
                 <div><p class="text-xs text-gray-600 mb-1">Seed 42</p><img src="results/e5/seed_42/single_split/plots/autocorrelation.png" alt="Autocorrelation: LDM seed 42" class="rounded border border-gray-700 w-full"></div>
                 <div><p class="text-xs text-gray-600 mb-1">Seed 123</p><img src="results/e5/seed_123/single_split/plots/autocorrelation.png" alt="Autocorrelation: LDM seed 123" class="rounded border border-gray-700 w-full"></div>
                 <div><p class="text-xs text-gray-600 mb-1">Seed 456</p><img src="results/e5/seed_456/single_split/plots/autocorrelation.png" alt="Autocorrelation: LDM seed 456" class="rounded border border-gray-700 w-full"></div>
+              </div>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 mb-2 font-semibold">Cross-channel correlation (spatial structure):</p>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div><p class="text-xs text-gray-600 mb-1">Seed 42</p><img src="results/e5/seed_42/single_split/plots/cross_channel_corr.png" alt="Cross-Channel: LDM seed 42" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-gray-600 mb-1">Seed 123</p><img src="results/e5/seed_123/single_split/plots/cross_channel_corr.png" alt="Cross-Channel: LDM seed 123" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-gray-600 mb-1">Seed 456</p><img src="results/e5/seed_456/single_split/plots/cross_channel_corr.png" alt="Cross-Channel: LDM seed 456" class="rounded border border-gray-700 w-full"></div>
               </div>
             </div>
             <div>
@@ -2981,6 +3128,14 @@ tailwind.config = {
                 <div><p class="text-xs text-gray-600 mb-1">Seed 42</p><img src="results/e5/seed_42/single_split/plots/tsne.png" alt="t-SNE: LDM seed 42" class="rounded border border-gray-700 w-full"></div>
                 <div><p class="text-xs text-gray-600 mb-1">Seed 123</p><img src="results/e5/seed_123/single_split/plots/tsne.png" alt="t-SNE: LDM seed 123" class="rounded border border-gray-700 w-full"></div>
                 <div><p class="text-xs text-gray-600 mb-1">Seed 456</p><img src="results/e5/seed_456/single_split/plots/tsne.png" alt="t-SNE: LDM seed 456" class="rounded border border-gray-700 w-full"></div>
+              </div>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 mb-2 font-semibold">Per-channel KL divergence heatmap (23 channels x 5 bands):</p>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div><p class="text-xs text-gray-600 mb-1">Seed 42</p><img src="results/e5/seed_42/single_split/plots/kl_per_channel.png" alt="Per-Channel KL: LDM seed 42" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-gray-600 mb-1">Seed 123</p><img src="results/e5/seed_123/single_split/plots/kl_per_channel.png" alt="Per-Channel KL: LDM seed 123" class="rounded border border-gray-700 w-full"></div>
+                <div><p class="text-xs text-gray-600 mb-1">Seed 456</p><img src="results/e5/seed_456/single_split/plots/kl_per_channel.png" alt="Per-Channel KL: LDM seed 456" class="rounded border border-gray-700 w-full"></div>
               </div>
             </div>
           </div>
@@ -3016,6 +3171,15 @@ tailwind.config = {
         <p><strong class="text-rsch-400"><a href="#gl-timegan" class="text-cyan-600 hover:text-cyan-400 hover:underline">TimeGAN</a></strong> fails significantly on amplitude: per-channel means deviate from zero (offsets of 20-80 uV on several channels), and per-channel standard deviations are dramatically reduced (~25-45 uV vs real ~85-130 uV). The generator produces signals that are both offset and compressed in amplitude - about 3x lower variability than real seizures. This amplitude mismatch alone would make the synthetic data easy to detect by a downstream classifier.</p>
         <p><strong class="text-cyan-400"><a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a></strong> preserves per-channel means well (all near zero) but shows reduced standard deviation compared to real data (~50-95 uV vs ~85-130 uV). This is the classic <a href="#gl-vae" class="text-cyan-600 hover:text-cyan-400 hover:underline">VAE</a> smoothing effect: the <a href="#gl-kl" class="text-cyan-600 hover:text-cyan-400 hover:underline">KL</a> regularisation encourages the decoder to produce outputs closer to the mean, reducing extreme amplitudes. Still much better than TimeGAN - the amplitude profile is recognisably correct even if somewhat compressed.</p>
         <p><strong class="text-emerald-400"><a href="#gl-ldm" class="text-cyan-600 hover:text-cyan-400 hover:underline">LDM</a></strong> has correct per-channel means (near zero) but shows the most severe amplitude reduction (~20-50 uV vs ~85-130 uV). The iterative denoising in <a href="#gl-latentspace" class="text-cyan-600 hover:text-cyan-400 hover:underline">latent space</a>, combined with the CVAE decoder's smoothing tendency, produces signals with correct frequency content but lower dynamic range. This is the main weakness that the <a href="#gl-discriminative" class="text-cyan-600 hover:text-cyan-400 hover:underline">C2ST</a> likely exploits to distinguish LDM outputs from real data.</p>
+      </div>
+
+      <div class="text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-3 space-y-2 mt-3">
+        <strong class="text-gray-400">Per-channel spectral fidelity (dimension-by-dimension <a href="#gl-kl" class="text-cyan-600 hover:text-cyan-400 hover:underline">KL</a>):</strong>
+        <p>The per-channel KL heatmaps evaluate each of the 23 EEG channels independently across all 5 frequency bands - answering whether any specific channel is poorly reproduced.</p>
+        <p><strong class="text-rsch-400"><a href="#gl-timegan" class="text-cyan-600 hover:text-cyan-400 hover:underline">TimeGAN</a></strong> shows dramatic per-channel failures: worst-channel KL reaches 5.4 in the beta band, and the specific worst channel varies across seeds (ch 14 in seed 42, ch 2 in seed 123, ch 19 in seed 456). This instability means the <a href="#gl-gru" class="text-cyan-600 hover:text-cyan-400 hover:underline">GRU</a> architecture doesn't consistently reproduce high-frequency content on any particular channel - the failures are both severe and unpredictable.</p>
+        <p><strong class="text-cyan-400"><a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a></strong> shows uniformly low per-channel KL (worst channel &lt; 0.19 in any band). Channel 6 (F3-C3, left central) consistently shows the highest theta-band KL across seeds - a stable, identifiable weakness rather than random failure. All channels remain well below the 0.2 threshold.</p>
+        <p><strong class="text-emerald-400"><a href="#gl-ldm" class="text-cyan-600 hover:text-cyan-400 hover:underline">LDM</a></strong> is similar to CVAE (worst &lt; 0.17) with channel 6 again showing highest theta KL - expected since both share the same encoder. Alpha-band KL is slightly higher than CVAE (0.12-0.14 vs 0.05-0.08 on worst channels), consistent with the denoising process smoothing some mid-frequency detail.</p>
+        <p class="text-gray-600 mt-2"><strong class="text-gray-500">Clinical note:</strong> For CVAE, higher-KL channels cluster on central/midline derivations (F3-C3, FZ-CZ - beta ~0.15-0.19) rather than temporal onset zones (F7-T7, T7-P7, F8-T8, T8-P8 - all &lt; 0.10). For LDM, the pattern is less clear-cut: alpha-band KL is distributed relatively uniformly across both temporal and central channels (~0.09-0.14). In both cases, no individual channel fails catastrophically - the per-channel analysis confirms uniformly acceptable fidelity across all electrode positions.</p>
       </div>
 
       <div class="text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-3 space-y-2 mt-3">
@@ -4009,6 +4173,9 @@ tailwind.config = {
       <div id="cite-heusel2017" class="flex gap-3 p-2.5 rounded hover:bg-gray-800/40 transition-colors scroll-mt-20">
         <div>M. <strong class="text-white">Heusel</strong> <em>et al.</em>, &ldquo;GANs trained by a two time-scale update rule converge to a local Nash equilibrium,&rdquo; in <em>Proc. NeurIPS</em>, vol. 30, 2017. <a href="https://doi.org/10.48550/arXiv.1706.08500" target="_blank" class="text-cyan-600 hover:text-cyan-400 hover:underline">doi: 10.48550/arXiv.1706.08500</a><span class="ml-2 px-1.5 py-0.5 bg-gray-700/40 rounded text-gray-500 text-xs font-medium shrink-0">Foundational</span></div>
       </div>
+      <div id="cite-higgins2017" class="flex gap-3 p-2.5 rounded hover:bg-gray-800/40 transition-colors scroll-mt-20">
+        <div>I. <strong class="text-white">Higgins</strong> <em>et al.</em>, &ldquo;beta-VAE: Learning basic visual concepts with a constrained variational framework,&rdquo; in <em>Proc. ICLR</em>, 2017. <a href="https://openreview.net/forum?id=Sy2fzU9gl" target="_blank" class="text-cyan-600 hover:text-cyan-400 hover:underline">openreview.net</a><span class="ml-2 px-1.5 py-0.5 bg-gray-700/40 rounded text-gray-500 text-xs font-medium shrink-0">Foundational</span></div>
+      </div>
       <div id="cite-ho2020" class="flex gap-3 p-2.5 rounded hover:bg-gray-800/40 transition-colors scroll-mt-20">
         <div>J. <strong class="text-white">Ho</strong> <em>et al.</em>, &ldquo;Denoising diffusion probabilistic models,&rdquo; in <em>Proc. NeurIPS</em>, vol. 33, 2020. <a href="https://doi.org/10.48550/arXiv.2006.11239" target="_blank" class="text-cyan-600 hover:text-cyan-400 hover:underline">doi: 10.48550/arXiv.2006.11239</a><span class="ml-2 px-1.5 py-0.5 bg-gray-700/40 rounded text-gray-500 text-xs font-medium shrink-0">Foundational</span></div>
       </div>
@@ -4059,6 +4226,9 @@ tailwind.config = {
       </div>
       <div id="cite-niedermeyer2011" class="flex gap-3 p-2.5 rounded hover:bg-gray-800/40 transition-colors scroll-mt-20">
         <div>E. <strong class="text-white">Niedermeyer</strong> and F. H. Lopes da Silva, <em>Electroencephalography: Basic Principles, Clinical Applications, and Related Fields</em>, 6th ed. Philadelphia, PA: Lippincott Williams &amp; Wilkins, 2011. <a href="https://doi.org/10.1093/med/9780190228484.001.0001" target="_blank" class="text-cyan-600 hover:text-cyan-400 hover:underline">doi: 10.1093/med/9780190228484.001.0001</a><span class="ml-2 px-1.5 py-0.5 bg-gray-700/40 rounded text-gray-500 text-xs font-medium shrink-0">Foundational</span></div>
+      </div>
+      <div id="cite-oord2017" class="flex gap-3 p-2.5 rounded hover:bg-gray-800/40 transition-colors scroll-mt-20">
+        <div>A. van den <strong class="text-white">Oord</strong> <em>et al.</em>, &ldquo;Neural discrete representation learning,&rdquo; in <em>Proc. NeurIPS</em>, vol. 30, 2017. <a href="https://doi.org/10.48550/arXiv.1711.00937" target="_blank" class="text-cyan-600 hover:text-cyan-400 hover:underline">doi: 10.48550/arXiv.1711.00937</a><span class="ml-2 px-1.5 py-0.5 bg-gray-700/40 rounded text-gray-500 text-xs font-medium shrink-0">Foundational</span></div>
       </div>
       <div id="cite-page2021" class="flex gap-3 p-2.5 rounded hover:bg-gray-800/40 transition-colors scroll-mt-20">
         <div>M. J. <strong class="text-white">Page</strong> <em>et al.</em>, &ldquo;The PRISMA 2020 statement: An updated guideline for reporting systematic reviews,&rdquo; <em>BMJ</em>, vol. 372, Art. no. n71, 2021. <a href="https://doi.org/10.1136/bmj.n71" target="_blank" class="text-cyan-600 hover:text-cyan-400 hover:underline">doi: 10.1136/bmj.n71</a><span class="ml-2 px-1.5 py-0.5 bg-gray-700/40 rounded text-gray-500 text-xs font-medium shrink-0">Foundational</span></div>
@@ -4692,6 +4862,38 @@ function buildPatientTable() {
     tbody.appendChild(row);
   });
 }
+
+// ── Lightbox ──────────────────────────────────────────────────────────
+(function() {
+  const overlay = document.createElement('div');
+  overlay.id = 'lightbox-overlay';
+  overlay.className = 'fixed inset-0 z-50 hidden items-center justify-center bg-black/90 cursor-zoom-out';
+  overlay.innerHTML = '<img id="lightbox-img" class="max-w-[90vw] max-h-[90vh] object-contain rounded-lg shadow-2xl" alt="">' +
+    '<button class="absolute top-4 right-4 text-white/70 hover:text-white text-3xl font-light leading-none">&times;</button>';
+  document.body.appendChild(overlay);
+
+  const lbImg = document.getElementById('lightbox-img');
+  const close = () => overlay.classList.replace('flex', 'hidden');
+
+  overlay.addEventListener('click', close);
+  overlay.querySelector('button').addEventListener('click', close);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+
+  document.addEventListener('click', (e) => {
+    const img = e.target.closest('.page img[src*="results/"]');
+    if (!img) return;
+    e.preventDefault();
+    lbImg.src = img.src;
+    lbImg.alt = img.alt;
+    overlay.classList.remove('hidden');
+    overlay.classList.add('flex');
+  });
+
+  // Pointer cursor on clickable result images
+  const style = document.createElement('style');
+  style.textContent = '.page img[src*="results/"] { cursor: zoom-in; }';
+  document.head.appendChild(style);
+})();
 </script>
 </body>
 </html>
