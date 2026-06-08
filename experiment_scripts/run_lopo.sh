@@ -59,17 +59,17 @@ discord() {
     # Log all notifications locally (survives curl failures)
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $msg" >> "$STATUS_DIR/notifications.log"
 
-    # Retry up to 3 times with backoff
-    local attempt
-    for attempt in 1 2 3; do
-        if curl -s --max-time 10 -H "Content-Type: application/json" \
+    # Retry up to 4 times with longer backoff (5/15/30/60s)
+    local attempt delays=(5 15 30 60)
+    for attempt in 0 1 2 3; do
+        if curl -s --max-time 15 -H "Content-Type: application/json" \
             -d "{\"embeds\":[{\"title\":\"LOPO\",\"description\":\"$msg\",\"color\":$color}]}" \
             "$DISCORD_WEBHOOK" > /dev/null 2>&1; then
             return 0
         fi
-        sleep $((attempt * 2))
+        sleep "${delays[$attempt]}"
     done
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] WARNING: Discord notification failed after 3 attempts" >> "$STATUS_DIR/notifications.log"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] WARNING: Discord notification failed after 4 attempts" >> "$STATUS_DIR/notifications.log"
 }
 
 # --- Results extraction (called after each seed/experiment) ---
@@ -271,18 +271,28 @@ run_experiment() {
 
         discord "✔️ **${exp^^}** seed $seed done (${seed_elapsed}min)\\n$seed_summary" 3066993
         echo "  SEED $seed DONE $(date '+%Y-%m-%d %H:%M:%S') (${seed_elapsed}min)" >> "$STATUS_DIR/${exp}.status"
-    done
 
-    # TSTR phase (E3-E5 only, uses ratio 1.0)
-    if [ "$gen_model" != "none" ] && [ "$gen_model" != "builtin" ]; then
-        echo ">>> ${exp^^}: TSTR evaluation — $(date)"
-        if python -m training.train --experiment "$exp" --mode tstr; then
-            discord "✔️ **${exp^^}** TSTR complete" 3066993
-        else
-            echo "  WARNING: TSTR failed for ${exp^^} (non-fatal, continuing)"
-            discord "⚠️ **${exp^^}** TSTR failed (non-fatal)" 15105570
+        # TSTR per-seed (E3-E5 only) — run while ratio_1.00 npz still on disk
+        if [ "$gen_model" != "none" ] && [ "$gen_model" != "builtin" ]; then
+            echo ">>> ${exp^^} seed $seed: TSTR evaluation — $(date)"
+            if python -m training.train --experiment "$exp" --mode tstr --seeds "$seed"; then
+                discord "✔️ **${exp^^}** TSTR seed $seed complete" 3066993
+                # Only delete npz files for folds where tstr_results.json was produced
+                local freed=0
+                for fold_dir in "results/${exp}/seed_${seed}"/fold_*/; do
+                    [ -d "$fold_dir" ] || continue
+                    if [ -f "${fold_dir}/tstr_results.json" ] && [ -f "${fold_dir}/synthetic_ratio_1.00.npz" ]; then
+                        rm -f "${fold_dir}/synthetic_ratio_1.00.npz"
+                        freed=$((freed + 1))
+                    fi
+                done
+                echo "  Freed disk: deleted $freed ratio_1.00 npz files for ${exp} seed $seed"
+            else
+                echo "  WARNING: TSTR failed for ${exp^^} seed $seed (non-fatal, keeping npz files)"
+                discord "⚠️ **${exp^^}** TSTR seed $seed failed (non-fatal, npz kept)" 15105570
+            fi
         fi
-    fi
+    done
 
     # Experiment done — full summary
     local exp_elapsed=$(( (SECONDS - t_start) / 60 ))

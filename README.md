@@ -98,13 +98,13 @@ Download the [CHB-MIT Scalp EEG Database](https://physionet.org/content/chbmit/1
 |:----------:|-------------|:------:|
 | **E1** | Baseline 1D-CNN detector (real data, class-weighted cross-entropy) | LOPO complete |
 | **E2** | Non-synthetic controls (SMOTE, ADASYN) | LOPO complete (3 seeds) |
-| **E3** | TimeGAN augmentation (2 ratios: 50/ 100%) | LOPO running (14 May) |
-| **E4** | CVAE augmentation (2 ratios: 50/ 100%) | LOPO queued (after E3) |
+| **E3** | TimeGAN augmentation (2 ratios: 50/ 100%) | LOPO complete (3 Jun) |
+| **E4** | CVAE augmentation (2 ratios: 50/ 100%) | LOPO in progress (fold 4/22, seed 42) |
 | **E5** | Latent Diffusion augmentation (2 ratios, reuses CVAE encoder) | LOPO queued (after E4) |
 | **E6** | Cross-generator comparison (Wilcoxon, ratio sensitivity, cost-benefit) | After LOPO |
 | **E7** | Subject-identity analysis (linear probe + proximity check) | After E6 |
 
-> **Note (14 May 2026):** E2 LOPO complete (all 3 seeds, both SMOTE and ADASYN). Both methods substantially underperform E1 baseline (AUPRC 0.158/0.184 vs 0.394), confirming single-split findings at scale. E3-E5 LOPO now running.
+> **Note (8 Jun 2026):** E3 LOPO complete. TimeGAN hurts at both ratios (AUPRC 0.306/ 0.214 vs 0.394 baseline, -22%/ -46%). E4 LOPO in progress - early results (4 folds, seed 42) show ratio 0.50 performing strongly (mean AUPRC 0.551).
 
 ### Results (single-split, 3 seeds)
 
@@ -113,22 +113,22 @@ Download the [CHB-MIT Scalp EEG Database](https://physionet.org/content/chbmit/1
 | **E5** | LDM | **0.2272 +/- 0.0193** | **0.3759 +/- 0.0419** | ~58 min | ~72 min |
 | **E1** | None (baseline) | 0.1766 +/- 0.0542 | 0.2264 +/- 0.0646 | - | ~205 min |
 | **E4** | CVAE | 0.1750 +/- 0.0732 | 0.2877 +/- 0.1239 | ~42 min | ~99 min |
-| **E3** | TimeGAN | 0.1742 +/- 0.0842 | 0.1943 +/- 0.1063 | ~17 min | ~84 min |
+| **E3** | TimeGAN | 0.1201 +/- 0.0275 | 0.2179 +/- 0.0966 | ~17 min | ~84 min |
 | **E2** | ADASYN | 0.1078 +/- 0.0732 | 0.1302 +/- 0.0713 | - | ~79 min |
 
 LDM augmentation improves AUPRC by +29% over baseline with the lowest cross-seed variance (single-split).
 
 ### Results (LOPO, 23 folds x 3 seeds)
 
-E1 baseline LOPO complete (4 May 2026). E2 LOPO complete (14 May 2026). E3-E5 LOPO running (14 May 2026).
+| Experiment | Generator | Ratio | AUPRC (cross-seed) | AUROC | F1 | Sens. @ 95% Spec. |
+|:----------:|-----------|:-----:|:-------------------:|:-----:|:--:|:-----------------:|
+| **E1** | None (baseline) | - | **0.3941 +/- 0.0228** | 0.8438 +/- 0.0147 | 0.4333 +/- 0.0194 | 0.6459 +/- 0.0123 |
+| **E3** | TimeGAN | 0.50 | 0.3064 +/- 0.2990 | 0.7779 +/- 0.2235 | 0.3500 +/- 0.2831 | 0.5671 +/- 0.3335 |
+| **E3** | TimeGAN | 1.00 | 0.2145 +/- 0.2499 | 0.7287 +/- 0.2374 | 0.2778 +/- 0.2501 | 0.4895 +/- 0.3246 |
+| **E2** | ADASYN | - | 0.1844 +/- 0.0550 | 0.6458 +/- 0.0139 | 0.2514 +/- 0.0515 | 0.4046 +/- 0.0416 |
+| **E2** | SMOTE | - | 0.1580 +/- 0.0212 | 0.6283 +/- 0.0193 | 0.2295 +/- 0.0204 | 0.3835 +/- 0.0276 |
 
-| Experiment | Generator | AUPRC (cross-seed) | AUROC | F1 | Sens. @ 95% Spec. | Det. train (avg/ seed/ fold) |
-|:----------:|-----------|:-------------------:|:-----:|:--:|:-----------------:|:---------------------------:|
-| **E1** | None (baseline) | 0.3941 +/- 0.0228 | 0.8438 +/- 0.0147 | 0.4333 +/- 0.0194 | 0.6459 +/- 0.0123 | ~92 min |
-| **E2** | SMOTE | 0.1580 +/- 0.0212 | 0.6283 +/- 0.0193 | 0.2295 +/- 0.0204 | 0.3835 +/- 0.0276 | ~5 min |
-| **E2** | ADASYN | 0.1844 +/- 0.0550 | 0.6458 +/- 0.0139 | 0.2514 +/- 0.0515 | 0.4046 +/- 0.0416 | ~5 min |
-
-E2 LOPO complete (14 May 2026, 3 seeds x 23 folds). E3-E5 LOPO running (started 14 May). Results will be added as they complete. Detailed results, per-fold breakdowns, and fidelity analysis on the [project website](https://vandabarata.github.io/msc-thesis-eeg/).
+E4 LOPO in progress (4/22 folds, seed 42, preliminary AUPRC 0.551 at ratio 0.50). E5 pending. Detailed results, per-fold breakdowns, and fidelity analysis on the [project website](https://vandabarata.github.io/msc-thesis-eeg/).
 
 <details>
 <summary>Protocol rules enforced in code</summary>
