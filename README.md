@@ -99,12 +99,12 @@ Download the [CHB-MIT Scalp EEG Database](https://physionet.org/content/chbmit/1
 | **E1** | Baseline 1D-CNN detector (real data, class-weighted cross-entropy) | LOPO complete |
 | **E2** | Non-synthetic controls (SMOTE, ADASYN) | LOPO complete (3 seeds) |
 | **E3** | TimeGAN augmentation (2 ratios: 50/ 100%) | LOPO complete (3 Jun) |
-| **E4** | CVAE augmentation (2 ratios: 50/ 100%) | LOPO in progress (fold 4/22, seed 42) |
+| **E4** | CVAE augmentation (2 ratios: 50/ 100%) | LOPO: seed 42 complete, seed 123 in progress (16/22), seed 456 pending |
 | **E5** | Latent Diffusion augmentation (2 ratios, reuses CVAE encoder) | LOPO queued (after E4) |
 | **E6** | Cross-generator comparison (Wilcoxon, ratio sensitivity, cost-benefit) | After LOPO |
 | **E7** | Subject-identity analysis (linear probe + proximity check) | After E6 |
 
-> **Note (8 Jun 2026):** E3 LOPO complete. TimeGAN hurts at both ratios (AUPRC 0.306/ 0.214 vs 0.394 baseline, -22%/ -46%). E4 LOPO in progress - early results (4 folds, seed 42) show ratio 0.50 performing strongly (mean AUPRC 0.551).
+> **Note (22 Jun 2026):** E4 seed 42 LOPO complete (23 folds); seed 123 at fold 16/22 (currently running TSTR). Ratio 0.50 outperforms 1.00 on seed 42 (AUPRC 0.364 vs 0.276). TSTR yields near-zero AUPRC as expected (0.029 seed 42, 0.010 seed 123 partial). ETA: E4 complete ~4 Jul, E5 complete ~1 Aug, E6+E7 analysis ~3-5 Aug.
 
 ### Results (single-split, 3 seeds)
 
@@ -120,15 +120,19 @@ LDM augmentation improves AUPRC by +29% over baseline with the lowest cross-seed
 
 ### Results (LOPO, 23 folds x 3 seeds)
 
-| Experiment | Generator | Ratio | AUPRC (cross-seed) | AUROC | F1 | Sens. @ 95% Spec. |
-|:----------:|-----------|:-----:|:-------------------:|:-----:|:--:|:-----------------:|
+| Experiment | Generator | Ratio | AUPRC | AUROC | F1 | Sens. @ 95% Spec. |
+|:----------:|-----------|:-----:|:-----:|:-----:|:--:|:-----------------:|
 | **E1** | None (baseline) | - | **0.3941 +/- 0.0228** | 0.8438 +/- 0.0147 | 0.4333 +/- 0.0194 | 0.6459 +/- 0.0123 |
+| **E4**\* | CVAE | 0.50 | 0.3635 +/- 0.3070 | 0.8426 +/- 0.1835 | 0.4012 +/- 0.2888 | 0.6272 +/- 0.3286 |
 | **E3** | TimeGAN | 0.50 | 0.3064 +/- 0.2990 | 0.7779 +/- 0.2235 | 0.3500 +/- 0.2831 | 0.5671 +/- 0.3335 |
+| **E4**\* | CVAE | 1.00 | 0.2758 +/- 0.2979 | 0.7797 +/- 0.2328 | 0.3375 +/- 0.2888 | 0.5551 +/- 0.3561 |
 | **E3** | TimeGAN | 1.00 | 0.2145 +/- 0.2499 | 0.7287 +/- 0.2374 | 0.2778 +/- 0.2501 | 0.4895 +/- 0.3246 |
 | **E2** | ADASYN | - | 0.1844 +/- 0.0550 | 0.6458 +/- 0.0139 | 0.2514 +/- 0.0515 | 0.4046 +/- 0.0416 |
 | **E2** | SMOTE | - | 0.1580 +/- 0.0212 | 0.6283 +/- 0.0193 | 0.2295 +/- 0.0204 | 0.3835 +/- 0.0276 |
 
-E4 LOPO in progress (4/22 folds, seed 42, preliminary AUPRC 0.551 at ratio 0.50). E5 pending. Detailed results, per-fold breakdowns, and fidelity analysis on the [project website](https://vandabarata.github.io/msc-thesis-eeg/).
+\*E4 results are preliminary (seed 42 only, 1/3 seeds). E5 pending. Detailed results, per-fold breakdowns, and fidelity analysis on the [project website](https://vandabarata.github.io/msc-thesis-eeg/).
+
+No augmentation method beats the E1 baseline so far. CVAE at ratio 0.50 comes closest (-7.8%), followed by TimeGAN at 0.50 (-22%). All methods perform worse at higher synthetic ratios. SMOTE/ADASYN remain the weakest (-53% to -60%).
 
 <details>
 <summary>Protocol rules enforced in code</summary>

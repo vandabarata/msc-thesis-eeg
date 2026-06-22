@@ -182,9 +182,9 @@ tailwind.config = {
         <div class="flex flex-wrap items-center gap-3 mb-3 sm:mb-3">
           <a href="#status" class="inline-flex items-center gap-2 bg-iscte-500/10 border border-iscte-500/20 rounded-full px-3 py-1.5 text-cyan-500 text-xs sm:text-sm hover:bg-iscte-500/20 transition-colors">
             <span class="w-2 h-2 bg-iscte-400 rounded-full animate-pulse shrink-0"></span>
-            MSc Thesis &middot; Running ~65%
+            MSc Thesis &middot; Running ~75%
           </a>
-          <span class="text-xs text-gray-600">Last updated: 8 Jun 2026</span>
+          <span class="text-xs text-gray-600">Last updated: 22 Jun 2026</span>
         </div>
         <h1 class="text-3xl sm:text-4xl lg:text-6xl font-extrabold text-white leading-tight mb-3 sm:mb-3">
           Synthetic Data in Healthcare:<br>
@@ -2317,7 +2317,7 @@ tailwind.config = {
       <!-- Gantt chart -->
       <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-3">
         <h3 class="font-semibold text-white mb-1">Phase Overview (30 Mar &ndash; 26 Jul 2026, updated 6 May with measured timings)</h3>
-        <p class="text-xs text-gray-500 mb-3">Sequential execution on a single machine (RTX 3080 Ti 12GB). All single-split experiments (E1-E5) complete. Full LOPO relaunched 5 May 2026 after OOM/disk-full fixes (E2 SMOTE reduced interictal subsample 10x&rarr;5x; E3-E5 now generate+train per fold to fit in 98 GB disk). E1 complete (4 May), E2 complete (14 May), E3 complete (3 Jun), E4 LOPO in progress (fold 4/22, seed 42, started 7 Jun). Measured detector time: ~90 min/fold (mean per seed). Generator times (measured in single-split, estimated ~1.2x in LOPO due to larger training set): TimeGAN ~20 min/fold, CVAE ~50 min/fold, LDM ~68 min/fold. Total LOPO estimate: completing mid-late Jun 2026. Thesis writing ongoing since Jan 2026 (midterm submitted 31 Jan).</p>
+        <p class="text-xs text-gray-500 mb-3">Sequential execution on a single machine (RTX 3080 Ti 12GB). All single-split experiments (E1-E5) complete. Full LOPO relaunched 5 May 2026 after OOM/disk-full fixes (E2 SMOTE reduced interictal subsample 10x&rarr;5x; E3-E5 now generate+train per fold to fit in 98 GB disk). E1 complete (4 May), E2 complete (14 May), E3 complete (3 Jun), E4 seed 42 complete (22 Jun), seed 123 in progress (fold 16/22 TSTR), seed 456 pending. Measured detector time: ~90 min/fold (mean per seed). Generator times (measured in single-split, estimated ~1.2x in LOPO due to larger training set): TimeGAN ~20 min/fold, CVAE ~50 min/fold, LDM ~68 min/fold. ETA: E4 complete ~4 Jul, E5 complete ~1 Aug, E6+E7 ~3-5 Aug. Thesis writing ongoing since Jan 2026 (midterm submitted 31 Jan).</p>
         <div class="chart-wrap" style="height:clamp(260px,40vw,340px)"><canvas id="chart-gantt"></canvas></div>
       </div>
 
@@ -2592,22 +2592,22 @@ tailwind.config = {
 <div id="page-status" class="page">
   <section class="max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12">
     <h1 class="text-3xl font-bold text-white mb-2">Current Status</h1>
-    <p class="text-gray-500 mb-3">Implementation progress. Last updated: 8 Jun 2026. See <a href="#results" data-page="results" class="text-cyan-600 hover:text-cyan-400 hover:underline">Results</a> for experimental data and <a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">Roadmap</a> for the full experiment plan.</p>
+    <p class="text-gray-500 mb-3">Implementation progress. Last updated: 22 Jun 2026. See <a href="#results" data-page="results" class="text-cyan-600 hover:text-cyan-400 hover:underline">Results</a> for experimental data and <a href="#roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">Roadmap</a> for the full experiment plan.</p>
 
     <!-- Progress overview -->
     <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-3">
       <div class="flex items-center gap-4 mb-3">
         <h3 class="font-semibold text-white">Overall Thesis Progress</h3>
-        <span class="text-2xl font-bold text-cyan-500">~65%</span>
+        <span class="text-2xl font-bold text-cyan-500">~75%</span>
       </div>
       <div class="w-full bg-gray-800 rounded-full h-4 mb-3 overflow-hidden">
-        <div class="h-full rounded-full bg-gradient-to-r from-iscte-500 to-cyan-500 relative" style="width: 65%">
+        <div class="h-full rounded-full bg-gradient-to-r from-iscte-500 to-cyan-500 relative" style="width: 75%">
           <div class="absolute inset-0 bg-white/10 animate-pulse rounded-full"></div>
         </div>
       </div>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs">
         <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3">
-          <div class="text-emerald-400 font-bold text-lg">5</div>
+          <div class="text-emerald-400 font-bold text-lg">6</div>
           <div class="text-gray-400">Phases Complete</div>
         </div>
         <div class="bg-iscte-500/10 border border-iscte-500/30 rounded-lg p-3">
@@ -2645,8 +2645,8 @@ tailwind.config = {
         <h3 class="font-semibold text-white mb-3 text-sm">What's Left</h3>
         <div class="space-y-2 text-xs">
           <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-1 mb-1">Full evaluation (in progress)</div>
-          <div class="flex items-start gap-2"><span class="text-iscte-400 shrink-0">&#9654;</span><span class="text-gray-400">Full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> evaluation (23 folds &times; 3 seeds per experiment) - relaunched 5 May 2026 after OOM/disk-full fixes. E1 complete (4 May). E2 complete (14 May). E3 complete (3 Jun). E4 LOPO in progress (fold 4/22, seed 42). E5 pending. Estimated completion mid Jun 2026</span></div>
-          <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">Run E6 + E7 (after E3-E5 LOPO completes)</span></div>
+          <div class="flex items-start gap-2"><span class="text-iscte-400 shrink-0">&#9654;</span><span class="text-gray-400">Full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> evaluation (23 folds &times; 3 seeds per experiment) - relaunched 5 May 2026 after OOM/disk-full fixes. E1 complete (4 May). E2 complete (14 May). E3 complete (3 Jun). E4 seed 42 complete (22 Jun), seed 123 in progress (fold 16/22 TSTR), seed 456 pending. E4 complete ~4 Jul. E5 complete ~1 Aug</span></div>
+          <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">Run E6 + E7 (after E3-E5 LOPO completes, ~3&ndash;5 Aug)</span></div>
           <div class="text-gray-500 font-semibold uppercase tracking-wide text-[10px] mt-3 mb-1">Thesis document (Chapters 1&ndash;5 written, 29 pages)</div>
           <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">Results &amp; Discussion chapter (after LOPO + E6/E7 complete)</span></div>
           <div class="flex items-start gap-2"><span class="text-amber-400 shrink-0">&#9679;</span><span class="text-gray-400">Expand Chapter 6 - conclusions, limitations, future work</span></div>
@@ -2661,7 +2661,7 @@ tailwind.config = {
         <span class="text-xs font-semibold text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 px-2 py-0.5 rounded">STAGE 2 OF 2 - RUNNING</span>
         <h3 class="font-semibold text-white text-sm">Full <a href="#gl-lopo" class="text-cyan-600 hover:text-cyan-400 hover:underline">LOPO</a> evaluation in progress</h3>
       </div>
-      <p class="text-xs text-gray-400 leading-relaxed">23 folds &times; 3 seeds = 69 runs per experiment per ratio. E1 complete (AUPRC 0.394 &plusmn; 0.023); E2-E5 running (estimated mid Jun 2026). See <a href="#results" data-page="results" class="text-cyan-600 hover:text-cyan-400 hover:underline">Results</a> for all experimental data.</p>
+      <p class="text-xs text-gray-400 leading-relaxed">23 folds &times; 3 seeds = 69 runs per experiment per ratio. E1 complete; E2 complete; E3 complete; E4 seed 42 complete (AUPRC 0.364 at r=0.50), seed 123 at fold 16/22, seed 456 pending (~4 Jul). E5 pending (~1 Aug). E6+E7 analysis ~3&ndash;5 Aug. See <a href="#results" data-page="results" class="text-cyan-600 hover:text-cyan-400 hover:underline">Results</a> for all experimental data.</p>
     </div>
 
     <!-- Decisions made during experiments -->
@@ -2691,7 +2691,7 @@ tailwind.config = {
 <div id="page-results" class="page">
   <section class="max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12">
     <h1 class="text-3xl font-bold text-white mb-2">Experimental Results</h1>
-    <p class="text-gray-500 mb-3">LOPO and single-split results for all experiments. See <a href="#roadmap" data-page="roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">Roadmap</a> for experiment definitions, <a href="#models" data-page="models" class="text-cyan-600 hover:text-cyan-400 hover:underline">Models</a> for architecture details, and <a href="#runtime-decisions" data-page="status" class="text-cyan-600 hover:text-cyan-400 hover:underline">runtime decisions</a> for issues encountered during execution. Last updated: 8 Jun 2026.</p>
+    <p class="text-gray-500 mb-3">LOPO and single-split results for all experiments. See <a href="#roadmap" data-page="roadmap" class="text-cyan-600 hover:text-cyan-400 hover:underline">Roadmap</a> for experiment definitions, <a href="#models" data-page="models" class="text-cyan-600 hover:text-cyan-400 hover:underline">Models</a> for architecture details, and <a href="#runtime-decisions" data-page="status" class="text-cyan-600 hover:text-cyan-400 hover:underline">runtime decisions</a> for issues encountered during execution. Last updated: 22 Jun 2026.</p>
 
     <!-- E1 LOPO Results -->
     <div id="lopo-results" class="bg-gray-900 border border-emerald-500/30 rounded-xl p-5 mb-3">
@@ -2885,45 +2885,96 @@ tailwind.config = {
       </div>
     </div>
 
-    <!-- E4 LOPO Results (partial) -->
+    <!-- E4 LOPO Results (partial - seed 42 complete, seed 123 in progress) -->
     <div class="bg-gray-900 border border-cyan-500/30 rounded-xl p-5 mb-3">
       <div class="flex items-center gap-3 mb-3">
         <div class="w-8 h-8 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-500 font-bold text-sm shrink-0">E4</div>
         <div>
-          <h3 class="font-semibold text-white text-sm">E4 CVAE - LOPO Results (in progress: 4/22 folds, seed 42)</h3>
-          <p class="text-xs text-gray-500">Running since 7 Jun 2026 - <a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a>-generated ictal windows per fold, 2 ratios (50%, 100%)</p>
+          <h3 class="font-semibold text-white text-sm">E4 CVAE - LOPO Results (in progress: seed 42 complete, seed 123 16/22)</h3>
+          <p class="text-xs text-gray-500">Running since 7 Jun 2026 - <a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a>-generated ictal windows per fold, 2 ratios (50%, 100%) + <a href="#gl-tstr" class="text-cyan-600 hover:text-cyan-400 hover:underline">TSTR</a></p>
         </div>
         <span class="ml-auto text-xs font-semibold text-iscte-400 bg-iscte-500/10 border border-iscte-500/30 px-2 py-0.5 rounded">IN PROGRESS</span>
       </div>
       <div class="overflow-x-auto">
-        <p class="text-xs text-gray-600 mb-1">Preliminary: 4 folds completed (seed 42 only). Full results (23 folds &times; 3 seeds) pending.</p>
+        <p class="text-xs text-gray-600 mb-1">Seed 42 complete (23 folds, all ratios + TSTR). Seed 123 in progress (16/22 folds). Seed 456 pending.</p>
         <table class="w-full text-xs">
-          <thead><tr class="border-b border-gray-700 text-left text-gray-500"><th class="py-2 pr-3">Fold</th><th class="py-2 pr-3">Patient</th><th class="py-2 pr-3">AUPRC (r=0.50)</th><th class="py-2 pr-3">AUROC (r=0.50)</th><th class="py-2 pr-3">AUPRC (r=1.00)</th><th class="py-2">AUROC (r=1.00)</th></tr></thead>
+          <thead><tr class="border-b border-gray-700 text-left text-gray-500"><th class="py-2 pr-3">Metric</th><th class="py-2 pr-3">Seed 42 (23 folds)</th><th class="py-2 pr-3">Seed 123 (partial)</th><th class="py-2">E1 Baseline</th></tr></thead>
           <tbody class="text-gray-400">
-            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3">0</td><td class="py-2 pr-3">chb01+chb21</td><td class="py-2 pr-3 text-emerald-400 font-semibold">0.626</td><td class="py-2 pr-3">0.965</td><td class="py-2 pr-3">0.624</td><td class="py-2">0.938</td></tr>
-            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3">1</td><td class="py-2 pr-3">chb02</td><td class="py-2 pr-3 text-emerald-400 font-semibold">0.843</td><td class="py-2 pr-3">0.993</td><td class="py-2 pr-3">0.545</td><td class="py-2">0.986</td></tr>
-            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3">2</td><td class="py-2 pr-3">chb03</td><td class="py-2 pr-3">0.354</td><td class="py-2 pr-3">0.952</td><td class="py-2 pr-3 text-rose-400">0.017</td><td class="py-2 text-rose-400">0.439</td></tr>
-            <tr><td class="py-2 pr-3">3</td><td class="py-2 pr-3">chb04</td><td class="py-2 pr-3">0.382</td><td class="py-2 pr-3">0.964</td><td class="py-2 pr-3">0.074</td><td class="py-2">0.961</td></tr>
+            <tr class="border-b border-gray-800/50 font-semibold uppercase text-[10px] text-gray-500"><td colspan="4" class="py-2">Ratio 0.50</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-gray-300 font-medium"><a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></td><td class="py-2 pr-3 text-cyan-400 font-semibold">0.3635 &plusmn; 0.3070</td><td class="py-2 pr-3">0.2273 &plusmn; 0.2777 (16 folds)</td><td class="py-2 text-emerald-400">0.3941 &plusmn; 0.0228</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-gray-300 font-medium"><a href="#gl-auroc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUROC</a></td><td class="py-2 pr-3">0.8426 &plusmn; 0.1835</td><td class="py-2 pr-3">&mdash;</td><td class="py-2">0.8438 &plusmn; 0.0147</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-gray-300 font-medium"><a href="#gl-f1" class="text-cyan-600 hover:text-cyan-400 hover:underline">F1</a></td><td class="py-2 pr-3">0.4012 &plusmn; 0.2888</td><td class="py-2 pr-3">&mdash;</td><td class="py-2">0.4333 &plusmn; 0.0194</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-gray-300 font-medium"><a href="#gl-sens95spec" class="text-cyan-600 hover:text-cyan-400 hover:underline">Sens. @ 95% Spec.</a></td><td class="py-2 pr-3">0.6272 &plusmn; 0.3286</td><td class="py-2 pr-3">&mdash;</td><td class="py-2">0.6459 &plusmn; 0.0123</td></tr>
+            <tr class="border-b border-gray-800/50 font-semibold uppercase text-[10px] text-gray-500"><td colspan="4" class="py-2 pt-3">Ratio 1.00</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-gray-300 font-medium"><a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></td><td class="py-2 pr-3">0.2758 &plusmn; 0.2979</td><td class="py-2 pr-3">0.2589 &plusmn; 0.2985 (16 folds)</td><td class="py-2 text-emerald-400">0.3941 &plusmn; 0.0228</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-gray-300 font-medium"><a href="#gl-auroc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUROC</a></td><td class="py-2 pr-3">0.7797 &plusmn; 0.2328</td><td class="py-2 pr-3">&mdash;</td><td class="py-2">0.8438 &plusmn; 0.0147</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-gray-300 font-medium"><a href="#gl-f1" class="text-cyan-600 hover:text-cyan-400 hover:underline">F1</a></td><td class="py-2 pr-3">0.3375 &plusmn; 0.2888</td><td class="py-2 pr-3">&mdash;</td><td class="py-2">0.4333 &plusmn; 0.0194</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-gray-300 font-medium"><a href="#gl-sens95spec" class="text-cyan-600 hover:text-cyan-400 hover:underline">Sens. @ 95% Spec.</a></td><td class="py-2 pr-3">0.5551 &plusmn; 0.3561</td><td class="py-2 pr-3">&mdash;</td><td class="py-2">0.6459 &plusmn; 0.0123</td></tr>
+            <tr class="border-b border-gray-800/50 font-semibold uppercase text-[10px] text-gray-500"><td colspan="4" class="py-2 pt-3">TSTR (synthetic ictal + real interictal only)</td></tr>
+            <tr><td class="py-2 pr-3 text-gray-300 font-medium"><a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a></td><td class="py-2 pr-3 text-rose-400">0.0287 &plusmn; 0.0707</td><td class="py-2 pr-3 text-rose-400">0.0096 &plusmn; 0.0151 (16 folds)</td><td class="py-2">&mdash;</td></tr>
           </tbody>
         </table>
       </div>
-      <div class="mt-3 grid grid-cols-2 gap-3 text-xs">
+      <div class="mt-3 grid grid-cols-3 gap-3 text-xs">
         <div class="bg-gray-800/40 rounded p-2 text-center">
-          <div class="text-gray-500">Ratio 0.50 (4 folds)</div>
-          <div class="text-emerald-400 font-semibold">Mean AUPRC: 0.551</div>
-          <div class="text-gray-400">AUROC: 0.968</div>
+          <div class="text-gray-500">Ratio 0.50 (seed 42)</div>
+          <div class="text-cyan-400 font-semibold">AUPRC: 0.3635</div>
+          <div class="text-gray-400">vs E1: -7.8%</div>
         </div>
         <div class="bg-gray-800/40 rounded p-2 text-center">
-          <div class="text-gray-500">Ratio 1.00 (4 folds)</div>
-          <div class="text-gray-400">Mean AUPRC: 0.315</div>
-          <div class="text-gray-400">AUROC: 0.831</div>
+          <div class="text-gray-500">Ratio 1.00 (seed 42)</div>
+          <div class="text-gray-400">AUPRC: 0.2758</div>
+          <div class="text-rose-400">vs E1: -30%</div>
+        </div>
+        <div class="bg-gray-800/40 rounded p-2 text-center">
+          <div class="text-gray-500">TSTR (seed 42)</div>
+          <div class="text-rose-400">AUPRC: 0.0287</div>
+          <div class="text-gray-400">synth-only signal</div>
         </div>
       </div>
       <div class="mt-3 text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-3 space-y-2">
-        <strong class="text-gray-400">Early observations (4 folds, preliminary):</strong>
-        <p><a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a> at ratio 0.50 is performing strongly on the first 4 folds (mean AUPRC 0.551 vs E1 baseline ~0.394). Folds 0 and 1 show excellent detection (AUPRC 0.63-0.84), while folds 2-3 are moderate but still above many E1 per-fold scores.</p>
-        <p><strong class="text-gray-400">Ratio 0.50 clearly outperforms 1.00</strong> - ratio 1.00 shows a catastrophic failure on fold 2 (chb03: AUPRC 0.017, AUROC 0.44), suggesting too much synthetic data overwhelms the real signal for some patients. This echoes the TimeGAN finding.</p>
-        <p class="text-gray-600">Remaining: folds 4-22 (seed 42), then seeds 123 and 456. Currently running fold 4 classification.</p>
+        <strong class="text-gray-400">Observations (seed 42 complete, 23 folds):</strong>
+        <p><a href="#gl-cvae" class="text-cyan-600 hover:text-cyan-400 hover:underline">CVAE</a> at ratio 0.50 achieves AUPRC 0.3635, which is close to but does not beat the E1 baseline (0.3941, a -7.8% gap). The early 4-fold result (0.551) was optimistic - the full 23-fold average is much lower due to hard patients with atypical seizure morphology pulling down the mean.</p>
+        <p><strong class="text-gray-400">Ratio 0.50 clearly outperforms 1.00</strong> (0.3635 vs 0.2758) - same pattern as TimeGAN (E3). More synthetic data does not help; at ratio 1.00 the augmentation actively hurts (-30% vs E1). However, at ratio 0.50 CVAE is far less damaging than TimeGAN was (-7.8% vs TimeGAN's -22%).</p>
+        <p><strong class="text-gray-400">TSTR is very low</strong> (AUPRC 0.0287) - a detector trained only on synthetic ictal + real interictal performs near chance. This means the synthetic data alone carries very little discriminative signal; the utility of CVAE comes specifically from augmenting (not replacing) real ictal data.</p>
+        <p><strong class="text-gray-400">Cross-seed variance</strong> - seed 123 partial results (16 folds) show lower AUPRC than seed 42 at both ratios, though the comparison is not yet fair (7 folds still missing). Final cross-seed statistics will follow once all 3 seeds are complete.</p>
+        <p class="text-gray-600">Remaining: seed 123 TSTR fold 16/22 running (~24 Jun), then seed 456 (generation + classification + TSTR, ~4 Jul). E5 LDM follows (~1 Aug). All experiments ~early Aug.</p>
+      </div>
+    </div>
+
+    <!-- Cross-experiment synthesis -->
+    <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 mb-3">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-14 h-8 rounded-full bg-gray-700/50 border border-gray-600 flex items-center justify-center text-gray-300 font-bold text-xs shrink-0">LOPO</div>
+        <div>
+          <h3 class="font-semibold text-white text-sm">Cross-Experiment Summary (E1&ndash;E4, as of 22 Jun 2026)</h3>
+          <p class="text-xs text-gray-500">Ranking by AUPRC. E5 (LDM) LOPO pending.</p>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto mb-3">
+        <table class="w-full text-xs">
+          <thead><tr class="border-b border-gray-700 text-left text-gray-500"><th class="py-2 pr-3">Experiment</th><th class="py-2 pr-3">Method</th><th class="py-2 pr-3">Ratio</th><th class="py-2 pr-3">AUPRC</th><th class="py-2">vs E1 Baseline</th></tr></thead>
+          <tbody class="text-gray-400">
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-gray-300 font-medium">E1</td><td class="py-2 pr-3">None (baseline)</td><td class="py-2 pr-3">&mdash;</td><td class="py-2 pr-3 text-emerald-400 font-semibold">0.394</td><td class="py-2">&mdash;</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-gray-300 font-medium">E4*</td><td class="py-2 pr-3">CVAE</td><td class="py-2 pr-3">0.50</td><td class="py-2 pr-3 text-cyan-400">0.364</td><td class="py-2 text-amber-400">-7.8%</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-gray-300 font-medium">E3</td><td class="py-2 pr-3">TimeGAN</td><td class="py-2 pr-3">0.50</td><td class="py-2 pr-3">0.306</td><td class="py-2 text-rose-400">-22%</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-gray-300 font-medium">E4*</td><td class="py-2 pr-3">CVAE</td><td class="py-2 pr-3">1.00</td><td class="py-2 pr-3">0.276</td><td class="py-2 text-rose-400">-30%</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-gray-300 font-medium">E3</td><td class="py-2 pr-3">TimeGAN</td><td class="py-2 pr-3">1.00</td><td class="py-2 pr-3">0.214</td><td class="py-2 text-rose-400">-46%</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-gray-300 font-medium">E2</td><td class="py-2 pr-3">ADASYN</td><td class="py-2 pr-3">&mdash;</td><td class="py-2 pr-3">0.184</td><td class="py-2 text-rose-400">-53%</td></tr>
+            <tr><td class="py-2 pr-3 text-gray-300 font-medium">E2</td><td class="py-2 pr-3">SMOTE</td><td class="py-2 pr-3">&mdash;</td><td class="py-2 pr-3">0.158</td><td class="py-2 text-rose-400">-60%</td></tr>
+          </tbody>
+        </table>
+        <p class="text-xs text-gray-600 mt-1">*E4 preliminary (seed 42 only). E3 and E2 are 3-seed averages.</p>
+      </div>
+
+      <div class="text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-3 space-y-2">
+        <strong class="text-gray-400">Emerging findings:</strong>
+        <p><strong class="text-white">No augmentation method beats the E1 baseline under strict LOPO.</strong> Every approach &mdash; from naive oversampling (SMOTE/ADASYN) to learned generators (TimeGAN, CVAE) &mdash; degrades detection performance. The detector is better off with the original imbalanced dataset.</p>
+        <p><strong class="text-gray-400">Less synthetic data = less damage.</strong> Ratio 0.50 consistently outperforms 1.00 across both generators. More synthetic data amplifies artefacts rather than adding useful signal.</p>
+        <p><strong class="text-gray-400">Generator quality matters.</strong> CVAE (-7.8%) is far less harmful than TimeGAN (-22%) at the same ratio, correlating with its superior spectral fidelity (KL 0.004&ndash;0.041 vs TimeGAN&rsquo;s 1.84&ndash;2.78 in beta/gamma). Better data quality &rarr; less damage, but still not positive gain.</p>
+        <p><strong class="text-gray-400">TSTR confirms synthetic data alone is insufficient.</strong> Detectors trained only on synthetic ictal + real interictal achieve AUPRC ~0.03 (near chance). Synthetic seizures supplement but cannot replace real data.</p>
+        <p><strong class="text-gray-400">Single-split was misleading.</strong> LDM appeared best in single-split (+29% over baseline), but single-split tests on only 4 patients. LOPO across all 23 patients may tell a different story &mdash; E5 LOPO results (~Aug) will be decisive.</p>
       </div>
     </div>
 
