@@ -3362,6 +3362,20 @@ tailwind.config = {
         </table>
       </div>
 
+      <div id="single-split-per-patient" class="overflow-x-auto mb-3">
+        <p class="text-xs text-gray-600 mb-1">Per-patient AUPRC on the 4 test patients (chb19, chb21, chb22, chb23), mean across 3 seeds:</p>
+        <table class="w-full text-xs">
+          <thead><tr class="border-b border-gray-700 text-left text-gray-500"><th class="py-2 pr-3">Experiment</th><th class="py-2 pr-3">chb19</th><th class="py-2 pr-3">chb21</th><th class="py-2 pr-3">chb22</th><th class="py-2 pr-3">chb23</th><th class="py-2">Mean</th></tr></thead>
+          <tbody class="text-gray-400">
+            <tr class="border-b border-gray-800/50 bg-gray-800/20"><td class="py-2 pr-3 text-white font-medium">E1 Baseline</td><td class="py-2 pr-3">0.025</td><td class="py-2 pr-3">0.346</td><td class="py-2 pr-3">0.292</td><td class="py-2 pr-3">0.243</td><td class="py-2 font-semibold text-white">0.226</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-rsch-400 font-medium">E3 TimeGAN</td><td class="py-2 pr-3 text-rose-400">0.004</td><td class="py-2 pr-3 text-rose-400">0.174</td><td class="py-2 pr-3 text-rose-400">0.134</td><td class="py-2 pr-3">0.209</td><td class="py-2 text-rose-400">0.130</td></tr>
+            <tr class="border-b border-gray-800/50"><td class="py-2 pr-3 text-cyan-400 font-medium">E4 CVAE</td><td class="py-2 pr-3 text-emerald-400">0.054</td><td class="py-2 pr-3">0.371</td><td class="py-2 pr-3">0.321</td><td class="py-2 pr-3 text-rose-400">0.126</td><td class="py-2">0.218</td></tr>
+            <tr><td class="py-2 pr-3 text-emerald-400 font-medium">E5 LDM</td><td class="py-2 pr-3 text-emerald-400">0.039</td><td class="py-2 pr-3 text-emerald-400 font-semibold">0.585</td><td class="py-2 pr-3 text-emerald-400">0.340</td><td class="py-2 pr-3 text-rose-400">0.187</td><td class="py-2 text-emerald-400 font-semibold">0.288</td></tr>
+          </tbody>
+        </table>
+        <p class="text-xs text-gray-600 mt-1">LDM improves 3/4 test patients vs baseline. chb19 is near-zero across all conditions. chb21 shows the largest LDM gain (0.346 to 0.585).</p>
+      </div>
+
       <div class="text-xs text-gray-500 bg-gray-800/30 border border-gray-700/30 rounded p-3 space-y-2">
         <strong class="text-gray-400">What this means:</strong>
         <p><strong class="text-white">E1 baseline</strong> (real data + <a href="#gl-classweighted" class="text-cyan-600 hover:text-cyan-400 hover:underline">class-weighted loss</a>) achieves <a href="#gl-auprc" class="text-cyan-600 hover:text-cyan-400 hover:underline">AUPRC</a> 0.177 - this is the bar everything else must beat. Note the high variance across seeds, typical for small test sets.</p>
