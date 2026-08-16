@@ -371,16 +371,23 @@ def _run_lopo(args, device: str, experiment: str):
 
         save_dir = RESULTS_DIR / experiment / f"seed_{args.seed}" / f"fold_{fold:02d}"
 
-        # Skip if already done: either npz files exist (generation complete) or
-        # detector results exist (training already consumed the synthetic data)
-        has_npz = all((save_dir / f"synthetic_ratio_{r:.2f}.npz").exists() for r in args.ratio)
-        has_results = (
-            (save_dir / "results.json").exists()
-            or (save_dir / "results_ratio_1.00.json").exists()
-        )
-        if has_npz or has_results:
-            print(f"  Skipping fold {fold} — already complete")
-            continue
+        # --checkpoint-only: skip if checkpoint already exists
+        if getattr(args, "checkpoint_only", False):
+            ckpt_path = save_dir / f"{args.model}.pt"
+            if ckpt_path.exists():
+                print(f"  Skipping fold {fold} — checkpoint already exists")
+                continue
+        else:
+            # Skip if already done: either npz files exist (generation complete) or
+            # detector results exist (training already consumed the synthetic data)
+            has_npz = all((save_dir / f"synthetic_ratio_{r:.2f}.npz").exists() for r in args.ratio)
+            has_results = (
+                (save_dir / "results.json").exists()
+                or (save_dir / "results_ratio_1.00.json").exists()
+            )
+            if has_npz or has_results:
+                print(f"  Skipping fold {fold} — already complete")
+                continue
 
         train_ds = CHBMITDataset(
             split="train", fold=fold, seed=args.seed, normalize=False,
@@ -407,19 +414,20 @@ def _run_lopo(args, device: str, experiment: str):
             model = _train_generator(args, train_ds, device)
             save_generator(model, save_dir, args.model)
 
-            for ratio in args.ratio:
-                synthetic = generate_synthetic(model, n_ictal, ratio, device, seed=args.seed)
-                save_synthetic_windows(synthetic, save_dir, ratio)
+            if not getattr(args, "checkpoint_only", False):
+                for ratio in args.ratio:
+                    synthetic = generate_synthetic(model, n_ictal, ratio, device, seed=args.seed)
+                    save_synthetic_windows(synthetic, save_dir, ratio)
 
-            # Fidelity plots per fold
-            fidelity_ratio = 1.0 if 1.0 in args.ratio else args.ratio[0]
-            synth_path = save_dir / f"synthetic_ratio_{fidelity_ratio:.2f}.npz"
-            if synth_path.exists():
-                _run_fidelity_plots(
-                    train_ds, synth_path,
-                    output_dir=save_dir / "plots",
-                    generator_name=f"{args.model.upper()} fold {fold}",
-                )
+                # Fidelity plots per fold
+                fidelity_ratio = 1.0 if 1.0 in args.ratio else args.ratio[0]
+                synth_path = save_dir / f"synthetic_ratio_{fidelity_ratio:.2f}.npz"
+                if synth_path.exists():
+                    _run_fidelity_plots(
+                        train_ds, synth_path,
+                        output_dir=save_dir / "plots",
+                        generator_name=f"{args.model.upper()} fold {fold}",
+                    )
         except RuntimeError as exc:
             print(f"  ERROR: fold {fold} failed — {exc}")
             print(f"  Skipping fold {fold}, continuing with remaining folds.")
@@ -482,6 +490,8 @@ Examples:
                         help="Override default epoch count")
     parser.add_argument("--folds", type=int, nargs="+", default=None,
                         help="Specific LOPO folds (default: all 23)")
+    parser.add_argument("--checkpoint-only", action="store_true",
+                        help="Only train and save the generator checkpoint (no synthetic data)")
 
     args = parser.parse_args()
     device = args.device or ("cuda" if torch.cuda.is_available() else "cpu")

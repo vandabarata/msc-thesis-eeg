@@ -1,0 +1,316 @@
+{
+  "per_fold": [
+    {
+      "fold": 0,
+      "test_patients": [
+        "chb01",
+        "chb21"
+      ],
+      "baseline_auprc": 0.6581113465237396,
+      "ldm_050_auprc": 0.4966738965132773,
+      "cvae_050_auprc": 0.5777586300606834,
+      "timegan_050_auprc": 0.46883140605351,
+      "ldm_diff": -0.16143745001046228,
+      "best_augmentation": "CVAE",
+      "best_aug_diff": -0.0803527164630562
+    },
+    {
+      "fold": 1,
+      "test_patients": [
+        "chb02"
+      ],
+      "baseline_auprc": 0.7670869916433835,
+      "ldm_050_auprc": 0.6320875386265782,
+      "cvae_050_auprc": 0.7541173750548745,
+      "timegan_050_auprc": 0.6004727994716756,
+      "ldm_diff": -0.13499945301680527,
+      "best_augmentation": "CVAE",
+      "best_aug_diff": -0.012969616588508925
+    },
+    {
+      "fold": 2,
+      "test_patients": [
+        "chb03"
+      ],
+      "baseline_auprc": 0.6462640740966236,
+      "ldm_050_auprc": 0.48846815720685194,
+      "cvae_050_auprc": 0.20710486842426157,
+      "timegan_050_auprc": 0.3276625980480339,
+      "ldm_diff": -0.15779591688977163,
+      "best_augmentation": "LDM",
+      "best_aug_diff": -0.15779591688977163
+    },
+    {
+      "fold": 3,
+      "test_patients": [
+        "chb04"
+      ],
+      "baseline_auprc": 0.218880615292219,
+      "ldm_050_auprc": 0.11602419969879264,
+      "cvae_050_auprc": 0.16232256000222672,
+      "timegan_050_auprc": 0.16352924113169331,
+      "ldm_diff": -0.10285641559342636,
+      "best_augmentation": "TimeGAN",
+      "best_aug_diff": -0.055351374160525685
+    },
+    {
+      "fold": 4,
+      "test_patients": [
+        "chb05"
+      ],
+      "baseline_auprc": 0.4735570491273871,
+      "ldm_050_auprc": 0.266714498593612,
+      "cvae_050_auprc": 0.368500976938331,
+      "timegan_050_auprc": 0.6175410235532103,
+      "ldm_diff": -0.2068425505337751,
+      "best_augmentation": "TimeGAN",
+      "best_aug_diff": 0.14398397442582317
+    },
+    {
+      "fold": 5,
+      "test_patients": [
+        "chb06"
+      ],
+      "baseline_auprc": 0.000768977270308998,
+      "ldm_050_auprc": 0.0014046978618084134,
+      "cvae_050_auprc": 0.0016286512317541639,
+      "timegan_050_auprc": 0.0009343641526424365,
+      "ldm_diff": 0.0006357205914994154,
+      "best_augmentation": "CVAE",
+      "best_aug_diff": 0.0008596739614451659
+    },
+    {
+      "fold": 6,
+      "test_patients": [
+        "chb07"
+      ],
+      "baseline_auprc": 0.7285674764450564,
+      "ldm_050_auprc": 0.49221094311451014,
+      "cvae_050_auprc": 0.3635640718512246,
+      "timegan_050_auprc": 0.6266336481939155,
+      "ldm_diff": -0.23635653333054624,
+      "best_augmentation": "TimeGAN",
+      "best_aug_diff": -0.10193382825114083
+    },
+    {
+      "fold": 7,
+      "test_patients": [
+        "chb08"
+      ],
+      "baseline_auprc": 0.21808846026247475,
+      "ldm_050_auprc": 0.16666911848058527,
+      "cvae_050_auprc": 0.24862096616210108,
+      "timegan_050_auprc": 0.18875238300299937,
+      "ldm_diff": -0.05141934178188948,
+      "best_augmentation": "CVAE",
+      "best_aug_diff": 0.030532505899626333
+    },
+    {
+      "fold": 8,
+      "test_patients": [
+        "chb09"
+      ],
+      "baseline_auprc": 0.8954092122590138,
+      "ldm_050_auprc": 0.9283508888351476,
+      "cvae_050_auprc": 0.9343018716249842,
+      "timegan_050_auprc": 0.8690148553347264,
+      "ldm_diff": 0.03294167657613378,
+      "best_augmentation": "CVAE",
+      "best_aug_diff": 0.03889265936597042
+    },
+    {
+      "fold": 9,
+      "test_patients": [
+        "chb10"
+      ],
+      "baseline_auprc": 0.8151516321342948,
+      "ldm_050_auprc": 0.7520864616337528,
+      "cvae_050_auprc": 0.47158745790127576,
+      "timegan_050_auprc": 0.5585109803138882,
+      "ldm_diff": -0.06306517050054194,
+      "best_augmentation": "LDM",
+      "best_aug_diff": -0.06306517050054194
+    },
+    {
+      "fold": 10,
+      "test_patients": [
+        "chb11"
+      ],
+      "baseline_auprc": 0.9245974779316778,
+      "ldm_050_auprc": 0.9534140232303141,
+      "cvae_050_auprc": 0.5230551139421353,
+      "timegan_050_auprc": 0.7711941281082922,
+      "ldm_diff": 0.02881654529863631,
+      "best_augmentation": "LDM",
+      "best_aug_diff": 0.02881654529863631
+    },
+    {
+      "fold": 11,
+      "test_patients": [
+        "chb12"
+      ],
+      "baseline_auprc": 0.0643647840454629,
+      "ldm_050_auprc": 0.10138281304800649,
+      "cvae_050_auprc": 0.04186618802879891,
+      "timegan_050_auprc": 0.03425099911236326,
+      "ldm_diff": 0.037018029002543584,
+      "best_augmentation": "LDM",
+      "best_aug_diff": 0.037018029002543584
+    },
+    {
+      "fold": 12,
+      "test_patients": [
+        "chb13"
+      ],
+      "baseline_auprc": 0.05698178952937175,
+      "ldm_050_auprc": 0.07281381484089444,
+      "cvae_050_auprc": 0.0634639776606447,
+      "timegan_050_auprc": 0.07355148919963465,
+      "ldm_diff": 0.01583202531152269,
+      "best_augmentation": "TimeGAN",
+      "best_aug_diff": 0.0165696996702629
+    },
+    {
+      "fold": 13,
+      "test_patients": [
+        "chb14"
+      ],
+      "baseline_auprc": 0.00167043665503411,
+      "ldm_050_auprc": 0.02942590428614982,
+      "cvae_050_auprc": 0.0029391849198476916,
+      "timegan_050_auprc": 0.0030829043001003933,
+      "ldm_diff": 0.027755467631115707,
+      "best_augmentation": "LDM",
+      "best_aug_diff": 0.027755467631115707
+    },
+    {
+      "fold": 14,
+      "test_patients": [
+        "chb15"
+      ],
+      "baseline_auprc": 0.2472976525003859,
+      "ldm_050_auprc": 0.0185837958521827,
+      "cvae_050_auprc": 0.058524978273770976,
+      "timegan_050_auprc": 0.04385127381195044,
+      "ldm_diff": -0.2287138566482032,
+      "best_augmentation": "CVAE",
+      "best_aug_diff": -0.18877267422661492
+    },
+    {
+      "fold": 15,
+      "test_patients": [
+        "chb16"
+      ],
+      "baseline_auprc": 0.011617821096987913,
+      "ldm_050_auprc": 0.004571985320083799,
+      "cvae_050_auprc": 0.0019967892641536114,
+      "timegan_050_auprc": 0.0021064006692464864,
+      "ldm_diff": -0.007045835776904114,
+      "best_augmentation": "LDM",
+      "best_aug_diff": -0.007045835776904114
+    },
+    {
+      "fold": 16,
+      "test_patients": [
+        "chb17"
+      ],
+      "baseline_auprc": 0.15870837977099805,
+      "ldm_050_auprc": 0.041280073131279536,
+      "cvae_050_auprc": 0.21024593289473267,
+      "timegan_050_auprc": 0.11065548735671145,
+      "ldm_diff": -0.11742830663971851,
+      "best_augmentation": "CVAE",
+      "best_aug_diff": 0.05153755312373462
+    },
+    {
+      "fold": 17,
+      "test_patients": [
+        "chb18"
+      ],
+      "baseline_auprc": 0.21552843380711337,
+      "ldm_050_auprc": 0.2202518976355565,
+      "cvae_050_auprc": 0.1978859585506628,
+      "timegan_050_auprc": 0.12521571122357422,
+      "ldm_diff": 0.004723463828443131,
+      "best_augmentation": "LDM",
+      "best_aug_diff": 0.004723463828443131
+    },
+    {
+      "fold": 18,
+      "test_patients": [
+        "chb19"
+      ],
+      "baseline_auprc": 0.7106196237542619,
+      "ldm_050_auprc": 0.6324588922964688,
+      "cvae_050_auprc": 0.6134705844502648,
+      "timegan_050_auprc": 0.3689873129247075,
+      "ldm_diff": -0.07816073145779312,
+      "best_augmentation": "LDM",
+      "best_aug_diff": -0.07816073145779312
+    },
+    {
+      "fold": 19,
+      "test_patients": [
+        "chb20"
+      ],
+      "baseline_auprc": 0.010871858678070447,
+      "ldm_050_auprc": 0.007794030313968505,
+      "cvae_050_auprc": 0.004981065922962165,
+      "timegan_050_auprc": 0.035494586679558855,
+      "ldm_diff": -0.0030778283641019416,
+      "best_augmentation": "TimeGAN",
+      "best_aug_diff": 0.02462272800148841
+    },
+    {
+      "fold": 20,
+      "test_patients": [
+        "chb22"
+      ],
+      "baseline_auprc": 0.6514150832645996,
+      "ldm_050_auprc": 0.5661528033821702,
+      "cvae_050_auprc": 0.4238796543253747,
+      "timegan_050_auprc": 0.6109638221958679,
+      "ldm_diff": -0.0852622798824294,
+      "best_augmentation": "TimeGAN",
+      "best_aug_diff": -0.04045126106873176
+    },
+    {
+      "fold": 21,
+      "test_patients": [
+        "chb23"
+      ],
+      "baseline_auprc": 0.3468855468305394,
+      "ldm_050_auprc": 0.2866957544113397,
+      "cvae_050_auprc": 0.39091849456643635,
+      "timegan_050_auprc": 0.3118979128415561,
+      "ldm_diff": -0.060189792419199695,
+      "best_augmentation": "CVAE",
+      "best_aug_diff": 0.04403294773589694
+    },
+    {
+      "fold": 22,
+      "test_patients": [
+        "chb24"
+      ],
+      "baseline_auprc": 0.24188368967677684,
+      "ldm_050_auprc": 0.2191069358396345,
+      "cvae_050_auprc": 0.22163769792495977,
+      "timegan_050_auprc": 0.1349447839848283,
+      "ldm_diff": -0.02277675383714234,
+      "best_augmentation": "CVAE",
+      "best_aug_diff": -0.020245991751817072
+    }
+  ],
+  "summary": {
+    "n_folds_ldm_improves": 7,
+    "n_folds_ldm_hurts": 16,
+    "n_folds_total": 23,
+    "mean_ldm_diff": -0.06824805601925286,
+    "correlation_baseline_vs_diff": -0.32586545056851746,
+    "best_generator_counts": {
+      "LDM": 8,
+      "CVAE": 9,
+      "TimeGAN": 6
+    }
+  }
+}

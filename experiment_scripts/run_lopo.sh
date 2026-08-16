@@ -246,7 +246,10 @@ run_experiment() {
                     esac
                 done
                 # Delete generator checkpoint (only needed during generation)
-                rm -f "${fold_dir}/${gen_model}.pt"
+                # Exception: keep cvae.pt — E5 (LDM) needs E4's per-fold CVAE
+                if [ "$gen_model" != "cvae" ]; then
+                    rm -f "${fold_dir}/${gen_model}.pt"
+                fi
             done
         else
             # E1/E2: no generator, just train all folds

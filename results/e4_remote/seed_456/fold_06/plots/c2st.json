@@ -1,0 +1,7 @@
+{
+  "accuracy": 0.754,
+  "accuracy_std": 0.01372497723131078,
+  "auroc": 0.8117725,
+  "auroc_std": 0.012102709923814615,
+  "n_samples_used": 4000
+}

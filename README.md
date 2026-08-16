@@ -50,6 +50,8 @@ msc_thesis_code/
 │
 ├── experiment_scripts/          Shell scripts for running on the remote GPU machine
 │   ├── run_e1.sh ... run_e5.sh    Per-experiment single-split launchers
+│   ├── run_e6.sh                  E6 statistical analysis (no GPU needed)
+│   ├── run_e7.sh                  E7 subject-identity analysis (GPU)
 │   ├── run_lopo.sh                Full LOPO evaluation (E1-E5, 23 folds x 3 seeds)
 │   └── deploy_and_train.sh        Deploy code to remote and start training
 │
@@ -96,43 +98,52 @@ Download the [CHB-MIT Scalp EEG Database](https://physionet.org/content/chbmit/1
 
 | Experiment | Description | Status |
 |:----------:|-------------|:------:|
-| **E1** | Baseline 1D-CNN detector (real data, class-weighted cross-entropy) | LOPO complete |
-| **E2** | Non-synthetic controls (SMOTE, ADASYN) | LOPO complete (3 seeds) |
-| **E3** | TimeGAN augmentation (2 ratios: 50/ 100%) | LOPO complete (3 Jun) |
-| **E4** | CVAE augmentation (2 ratios: 50/ 100%) | LOPO: seed 42 complete, seed 123 in progress (16/22), seed 456 pending |
-| **E5** | Latent Diffusion augmentation (2 ratios, reuses CVAE encoder) | LOPO queued (after E4) |
-| **E6** | Cross-generator comparison (Wilcoxon, ratio sensitivity, cost-benefit) | After LOPO |
-| **E7** | Subject-identity analysis (linear probe + proximity check) | After E6 |
+| **E1** | Baseline 1D-CNN detector (real data, class-weighted cross-entropy) | LOPO complete (4 May) |
+| **E2** | Non-synthetic controls (SMOTE, ADASYN) | LOPO complete (14 May) |
+| **E3** | TimeGAN augmentation (2 ratios: 50/ 100%) | LOPO complete (7 Jun) |
+| **E4** | CVAE augmentation (2 ratios: 50/ 100%) | LOPO complete (1 Jul) |
+| **E5** | Latent Diffusion augmentation (2 ratios, reuses CVAE encoder) | LOPO complete (31 Jul) |
+| **E6** | Cross-generator comparison (Wilcoxon, ratio sensitivity, cost-benefit) | Complete (16 Aug) |
+| **E7** | Subject-identity analysis (linear probe + proximity check) | Complete (16 Aug) |
 
-> **Note (22 Jun 2026):** E4 seed 42 LOPO complete (23 folds); seed 123 at fold 16/22 (currently running TSTR). Ratio 0.50 outperforms 1.00 on seed 42 (AUPRC 0.364 vs 0.276). TSTR yields near-zero AUPRC as expected (0.029 seed 42, 0.010 seed 123 partial). ETA: E4 complete ~4 Jul, E5 complete ~1 Aug, E6+E7 analysis ~3-5 Aug.
+> **All experiments complete (16 Aug 2026).** Total LOPO runtime: 673 hours. Key finding: **no augmentation method significantly improves over baseline under LOPO** (all p<0.01 vs baseline, Wilcoxon signed-rank). LDM at ratio 0.50 is the least harmful (-17%), but the single-split +29% improvement (reported in the EPIA paper) does not generalize across patients. This reversal validates the paper's own warning that single-split results require broader confirmation.
 
 ### Results (single-split, 3 seeds)
 
-| Experiment | Generator | AUPRC | Per-Patient AUPRC | Gen. train (avg/ seed) | Det. train (avg/ seed) |
-|:----------:|-----------|:-----:|:-----------------:|:----------------------:|:----------------------:|
-| **E5** | LDM | **0.2272 +/- 0.0193** | **0.3759 +/- 0.0419** | ~58 min | ~72 min |
-| **E1** | None (baseline) | 0.1766 +/- 0.0542 | 0.2264 +/- 0.0646 | - | ~205 min |
-| **E4** | CVAE | 0.1750 +/- 0.0732 | 0.2877 +/- 0.1239 | ~42 min | ~99 min |
-| **E3** | TimeGAN | 0.1201 +/- 0.0275 | 0.2179 +/- 0.0966 | ~17 min | ~84 min |
-| **E2** | ADASYN | 0.1078 +/- 0.0732 | 0.1302 +/- 0.0713 | - | ~79 min |
+Single patient-level split (18 train/ 2 val/ 4 test patients), ratio 1.0 for generators. These are the results reported in the EPIA 2026 paper.
 
-LDM augmentation improves AUPRC by +29% over baseline with the lowest cross-seed variance (single-split).
+| Experiment | Generator | AUPRC | Precision | Recall | F1 | Sens.@95%Spec. | Per-Patient AUPRC |
+|:----------:|-----------|:-----:|:---------:|:------:|:--:|:--------------:|:-----------------:|
+| **E5** | LDM | **0.227 +/- 0.019** | **0.407 +/- 0.045** | **0.336 +/- 0.005** | **0.367 +/- 0.020** | **0.717 +/- 0.077** | **0.376 +/- 0.042** |
+| **E1** | None (baseline) | 0.177 +/- 0.054 | 0.324 +/- 0.071 | 0.259 +/- 0.078 | 0.287 +/- 0.077 | 0.618 +/- 0.097 | 0.226 +/- 0.065 |
+| **E4** | CVAE | 0.175 +/- 0.073 | 0.264 +/- 0.075 | 0.273 +/- 0.132 | 0.263 +/- 0.103 | 0.602 +/- 0.207 | 0.288 +/- 0.124 |
+| **E3** | TimeGAN | 0.120 +/- 0.028 | 0.204 +/- 0.044 | 0.217 +/- 0.048 | 0.214 +/- 0.020 | 0.435 +/- 0.184 | 0.218 +/- 0.097 |
+| **E2** | ADASYN | 0.108 +/- 0.073 | - | - | - | - | 0.130 +/- 0.071 |
+
+LDM augmentation improves AUPRC by +29% over baseline with the lowest cross-seed variance (single-split). This result does NOT generalize under LOPO (see below).
 
 ### Results (LOPO, 23 folds x 3 seeds)
 
-| Experiment | Generator | Ratio | AUPRC | AUROC | F1 | Sens. @ 95% Spec. |
-|:----------:|-----------|:-----:|:-----:|:-----:|:--:|:-----------------:|
-| **E1** | None (baseline) | - | **0.3941 +/- 0.0228** | 0.8438 +/- 0.0147 | 0.4333 +/- 0.0194 | 0.6459 +/- 0.0123 |
-| **E4**\* | CVAE | 0.50 | 0.3635 +/- 0.3070 | 0.8426 +/- 0.1835 | 0.4012 +/- 0.2888 | 0.6272 +/- 0.3286 |
-| **E3** | TimeGAN | 0.50 | 0.3064 +/- 0.2990 | 0.7779 +/- 0.2235 | 0.3500 +/- 0.2831 | 0.5671 +/- 0.3335 |
-| **E4**\* | CVAE | 1.00 | 0.2758 +/- 0.2979 | 0.7797 +/- 0.2328 | 0.3375 +/- 0.2888 | 0.5551 +/- 0.3561 |
-| **E3** | TimeGAN | 1.00 | 0.2145 +/- 0.2499 | 0.7287 +/- 0.2374 | 0.2778 +/- 0.2501 | 0.4895 +/- 0.3246 |
-| **E2** | ADASYN | - | 0.1844 +/- 0.0550 | 0.6458 +/- 0.0139 | 0.2514 +/- 0.0515 | 0.4046 +/- 0.0416 |
-| **E2** | SMOTE | - | 0.1580 +/- 0.0212 | 0.6283 +/- 0.0193 | 0.2295 +/- 0.0204 | 0.3835 +/- 0.0276 |
+| Experiment | Generator | Ratio | AUPRC | Precision | Recall | F1 | AUROC | Sens. @ 95% Spec. |
+|:----------:|-----------|:-----:|:-----:|:---------:|:------:|:--:|:-----:|:-----------------:|
+| **E1** | None (baseline) | - | **0.3941 +/- 0.3308** | 0.4848 +/- 0.3438 | 0.4849 +/- 0.2706 | 0.4333 +/- 0.3078 | 0.8438 +/- 0.1907 | 0.6459 +/- 0.3367 |
+| **E5** | LDM | 0.50 | 0.3259 +/- 0.3185 | 0.4402 +/- 0.3415 | 0.4351 +/- 0.2971 | 0.3730 +/- 0.3008 | 0.7851 +/- 0.2216 | 0.5684 +/- 0.3478 |
+| **E3** | TimeGAN | 0.50 | 0.3064 +/- 0.2990 | 0.4104 +/- 0.3429 | 0.4506 +/- 0.2817 | 0.3500 +/- 0.2831 | 0.7779 +/- 0.2235 | 0.5671 +/- 0.3335 |
+| **E4** | CVAE | 0.50 | 0.2976 +/- 0.2894 | 0.4120 +/- 0.3389 | 0.3990 +/- 0.2731 | 0.3480 +/- 0.2802 | 0.7769 +/- 0.2147 | 0.5402 +/- 0.3353 |
+| **E5** | LDM | 1.00 | 0.2830 +/- 0.2767 | 0.4119 +/- 0.3323 | 0.4072 +/- 0.2750 | 0.3384 +/- 0.2713 | 0.7715 +/- 0.2097 | 0.5300 +/- 0.3198 |
+| **E4** | CVAE | 1.00 | 0.2507 +/- 0.2771 | 0.3620 +/- 0.3119 | 0.4049 +/- 0.3042 | 0.3060 +/- 0.2671 | 0.7288 +/- 0.2451 | 0.5140 +/- 0.3507 |
+| **E3** | TimeGAN | 1.00 | 0.2145 +/- 0.2499 | 0.3321 +/- 0.3123 | 0.3625 +/- 0.2712 | 0.2778 +/- 0.2501 | 0.7287 +/- 0.2374 | 0.4895 +/- 0.3246 |
+| **E2** | ADASYN | - | 0.1844 +/- 0.2270 | 0.2817 +/- 0.2849 | 0.4283 +/- 0.3299 | 0.2514 +/- 0.2494 | 0.6458 +/- 0.2639 | 0.4046 +/- 0.3364 |
+| **E2** | SMOTE | - | 0.1580 +/- 0.2016 | 0.2862 +/- 0.2857 | 0.3700 +/- 0.3058 | 0.2295 +/- 0.2241 | 0.6283 +/- 0.2532 | 0.3835 +/- 0.3187 |
 
-\*E4 results are preliminary (seed 42 only, 1/3 seeds). E5 pending. Detailed results, per-fold breakdowns, and fidelity analysis on the [project website](https://vandabarata.github.io/msc-thesis-eeg/).
+**No augmentation method beats the E1 baseline.** All differences are statistically significant (Wilcoxon signed-rank, p<0.01). LDM at ratio 0.50 is the best augmentation but still -17% below baseline. Ratio 0.50 consistently outperforms 1.00 for all generators (diminishing returns). Detailed results, per-fold breakdowns, and fidelity analysis on the [project website](https://vandabarata.github.io/msc-thesis-eeg/).
 
-No augmentation method beats the E1 baseline so far. CVAE at ratio 0.50 comes closest (-7.8%), followed by TimeGAN at 0.50 (-22%). All methods perform worse at higher synthetic ratios. SMOTE/ADASYN remain the weakest (-53% to -60%).
+### E6: Statistical Analysis
+
+- **Wilcoxon tests:** All methods significantly worse than baseline (p<0.01). Pairwise differences between generators at ratio 0.50 are NOT significant (p>0.3) - they are statistically indistinguishable.
+- **Ratio sensitivity:** 0.50 > 1.00 for all generators. All ratios degrade below baseline.
+- **Per-patient:** LDM improves only 7/23 folds (mostly hard patients with baseline AUPRC < 0.05). Correlation between baseline difficulty and improvement: r = -0.33.
+- **Cost-benefit:** LDM has the smallest loss per compute hour (-0.0001 AUPRC/h), but all augmentation methods have negative ROI.
 
 <details>
 <summary>Protocol rules enforced in code</summary>
@@ -180,9 +191,14 @@ python -m training.train --experiment e5 --mode tstr
 # Full LOPO evaluation (E1-E5, 23 folds x 3 seeds x 2 ratios, includes TSTR)
 bash experiment_scripts/run_lopo.sh
 
-# Manual multi-ratio LOPO (generate at 2 ratios, train at 2 ratios)
-python -m training.generate --model cvae --mode lopo --seed 42 --ratio 0.5 1.0
-python -m training.train --experiment e4 --mode lopo --seeds 42 --ratio 0.5 1.0
+# E6: Cross-generator statistical comparison (no GPU needed)
+python -m training.run_e6
+
+# E7: Subject-identity analysis (needs GPU for embedding extraction)
+python -m training.run_e7 --device cuda
+
+# Per-patient augmentation analysis
+python -m training.run_per_patient
 ```
 
 ### Results Structure
@@ -206,7 +222,12 @@ results/<experiment>/
 │   └── ...
 ├── lopo_summary.json               Aggregated LOPO results
 ├── tstr_summary.json               Aggregated TSTR results (E3-E5 only)
-└── lopo_status/                    Checkpoint files from run_lopo.sh
+├── lopo_status/                    Checkpoint files from run_lopo.sh
+├── e6/                             E6 statistical analysis outputs
+│   ├── e6_analysis.json              Wilcoxon, ratio sensitivity, cost-benefit
+│   └── per_patient_analysis.json     Per-fold augmentation breakdown
+└── e7/                             E7 subject-identity analysis
+    └── e7_analysis.json              Probe accuracy, proximity ratios
 ```
 
 ---
